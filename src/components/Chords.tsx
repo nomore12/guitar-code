@@ -6,7 +6,7 @@ import OpenMark from "./chords/OpenMark";
 import FlatChord from "./chords/FlatChord";
 
 interface PropsType {
-  chord: { chord: string; fingers: number[][]; mute: [] };
+  chord: { chord: string; fingers: number[][]; mute: number[] | [] };
 }
 
 const ContainerStyle = styled.div`
@@ -28,7 +28,7 @@ const ContainerStyle = styled.div`
   }
 `;
 
-const Chords: React.FC<PropsType> = ({ chord, mute }) => {
+const Chords: React.FC<PropsType> = ({ chord }) => {
   const rowCount = 4;
   const columnCount = 5;
   const cellSize = 20;
@@ -48,7 +48,7 @@ const Chords: React.FC<PropsType> = ({ chord, mute }) => {
         y2={(i + 1) * cellSizeY}
         strokeWidth={i === 0 ? 4 : 1}
         stroke="black"
-      />
+      />,
     );
   }
 
@@ -61,7 +61,7 @@ const Chords: React.FC<PropsType> = ({ chord, mute }) => {
         x2={(i + 1) * cellSize}
         y2={cellSizeY * (rowCount + 1)}
         stroke="black"
-      />
+      />,
     );
   }
 
@@ -70,10 +70,10 @@ const Chords: React.FC<PropsType> = ({ chord, mute }) => {
     const resultLines = chord.mute ? lines.concat(chord.mute) : lines;
     const removeSet = new Set(resultLines);
     const resultArray = [1, 2, 3, 4, 5, 6].filter(
-      (item) => !removeSet.has(item)
+      (item) => !removeSet.has(item),
     );
     setOpenFingers([...resultArray]);
-  }, []);
+  }, [chord.fingers]);
 
   return (
     <ContainerStyle>
