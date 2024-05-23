@@ -1,7 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
+import styled from "styled-components";
 import Chords from "../components/Chords";
 import chordsData from "../data/chords.json";
 import * as Tone from "tone";
+
+const ContainerStyle = styled.div`
+  .control-wrapper {
+    padding: 24px;
+  }
+`;
 
 const allChords = [
   chordsData.A,
@@ -102,7 +109,7 @@ const Main: React.FC = () => {
   }, []);
 
   return (
-    <div>
+    <ContainerStyle>
       <div>
         <Chords chord={currentChord} />
       </div>
@@ -137,12 +144,12 @@ const Main: React.FC = () => {
         <button onClick={() => setCurrentChord(chordsData.G7)}>G7</button>
       </div>
       {isSoundLoaded && (
-        <>
-          <button onClick={handlePlay}>kick</button>
+        <div className="control-wrapper">
+          <button onClick={handlePlay}>start</button>
           <button onClick={handleStop}>stop</button>
-        </>
+        </div>
       )}
-    </div>
+    </ContainerStyle>
   );
 };
 
