@@ -46,7 +46,7 @@ const Main: React.FC = () => {
       const loop = new Tone.Loop((time) => {
         playerToUse.start(time);
         beatCount.current++;
-        if ((beatCount.current - 1) % 4 === 1) {
+        if ((beatCount.current - 1) % 4 === 0) {
           console.log("show next chord", beatCount.current);
           setCurrentChord(getRandomElement(allChords));
         }
