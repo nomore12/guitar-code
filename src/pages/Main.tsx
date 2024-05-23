@@ -13,6 +13,21 @@ const allChords = [
   chordsData.Em,
   chordsData.F,
   chordsData.G,
+  chordsData.A7,
+  chordsData.Am7,
+  chordsData.Amaj7,
+  chordsData.Bb,
+  chordsData.B7,
+  chordsData.Bm,
+  chordsData.C7,
+  chordsData.Cmaj7,
+  chordsData.D7,
+  chordsData.Dm7,
+  chordsData.Dmaj7,
+  chordsData.E7,
+  chordsData.Em7,
+  chordsData.Fmaj7,
+  chordsData.G7,
 ];
 
 function getRandomElement(arr: any[]) {
@@ -101,6 +116,25 @@ const Main: React.FC = () => {
         <button onClick={() => setCurrentChord(chordsData.Em)}>Em</button>
         <button onClick={() => setCurrentChord(chordsData.F)}>F</button>
         <button onClick={() => setCurrentChord(chordsData.G)}>G</button>
+      </div>
+      <div>
+        <button onClick={() => setCurrentChord(chordsData.A7)}>A7</button>
+        <button onClick={() => setCurrentChord(chordsData.Am7)}>Am7</button>
+        <button onClick={() => setCurrentChord(chordsData.Amaj7)}>Amaj7</button>
+        <button onClick={() => setCurrentChord(chordsData.Bb)}>Bb</button>
+        <button onClick={() => setCurrentChord(chordsData.B7)}>B7</button>
+        <button onClick={() => setCurrentChord(chordsData.Bm)}>Bm</button>
+        <button onClick={() => setCurrentChord(chordsData.C7)}>C7</button>
+        <button onClick={() => setCurrentChord(chordsData.Cmaj7)}>Cmaj7</button>
+      </div>
+      <div>
+        <button onClick={() => setCurrentChord(chordsData.D7)}>D7</button>
+        <button onClick={() => setCurrentChord(chordsData.Dm7)}>Dm7</button>
+        <button onClick={() => setCurrentChord(chordsData.Dmaj7)}>Dmaj7</button>
+        <button onClick={() => setCurrentChord(chordsData.E7)}>E7</button>
+        <button onClick={() => setCurrentChord(chordsData.Em7)}>Em7</button>
+        <button onClick={() => setCurrentChord(chordsData.Fmaj7)}>Fmaj7</button>
+        <button onClick={() => setCurrentChord(chordsData.G7)}>G7</button>
       </div>
       {isSoundLoaded && (
         <>
