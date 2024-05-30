@@ -1,5 +1,5 @@
-import React from "react";
-import { lineToNumber } from "../../utils/chordsUtils";
+import React from 'react';
+import { lineToNumber } from '../../utils/chordsUtils';
 
 interface PropsType {
   line: number;

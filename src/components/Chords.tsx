@@ -1,12 +1,17 @@
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import FingerMark from "./chords/FingerMark";
-import MuteMark from "./chords/MuteMark";
-import OpenMark from "./chords/OpenMark";
-import FlatChord from "./chords/FlatChord";
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import FingerMark from './chords/FingerMark';
+import MuteMark from './chords/MuteMark';
+import OpenMark from './chords/OpenMark';
+import FlatChord from './chords/FlatChord';
 
 interface PropsType {
-  chord: { chord: string; fingers: number[][]; mute: number[] | [] };
+  chord: {
+    chord: string;
+    fingers: number[][];
+    mute: number[] | [];
+    flat: number;
+  };
 }
 
 const ContainerStyle = styled.div`
@@ -36,7 +41,7 @@ const Chords: React.FC<PropsType> = ({ chord }) => {
 
   const [openFingers, setOpenFingers] = useState<number[]>([]);
 
-  let lines: JSX.Element[] = [];
+  const lines: React.ReactNode[] = [];
 
   for (let i = 0; i <= rowCount; i++) {
     lines.push(
@@ -48,7 +53,7 @@ const Chords: React.FC<PropsType> = ({ chord }) => {
         y2={(i + 1) * cellSizeY}
         strokeWidth={i === 0 ? 4 : 1}
         stroke="black"
-      />,
+      />
     );
   }
 
@@ -61,7 +66,7 @@ const Chords: React.FC<PropsType> = ({ chord }) => {
         x2={(i + 1) * cellSize}
         y2={cellSizeY * (rowCount + 1)}
         stroke="black"
-      />,
+      />
     );
   }
 
@@ -70,7 +75,7 @@ const Chords: React.FC<PropsType> = ({ chord }) => {
     const resultLines = chord.mute ? lines.concat(chord.mute) : lines;
     const removeSet = new Set(resultLines);
     const resultArray = [1, 2, 3, 4, 5, 6].filter(
-      (item) => !removeSet.has(item),
+      (item) => !removeSet.has(item)
     );
     setOpenFingers([...resultArray]);
   }, [chord.fingers]);
@@ -85,10 +90,10 @@ const Chords: React.FC<PropsType> = ({ chord }) => {
           width={cellSize * columnCount + cellSize * 2}
           height={cellSizeY * rowCount + cellSizeY * 2}
         >
-          <FlatChord flat={1} position={1} />
-          <FlatChord flat={2} position={2} />
-          <FlatChord flat={3} position={3} />
-          <FlatChord flat={4} position={4} />
+          <FlatChord flat={chord.flat} position={chord.flat} />
+          <FlatChord flat={chord.flat + 1} position={chord.flat + 1} />
+          <FlatChord flat={chord.flat + 2} position={chord.flat + 2} />
+          <FlatChord flat={chord.flat + 3} position={chord.flat + 3} />
           {lines}
           {chord.mute &&
             chord.mute.map((item, index) => {

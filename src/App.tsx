@@ -1,5 +1,6 @@
-import "./styles.css";
-import Main from "./pages/Main";
+import React from 'react';
+import './styles.css';
+import Main from './pages/Main';
 
 export default function App() {
   return (
