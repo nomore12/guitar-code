@@ -3,8 +3,13 @@ import styled from 'styled-components';
 import Chords from '../components/Chords';
 import chordsData from '../data/openChords.json';
 import * as Tone from 'tone';
+import { Text } from '@radix-ui/themes';
 
 const ContainerStyle = styled.div`
+  .title {
+    font-family: 'Lobster', sans-serif;
+  }
+
   .control-wrapper {
     padding: 24px;
   }
@@ -65,13 +70,13 @@ const Main: React.FC = () => {
     fingers: number[][];
     mute: number[];
     flat: number;
-  }>(chordsData.F);
+  }>(chordsData.X);
   const [nextChord, setNextChord] = useState<{
     chord: string;
     fingers: number[][];
     mute: number[];
     flat: number;
-  }>(chordsData.F);
+  }>(chordsData.X);
   const [player, setPlayer] = useState<Tone.Player | null>(null);
   const [beatLoop, setBeatLoop] = useState<Tone.Loop | null>(null);
   const [isSoundLoaded, setIsSoundLoaded] = useState(false);
@@ -159,6 +164,9 @@ const Main: React.FC = () => {
 
   return (
     <ContainerStyle>
+      <Text className="title" size="9" weight="bold">
+        Chord! Chord! Chord!
+      </Text>
       <div className="chord-wrapper">
         <div>
           <h1>current</h1>

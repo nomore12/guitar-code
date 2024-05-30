@@ -47,9 +47,9 @@ const Chords: React.FC<PropsType> = ({ chord }) => {
     lines.push(
       <line
         key={`h${i}`}
-        x1={cellSize}
+        x1={cellSize + 10}
         y1={(i + 1) * cellSizeY}
-        x2={cellSize * (columnCount + 1)}
+        x2={cellSize * (columnCount + 1) + 10}
         y2={(i + 1) * cellSizeY}
         strokeWidth={i === 0 ? 4 : 1}
         stroke="black"
@@ -61,9 +61,9 @@ const Chords: React.FC<PropsType> = ({ chord }) => {
     lines.push(
       <line
         key={`v${i}`}
-        x1={(i + 1) * cellSize}
+        x1={(i + 1) * cellSize + 10}
         y1={cellSizeY}
-        x2={(i + 1) * cellSize}
+        x2={(i + 1) * cellSize + 10}
         y2={cellSizeY * (rowCount + 1)}
         stroke="black"
       />
@@ -87,7 +87,7 @@ const Chords: React.FC<PropsType> = ({ chord }) => {
       </div>
       <div>
         <svg
-          width={cellSize * columnCount + cellSize * 2}
+          width={cellSize * columnCount + cellSize * 2 + 10}
           height={cellSizeY * rowCount + cellSizeY * 2}
         >
           <FlatChord flat={chord.flat} position={chord.flat} />
