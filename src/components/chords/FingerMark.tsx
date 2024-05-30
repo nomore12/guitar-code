@@ -9,7 +9,7 @@ interface PropsType {
 const FingerMark: React.FC<PropsType> = ({ line, flat }) => {
   return (
     <circle
-      cx={lineToNumber(line) * 20}
+      cx={lineToNumber(line) * 20 + 10}
       cy={15 + flat * 30}
       r="8"
       fill="black"

@@ -8,7 +8,7 @@ interface PropsType {
 const OpenMark: React.FC<PropsType> = ({ line }) => {
   return (
     <circle
-      cx={lineToNumber(line) * 20}
+      cx={lineToNumber(line) * 20 + 10}
       cy={17}
       r="8"
       fill="white"
