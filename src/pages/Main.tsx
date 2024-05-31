@@ -178,7 +178,11 @@ const Main: React.FC = () => {
         </div>
       </div>
       <div>
-        <input type="number" placeholder="BPM을 입력하세요." defaultValue={80} />
+        <input
+          type="number"
+          placeholder="BPM을 입력하세요."
+          defaultValue={80}
+        />
       </div>
       {isSoundLoaded && (
         <div className="control-wrapper">

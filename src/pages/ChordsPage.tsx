@@ -56,7 +56,6 @@ const ChordsPage = () => {
 
   const { isSoundLoaded, handlePlay, handleStop } = useTonePlayer(
     'sounds/Kick.wav',
-
     60
   );
 
