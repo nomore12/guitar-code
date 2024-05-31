@@ -95,6 +95,7 @@ const Chords: React.FC<PropsType> = ({ chord }) => {
           <FlatChord flat={chord.flat + 2} position={chord.flat + 2} />
           <FlatChord flat={chord.flat + 3} position={chord.flat + 3} />
           {lines}
+
           {chord.mute &&
             chord.mute.map((item, index) => {
               return <MuteMark key={`mute-${index}`} line={item} />;
