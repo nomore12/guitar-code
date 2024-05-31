@@ -5,7 +5,7 @@ import chordsData from '../data/openChords.json';
 import * as Tone from 'tone';
 import useTonePlayer from '../hooks/useToneHook';
 
-const allChords: ChordsData = chordsData as unknown as ChordsData;
+const allChords: ChordsDataProps = chordsData as unknown as ChordsDataProps;
 
 const dynatonicChords = [
   chordsData.C,
@@ -47,10 +47,10 @@ const chords = [
 ];
 
 const ChordsPage = () => {
-  const [currentChord, setCurrentChord] = useState<Chord>(chordsData.X);
-  const [nextChord, setNextChord] = useState<Chord>(chordsData.X);
+  const [currentChord, setCurrentChord] = useState<ChordProps>(chordsData.X);
+  const [nextChord, setNextChord] = useState<ChordProps>(chordsData.X);
 
-  const [chordArr, setChordArr] = useState<Chord[]>([]);
+  const [chordArr, setChordArr] = useState<ChordProps[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
 

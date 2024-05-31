@@ -1,10 +1,10 @@
-declare interface Chord {
+declare interface ChordProps {
   chord: string;
   fingers: number[][];
   mute: number[];
   flat: number;
 }
 
-declare interface ChordsData {
-  [key: string]: Chord;
+declare interface ChordsDataProps {
+  [key: string]: ChordProps;
 }
