@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import Chords from '../components/Chords';
+import Chords from '../components/chords/Chords';
 import chordsData from '../data/openChords.json';
 import * as Tone from 'tone';
 import { Text } from '@radix-ui/themes';

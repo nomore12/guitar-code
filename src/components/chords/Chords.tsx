@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import FingerMark from './chords/FingerMark';
-import MuteMark from './chords/MuteMark';
-import OpenMark from './chords/OpenMark';
-import FlatChord from './chords/FlatChord';
+import FingerMark from './FingerMark';
+import MuteMark from './MuteMark';
+import OpenMark from './OpenMark';
+import FlatChord from './FlatChord';
 
 interface PropsType {
   chord: {
@@ -53,7 +53,7 @@ const Chords: React.FC<PropsType> = ({ chord }) => {
         y2={(i + 1) * cellSizeY}
         strokeWidth={i === 0 ? 4 : 1}
         stroke="black"
-      />
+      />,
     );
   }
 
@@ -66,7 +66,7 @@ const Chords: React.FC<PropsType> = ({ chord }) => {
         x2={(i + 1) * cellSize + 10}
         y2={cellSizeY * (rowCount + 1)}
         stroke="black"
-      />
+      />,
     );
   }
 
@@ -75,7 +75,7 @@ const Chords: React.FC<PropsType> = ({ chord }) => {
     const resultLines = chord.mute ? lines.concat(chord.mute) : lines;
     const removeSet = new Set(resultLines);
     const resultArray = [1, 2, 3, 4, 5, 6].filter(
-      (item) => !removeSet.has(item)
+      (item) => !removeSet.has(item),
     );
     setOpenFingers([...resultArray]);
   }, [chord.fingers]);

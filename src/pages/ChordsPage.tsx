@@ -1,6 +1,14 @@
 import React, { useState, useEffect, FormEvent } from 'react';
-import { Box, Button, Flex, Radio, RadioGroup, Text } from '@radix-ui/themes';
-import Chords from '../components/Chords';
+import {
+  Box,
+  Button,
+  Flex,
+  Radio,
+  RadioGroup,
+  Text,
+  TextField,
+} from '@radix-ui/themes';
+import Chords from '../components/chords/Chords';
 import chordsData from '../data/openChords.json';
 import * as Tone from 'tone';
 import useTonePlayer from '../hooks/useToneHook';
@@ -49,14 +57,14 @@ const chords = [
 const ChordsPage = () => {
   const [currentChord, setCurrentChord] = useState<ChordProps>(chordsData.X);
   const [nextChord, setNextChord] = useState<ChordProps>(chordsData.X);
-
   const [chordArr, setChordArr] = useState<ChordProps[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
+  const [bpm, setBpm] = useState<number>(60);
 
   const { isSoundLoaded, handlePlay, handleStop } = useTonePlayer(
     'sounds/Kick.wav',
-    60
+    bpm,
   );
 
   useEffect(() => {
@@ -82,6 +90,13 @@ const ChordsPage = () => {
       setNextChord(chordArr[newIndex]);
       return newIndex;
     });
+  };
+
+  const onChangeBpm = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (Number(e.target.value) < 40 || Number(e.target.value) >= 500) {
+      return;
+    }
+    setBpm(Number(e.target.value));
   };
 
   const handleChords = (value: string) => {
@@ -134,7 +149,7 @@ const ChordsPage = () => {
   };
 
   return (
-    <Flex gap="5" direction="column">
+    <Flex gap="5" direction="column" align="center">
       <Box py="6">
         <Text size="9">Chords! Chord! Chords!</Text>
       </Box>
@@ -165,6 +180,15 @@ const ChordsPage = () => {
             </Button>
           </div>
         )}
+      </Box>
+      <Box width="300px">
+        <TextField.Root
+          placeholder="bpm을 입력하세요."
+          type="number"
+          onChange={onChangeBpm}
+        >
+          <TextField.Slot></TextField.Slot>
+        </TextField.Root>
       </Box>
       <Box>
         <Text size="5" m={10}>

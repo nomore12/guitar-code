@@ -30,7 +30,7 @@
       "error",
       {
         "endOfLine": "auto",
-        "trailingComma": "es5"
+        "trailingComma": "all"
         // 또는 "all", "none"
       }
     ],
