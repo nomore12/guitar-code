@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Box, Button, Flex, Separator } from '@radix-ui/themes';
-import chordsData from '../data/openChords.json';
+import chordsData from '../../data/openChords.json';
 import ChordBadge from './ChordBadge';
 
 interface PropsType {

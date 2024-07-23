@@ -9,10 +9,10 @@ import {
   Tabs,
   Slider,
 } from '@radix-ui/themes';
-import Chords from '../components/chords/Chords';
-import chordsData from '../data/openChords.json';
-import useTonePlayer from '../hooks/useTonePlayer';
-import CustomChordDisplay from '../components/CustomChordDisplay';
+import Chords from '../../components/chords/Chords';
+import chordsData from '../../data/openChords.json';
+import useTonePlayer from '../../hooks/useTonePlayer';
+import CustomChordDisplay from './CustomChordDisplay';
 
 const dynatonicChords = [
   chordsData.C,

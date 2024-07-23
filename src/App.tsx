@@ -1,7 +1,7 @@
 import React from 'react';
 import './styles.css';
 import Main from './pages/Main';
-import ChordsPage from './pages/ChordsPage';
+import ChordsPage from './pages/chordsPage/ChordsPage';
 import DrumTest from './pages/DrumTest';
 
 export default function App() {
