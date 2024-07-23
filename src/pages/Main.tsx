@@ -105,24 +105,24 @@ const Main: React.FC = () => {
       transport.bpm.value = 60; // set BPM to 60
       transport.start(); // start Transport
 
-      const loop = new Tone.Loop((time) => {
-        playerToUse.start(time);
-        beatCount.current++;
-        if ((beatCount.current - 1) % 4 === 0) {
-          setCurrentIndex((prevIndex) => {
-            const newIndex = (prevIndex + 1) % chordArr.length;
-            setCurrentChord(chordArr[newIndex]);
-            return newIndex;
-          });
-          setNextIndex((prevIndex) => {
-            const newIndex = (prevIndex + 1) % chordArr.length;
-            setNextChord(chordArr[newIndex]);
-            return newIndex;
-          });
-        }
-      }, '4n').start(0);
+      // const loop = new Tone.Loop((time) => {
+      //   playerToUse.start(time);
+      //   beatCount.current++;
+      //   if ((beatCount.current - 1) % 4 === 0) {
+      //     setCurrentIndex((prevIndex) => {
+      //       const newIndex = (prevIndex + 1) % chordArr.length;
+      //       setCurrentChord(chordArr[newIndex]);
+      //       return newIndex;
+      //     });
+      //     setNextIndex((prevIndex) => {
+      //       const newIndex = (prevIndex + 1) % chordArr.length;
+      //       setNextChord(chordArr[newIndex]);
+      //       return newIndex;
+      //     });
+      //   }
+      // }, '4n').start(0);
 
-      setBeatLoop(loop);
+      // setBeatLoop(loop);
     }
   };
 

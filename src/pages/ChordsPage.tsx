@@ -1,19 +1,18 @@
-import React, { useState, useEffect, FormEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Button,
   Flex,
-  Radio,
   RadioGroup,
   Text,
   TextField,
+  Tabs,
+  Slider,
 } from '@radix-ui/themes';
 import Chords from '../components/chords/Chords';
 import chordsData from '../data/openChords.json';
-import * as Tone from 'tone';
-import useTonePlayer from '../hooks/useToneHook';
-
-const allChords: ChordsDataProps = chordsData as unknown as ChordsDataProps;
+import useTonePlayer from '../hooks/useTonePlayer';
+import CustomChordDisplay from '../components/CustomChordDisplay';
 
 const dynatonicChords = [
   chordsData.C,
@@ -61,11 +60,31 @@ const ChordsPage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
   const [bpm, setBpm] = useState<number>(60);
+  const [volume, setVolume] = useState(10);
 
-  const { isSoundLoaded, handlePlay, handleStop } = useTonePlayer(
-    'sounds/Kick.wav',
+  const { isSoundLoaded, handlePlay, handleStop } = useTonePlayer({
     bpm,
-  );
+    volume,
+    callback: playCallback,
+  });
+
+  useEffect(() => {
+    const shuffle = shuffleArray(dynatonicChords);
+    setChordArr(shuffle);
+  }, []);
+
+  function playCallback() {
+    setCurrentIndex((prevIndex) => {
+      const newIndex = (prevIndex + 1) % chordArr.length;
+      setCurrentChord(chordArr[newIndex]);
+      return newIndex;
+    });
+    setNextIndex((prevIndex) => {
+      const newIndex = (prevIndex + 1) % chordArr.length;
+      setNextChord(chordArr[newIndex]);
+      return newIndex;
+    });
+  }
 
   useEffect(() => {
     const shuffle = shuffleArray(dynatonicChords);
@@ -78,19 +97,6 @@ const ChordsPage = () => {
       setNextChord(chordArr[1]);
     }
   }, [chordArr]);
-
-  const playCallback = () => {
-    setCurrentIndex((prevIndex) => {
-      const newIndex = (prevIndex + 1) % chordArr.length;
-      setCurrentChord(chordArr[newIndex]);
-      return newIndex;
-    });
-    setNextIndex((prevIndex) => {
-      const newIndex = (prevIndex + 1) % chordArr.length;
-      setNextChord(chordArr[newIndex]);
-      return newIndex;
-    });
-  };
 
   const onChangeBpm = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (Number(e.target.value) < 40 || Number(e.target.value) >= 500) {
@@ -157,19 +163,22 @@ const ChordsPage = () => {
         <Flex gap="5" justify="center">
           <Box>
             <Text>현재 코드</Text>
-            <Chords chord={currentChord} />
+            {currentChord && <Chords chord={currentChord} />}
           </Box>
           <Box>
             <Text>다음 코드</Text>
-            <Chords chord={nextChord} />
+            {nextChord && <Chords chord={nextChord} />}
           </Box>
         </Flex>
       </Box>
       <Box>
         {isSoundLoaded && (
-          <div className="control-wrapper">
-            <Button onClick={() => handlePlay(playCallback)}>start</Button>
+          <Flex gap="4">
+            <Button size="4" onClick={() => handlePlay()}>
+              start
+            </Button>
             <Button
+              size="4"
               onClick={() => {
                 handleStop();
                 setCurrentIndex(0);
@@ -178,40 +187,77 @@ const ChordsPage = () => {
             >
               stop
             </Button>
-          </div>
+          </Flex>
         )}
       </Box>
       <Box width="300px">
         <TextField.Root
-          placeholder="bpm을 입력하세요."
+          placeholder="bpm을 입력하세요. 기본값은 60입니다."
           type="number"
           onChange={onChangeBpm}
         >
           <TextField.Slot></TextField.Slot>
         </TextField.Root>
+        <Flex align="center" justify="between" style={{ padding: '10px 0' }}>
+          <Box style={{ display: 'flex', alignItems: 'center' }}>
+            볼륨: {volume}
+          </Box>
+          <Box
+            style={{ display: 'flex', alignItems: 'center', width: '220px' }}
+          >
+            <Slider
+              onValueChange={(value) => setVolume(value[0])}
+              value={[volume]}
+              style={{ maxWidth: '240px' }}
+              max={30}
+            />
+          </Box>
+        </Flex>
       </Box>
       <Box>
         <Text size="5" m={10}>
           연습 방식
         </Text>
-        <Flex gap="5" justify="center" wrap="wrap">
-          <RadioGroup.Root defaultValue="1" onValueChange={handleChords}>
-            <RadioGroup.Item value="1">랜덤(다이아토닉)</RadioGroup.Item>
-            <RadioGroup.Item value="2">C - G - Am - F</RadioGroup.Item>
-            <RadioGroup.Item value="3">C - F - G - C</RadioGroup.Item>
-            <RadioGroup.Item value="4">C - Am - Dm - G</RadioGroup.Item>
-            <RadioGroup.Item value="5">G - D - Em - C</RadioGroup.Item>
-            <RadioGroup.Item value="6">G - C - D - G</RadioGroup.Item>
-            <RadioGroup.Item value="7">G - Em - Am - D</RadioGroup.Item>
-            <RadioGroup.Item value="8">D - A - Bm - G</RadioGroup.Item>
-            <RadioGroup.Item value="9">D - G - A - D</RadioGroup.Item>
-            <RadioGroup.Item value="10">D - Bm - Em - A</RadioGroup.Item>
-            <RadioGroup.Item value="11">A - E - F#m - D</RadioGroup.Item>
-            <RadioGroup.Item value="12">A - D - E - A</RadioGroup.Item>
-            <RadioGroup.Item value="13">A - F#m - Bm - E</RadioGroup.Item>
-            <RadioGroup.Item value="14">랜덤(코드진행 중에서)</RadioGroup.Item>
-          </RadioGroup.Root>
-        </Flex>
+        <Tabs.Root defaultValue="chordsArr">
+          <Tabs.List style={{ width: '692px' }}>
+            <Tabs.Trigger value="chordsArr">코드 진행</Tabs.Trigger>
+            <Tabs.Trigger value="customs">코드 직접 입력</Tabs.Trigger>
+          </Tabs.List>
+
+          <Tabs.Content value="chordsArr">
+            <Flex gap="5" justify="center" wrap="wrap" style={{ padding: 16 }}>
+              <RadioGroup.Root
+                defaultValue="1"
+                onValueChange={handleChords}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr 1fr 1fr', // 4열로 구성
+                  gap: '10px', // 원하는 간격 설정
+                }}
+              >
+                <RadioGroup.Item value="1">랜덤(다이아토닉)</RadioGroup.Item>
+                <RadioGroup.Item value="2">C - G - Am - F</RadioGroup.Item>
+                <RadioGroup.Item value="3">C - F - G - C</RadioGroup.Item>
+                <RadioGroup.Item value="4">C - Am - Dm - G</RadioGroup.Item>
+                <RadioGroup.Item value="5">G - D - Em - C</RadioGroup.Item>
+                <RadioGroup.Item value="6">G - C - D - G</RadioGroup.Item>
+                <RadioGroup.Item value="7">G - Em - Am - D</RadioGroup.Item>
+                <RadioGroup.Item value="8">D - A - Bm - G</RadioGroup.Item>
+                <RadioGroup.Item value="9">D - G - A - D</RadioGroup.Item>
+                <RadioGroup.Item value="10">D - Bm - Em - A</RadioGroup.Item>
+                <RadioGroup.Item value="11">A - E - F#m - D</RadioGroup.Item>
+                <RadioGroup.Item value="12">A - D - E - A</RadioGroup.Item>
+                <RadioGroup.Item value="13">A - F#m - Bm - E</RadioGroup.Item>
+                <RadioGroup.Item value="14">
+                  랜덤(코드진행 중에서)
+                </RadioGroup.Item>
+              </RadioGroup.Root>
+            </Flex>
+          </Tabs.Content>
+          <Tabs.Content value="customs">
+            <CustomChordDisplay setCustomChords={setChordArr} />
+          </Tabs.Content>
+        </Tabs.Root>
       </Box>
     </Flex>
   );
