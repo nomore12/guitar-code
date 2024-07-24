@@ -13,6 +13,7 @@ import Chords from '../../components/chords/Chords';
 import chordsData from '../../data/openChords.json';
 import useTonePlayer from '../../hooks/useTonePlayer';
 import CustomChordDisplay from './CustomChordDisplay';
+import useDrumPlayer from '../../hooks/useDrumPlayer';
 
 const dynatonicChords = [
   chordsData.C,
@@ -61,12 +62,21 @@ const ChordsPage = () => {
   const [nextIndex, setNextIndex] = useState(1);
   const [bpm, setBpm] = useState<number>(60);
   const [volume, setVolume] = useState(10);
+  const [beat, setBeat] = useState<'4' | '8' | '16'>('4');
 
-  const { isSoundLoaded, handlePlay, handleStop } = useTonePlayer({
+  const { handlePlay, handleStop } = useTonePlayer({
     bpm,
     volume,
+    beat,
     callback: playCallback,
   });
+
+  // const { handlePlay, handleStop } = useDrumPlayer({
+  //   bpm,
+  //   volume,
+  //   beat: '8',
+  //   callback: playCallback,
+  // });
 
   useEffect(() => {
     const shuffle = shuffleArray(dynatonicChords);
@@ -172,7 +182,7 @@ const ChordsPage = () => {
         </Flex>
       </Box>
       <Box>
-        {isSoundLoaded && (
+        {
           <Flex gap="4">
             <Button size="4" onClick={() => handlePlay()}>
               start
@@ -188,7 +198,7 @@ const ChordsPage = () => {
               stop
             </Button>
           </Flex>
-        )}
+        }
       </Box>
       <Box width="300px">
         <TextField.Root
@@ -213,6 +223,23 @@ const ChordsPage = () => {
             />
           </Box>
         </Flex>
+        <RadioGroup.Root
+          defaultValue="1"
+          onValueChange={(value) => {
+            const selectedBeat =
+              value === '1' ? '4' : value === '2' ? '8' : '16';
+            setBeat(selectedBeat);
+          }}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr 1fr',
+            gap: '10px',
+          }}
+        >
+          <RadioGroup.Item value="1">4 beat</RadioGroup.Item>
+          <RadioGroup.Item value="2">8 beat</RadioGroup.Item>
+          <RadioGroup.Item value="3">16 beat</RadioGroup.Item>
+        </RadioGroup.Root>
       </Box>
       <Box>
         <Text size="5" m={10}>
