@@ -108,11 +108,11 @@ const ChordsPage = () => {
     }
   }, [chordArr]);
 
-  const onChangeBpm = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (Number(e.target.value) < 40 || Number(e.target.value) >= 500) {
+  const onChangeBpm = (value: number[]) => {
+    if (value[0] < 40 || value[0] >= 300) {
       return;
     }
-    setBpm(Number(e.target.value));
+    setBpm(value[0]);
   };
 
   const handleChords = (value: string) => {
@@ -201,13 +201,21 @@ const ChordsPage = () => {
         }
       </Box>
       <Box width="300px">
-        <TextField.Root
-          placeholder="bpm을 입력하세요. 기본값은 60입니다."
-          type="number"
-          onChange={onChangeBpm}
-        >
-          <TextField.Slot></TextField.Slot>
-        </TextField.Root>
+        <Flex align="center" justify="between" style={{ padding: '10px 0' }}>
+          <Box style={{ display: 'flex', alignItems: 'center' }}>
+            BPM: {bpm}
+          </Box>
+          <Box
+            style={{ display: 'flex', alignItems: 'center', width: '220px' }}
+          >
+            <Slider
+              onValueChange={onChangeBpm}
+              value={[bpm]}
+              style={{ maxWidth: '240px' }}
+              max={300}
+            />
+          </Box>
+        </Flex>
         <Flex align="center" justify="between" style={{ padding: '10px 0' }}>
           <Box style={{ display: 'flex', alignItems: 'center' }}>
             볼륨: {volume}
