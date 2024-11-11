@@ -246,7 +246,7 @@ const ChordsPage = () => {
         >
           <RadioGroup.Item value="1">4 beat</RadioGroup.Item>
           <RadioGroup.Item value="2">8 beat</RadioGroup.Item>
-          <RadioGroup.Item value="3">16 beat</RadioGroup.Item>
+          {/*<RadioGroup.Item value="3">16 beat</RadioGroup.Item>*/}
         </RadioGroup.Root>
       </Box>
       <Box>

@@ -31,7 +31,6 @@
       {
         "endOfLine": "auto",
         "trailingComma": "all"
-        // 또는 "all", "none"
       }
     ],
     "react/prop-types": 1
