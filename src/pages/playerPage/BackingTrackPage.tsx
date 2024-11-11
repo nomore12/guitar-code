@@ -1,12 +1,13 @@
 import React, { useRef, useState, useEffect, ChangeEvent } from 'react';
 import {
   Button,
-  Checkbox,
   FormControlLabel,
   Slider,
   Typography,
   Box,
   TextField,
+  Radio,
+  RadioGroup,
 } from '@mui/material';
 
 const MediaPlayer: React.FC = () => {
@@ -14,12 +15,13 @@ const MediaPlayer: React.FC = () => {
   const [file, setFile] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [playbackRate, setPlaybackRate] = useState<number>(1.0);
-  const [isRepeating, setIsRepeating] = useState<boolean>(false);
   const [isABRepeat, setIsABRepeat] = useState<boolean>(false);
-  const [pointA, setPointA] = useState<number | null>(null);
-  const [pointB, setPointB] = useState<number | null>(null);
+  const [pointA, setPointA] = useState<number>(0);
+  const [pointB, setPointB] = useState<number>(0);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
+  const [repeat, setRepeat] = useState<string>('no-repeat');
+  const [volume, setVolume] = useState<number>(1.0); // 볼륨 상태 추가
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -30,7 +32,7 @@ const MediaPlayer: React.FC = () => {
 
   const handlePlay = () => {
     if (audioRef.current) {
-      if (isABRepeat && pointA !== null) {
+      if (isABRepeat) {
         audioRef.current.currentTime = pointA;
       }
       audioRef.current.playbackRate = playbackRate;
@@ -46,14 +48,6 @@ const MediaPlayer: React.FC = () => {
     }
   };
 
-  const handleStop = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      setIsPlaying(false);
-    }
-  };
-
   const handlePlaybackRateChange = (e: ChangeEvent<HTMLInputElement>) => {
     const rate = parseFloat(e.target.value);
     setPlaybackRate(rate);
@@ -62,25 +56,30 @@ const MediaPlayer: React.FC = () => {
     }
   };
 
-  const handleRepeatToggle = () => {
-    setIsRepeating(!isRepeating);
+  const handleVolumeChange = (e: Event, newValue: number | number[]) => {
+    const newVolume = newValue as number;
+    setVolume(newVolume);
     if (audioRef.current) {
-      audioRef.current.loop = !isRepeating;
+      audioRef.current.volume = newVolume;
     }
   };
 
-  const handleSetPointA = (e: Event, value: number | number[]) => {
-    const newTime = value as number;
-    setPointA(newTime);
-  };
-
-  const handleSetPointB = (e: Event, value: number | number[]) => {
-    const newTime = value as number;
-    setPointB(newTime);
-  };
-
-  const handleABRepeatToggle = () => {
-    setIsABRepeat(!isABRepeat);
+  const handleRepeatRadio = (e: ChangeEvent<HTMLInputElement>) => {
+    setRepeat(e.target.value);
+    if (audioRef.current) {
+      if (e.target.value === 'repeat') {
+        audioRef.current.loop = true;
+      } else {
+        audioRef.current.loop = false;
+      }
+    }
+    if (e.target.value === 'ab-repeat') {
+      setIsABRepeat(true);
+    } else {
+      setIsABRepeat(false);
+      setPointA(0);
+      setPointB(duration);
+    }
   };
 
   const handleTimeUpdate = () => {
@@ -88,28 +87,23 @@ const MediaPlayer: React.FC = () => {
       setCurrentTime(audioRef.current.currentTime);
       setDuration(audioRef.current.duration);
     }
-    if (isABRepeat && pointA !== null && pointB !== null) {
-      if (audioRef.current && audioRef.current.currentTime >= pointB) {
+    if (isABRepeat && audioRef.current && pointA !== null && pointB !== null) {
+      if (audioRef.current.currentTime >= pointB) {
         audioRef.current.currentTime = pointA;
       }
     }
   };
 
-  const handleSeekChange = (e: Event, value: number | number[]) => {
-    const newTime = value as number;
-    if (audioRef.current) {
-      audioRef.current.currentTime = newTime;
-      setCurrentTime(newTime);
-    }
-  };
-
-  const handleSeekMouseUp = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        if (isABRepeat && pointA !== null) {
-          audioRef.current.currentTime = pointA;
-        }
-        audioRef.current.play();
+  const handleSliderChange = (e: Event, newValue: number | number[]) => {
+    if (isABRepeat) {
+      const [newPointA, newPointB] = newValue as number[];
+      setPointA(newPointA);
+      setPointB(newPointB);
+    } else {
+      const newTime = newValue as number;
+      if (audioRef.current) {
+        audioRef.current.currentTime = newTime;
+        setCurrentTime(newTime);
       }
     }
   };
@@ -164,9 +158,6 @@ const MediaPlayer: React.FC = () => {
         >
           멈추기
         </Button>
-        <Button variant="contained" onClick={handleStop}>
-          재생 종료
-        </Button>
       </Box>
       <Box sx={{ marginTop: 3 }}>
         <Typography gutterBottom>재생 속도:</Typography>
@@ -180,86 +171,59 @@ const MediaPlayer: React.FC = () => {
       </Box>
       <Box sx={{ marginTop: 3 }}>
         <Typography gutterBottom>
-          재생 위치: {currentTime.toFixed(2)}초
+          재생 위치:{' '}
+          {isABRepeat
+            ? `${pointA.toFixed(2)} - ${pointB.toFixed(2)}`
+            : `${currentTime.toFixed(2)}초`}
         </Typography>
         <Slider
           min={0}
           max={duration}
-          value={currentTime}
+          value={isABRepeat ? [pointA, pointB] : currentTime}
           onChange={(e: Event, value: number | number[]) =>
-            handleSeekChange(e as Event, value)
+            handleSliderChange(e, value)
           }
-          onMouseUp={handleSeekMouseUp}
-        />
-        {/*<TextField*/}
-        {/*    type="number"*/}
-        {/*    value={currentTime}*/}
-        {/*    onChange={(e) => handleSeekChange(e as unknown as Event, parseFloat(e.target.value))}*/}
-        {/*    inputProps={{ step: 0.1, min: 0, max: duration }}*/}
-        {/*    sx={{ width: 100, marginTop: 2 }}*/}
-        {/*/>*/}
-      </Box>
-      <Box sx={{ marginTop: 3 }}>
-        <FormControlLabel
-          control={
-            <Checkbox checked={isRepeating} onChange={handleRepeatToggle} />
-          }
-          label="반복하기"
+          valueLabelDisplay="auto"
         />
       </Box>
       <Box sx={{ marginTop: 3 }}>
-        <Typography gutterBottom>구간 시작점 (A):</Typography>
+        <Typography gutterBottom>볼륨: {Math.round(volume * 100)}%</Typography>
         <Slider
           min={0}
-          max={duration}
-          value={pointA ?? 0}
+          max={1}
+          step={0.01}
+          value={volume}
           onChange={(e: Event, value: number | number[]) =>
-            handleSetPointA(e as Event, value)
+            handleVolumeChange(e, value)
           }
-        />
-        <TextField
-          type="number"
-          value={pointA ?? 0}
-          onChange={(e: any) =>
-            handleSetPointA(e as unknown as Event, parseFloat(e.target.value))
-          }
-          inputProps={{ step: 0.1, min: 0, max: duration }}
-          sx={{ width: 100, marginTop: 2 }}
+          valueLabelDisplay="auto"
         />
       </Box>
       <Box sx={{ marginTop: 3 }}>
-        <Typography gutterBottom>구간 종료점 (B):</Typography>
-        <Slider
-          min={0}
-          max={duration}
-          value={pointB ?? 0}
-          onChange={(e: Event, value: number | number[]) =>
-            handleSetPointB(e as Event, value)
-          }
-        />
-        <TextField
-          type="number"
-          value={pointB ?? 0}
-          onChange={(e: any) =>
-            handleSetPointB(e as unknown as Event, parseFloat(e.target.value))
-          }
-          inputProps={{ step: 0.1, min: 0, max: duration }}
-          sx={{ width: 100, marginTop: 2 }}
-        />
+        <RadioGroup
+          row
+          aria-labelledby="demo-radio-buttons-group-label"
+          value={repeat}
+          name="radio-buttons-group"
+          onChange={handleRepeatRadio}
+        >
+          <FormControlLabel
+            value="no-repeat"
+            control={<Radio />}
+            label="반복없음"
+          />
+          <FormControlLabel
+            value="repeat"
+            control={<Radio />}
+            label="한 곡 반복"
+          />
+          <FormControlLabel
+            value="ab-repeat"
+            control={<Radio />}
+            label="A/B 구간 반복"
+          />
+        </RadioGroup>
       </Box>
-      <Box sx={{ marginTop: 3 }}>
-        <FormControlLabel
-          control={
-            <Checkbox checked={isABRepeat} onChange={handleABRepeatToggle} />
-          }
-          label="A/B 반복하기"
-        />
-      </Box>
-      {pointA !== null && pointB !== null && (
-        <Typography sx={{ marginTop: 2 }}>
-          A: {pointA.toFixed(2)}초, B: {pointB.toFixed(2)}초
-        </Typography>
-      )}
     </Box>
   );
 };
