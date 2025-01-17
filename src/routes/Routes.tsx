@@ -3,6 +3,7 @@ import BackingTrackPage from '../pages/playerPage/BackingTrackPage';
 import ChordsPage from '../pages/chordsPage/ChordsPage';
 import { Route } from 'react-router-dom';
 import MainPage from '../pages/MainPage';
+import ChordTest from '../pages/ChordTest';
 
 export interface RouteItem {
   path: string;
@@ -34,6 +35,11 @@ const routes: RouteItem[] = [
   {
     path: '/backingTracks',
     element: <BackingTrackPage />,
+    exact: true,
+  },
+  {
+    path: '/test',
+    element: <ChordTest />,
     exact: true,
   },
 ];
