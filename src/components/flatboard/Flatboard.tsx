@@ -8,7 +8,12 @@ interface PropsType {
 
 const Flatboard: React.FC<PropsType> = ({ rootChord, selectedScale }) => {
   const [displayScale, setDisplayScale] = useState<
-    { flatNumber: number; lineNumber: number; chord: string }[]
+    {
+      flatNumber: number;
+      lineNumber: number;
+      chord: string;
+      codeTone: boolean;
+    }[]
   >([]);
 
   const strings = 6; // Number of guitar strings
@@ -24,7 +29,19 @@ const Flatboard: React.FC<PropsType> = ({ rootChord, selectedScale }) => {
 
   const generateScale = (
     root: string,
-    scaleType: 'major' | 'minor' | 'custom',
+    scaleType:
+      | 'major'
+      | 'minor'
+      | 'ionian'
+      | 'dorian'
+      | 'phrygian'
+      | 'lydian'
+      | 'mixolydian'
+      | 'aeolian'
+      | 'locrian'
+      | 'pentatonicMajor'
+      | 'pentatonicMinor'
+      | 'custom',
     scaleIntervals?: number[],
   ) => {
     const tuning = ['E', 'A', 'D', 'G', 'B', 'E']; // 표준 조율 (6번줄부터 1번줄)
@@ -43,15 +60,22 @@ const Flatboard: React.FC<PropsType> = ({ rootChord, selectedScale }) => {
       'G#',
     ]; // 12음계
 
-    // 메이저 및 마이너 스케일 기본 정의
+    // 스케일 및 모드의 기본 정의
     const predefinedScales: Record<string, number[]> = {
-      major: [0, 2, 4, 5, 7, 9, 11], // 메이저 스케일: 루트, 2도, 3도, 4도, 5도, 6도, 7도
-      minor: [0, 2, 3, 5, 7, 8, 10], // 마이너 스케일: 루트, 2도, b3도, 4도, 5도, b6도, b7도
-      pentatonicMajor: [0, 2, 4, 7, 9], // 메이저 펜타토닉
-      pentatonicMinor: [0, 3, 5, 7, 10], // 마이너 펜타토닉
+      major: [0, 2, 4, 5, 7, 9, 11], // Ionian (메이저 스케일과 동일)
+      minor: [0, 2, 3, 5, 7, 8, 10], // Aeolian (자연적 마이너 스케일과 동일)
+      ionian: [0, 2, 4, 5, 7, 9, 11], // Ionian
+      dorian: [0, 2, 3, 5, 7, 9, 10], // Dorian
+      phrygian: [0, 1, 3, 5, 7, 8, 10], // Phrygian
+      lydian: [0, 2, 4, 6, 7, 9, 11], // Lydian
+      mixolydian: [0, 2, 4, 5, 7, 9, 10], // Mixolydian
+      aeolian: [0, 2, 3, 5, 7, 8, 10], // Aeolian
+      locrian: [0, 1, 3, 5, 6, 8, 10], // Locrian
+      pentatonicMajor: [0, 2, 4, 7, 9], // Major Pentatonic
+      pentatonicMinor: [0, 3, 5, 7, 10], // Minor Pentatonic
     };
 
-    // 선택된 스케일 인터벌 계산
+    // 선택된 스케일 또는 모드 인터벌 계산
     const intervals =
       scaleType === 'custom'
         ? scaleIntervals || []
@@ -67,6 +91,16 @@ const Flatboard: React.FC<PropsType> = ({ rootChord, selectedScale }) => {
       (interval) => notes[(rootIndex + interval) % notes.length],
     );
 
+    // 코드 구성음 자동 계산 (루트, 3도, 5도)
+    const isMajor =
+      scaleType === 'major' ||
+      scaleType === 'ionian' ||
+      scaleType === 'pentatonicMajor';
+    const chordIntervals = isMajor ? [0, 4, 7] : [0, 3, 7]; // Major: Root, 3rd, 5th; Minor: Root, b3rd, 5th
+    const chordNotes = chordIntervals.map(
+      (interval) => notes[(rootIndex + interval) % notes.length],
+    );
+
     const frets = 12; // 프렛 수
     const strings = 6; // 줄 수
     const scale = [];
@@ -78,13 +112,20 @@ const Flatboard: React.FC<PropsType> = ({ rootChord, selectedScale }) => {
       return notes[nextIndex];
     };
 
-    // 줄 번호와 프렛 번호에 따라 스케일 음계 필터링
+    // 줄 번호와 프렛 번호에 따라 스케일 음계와 코드톤 여부 추가
     for (let lineNumber = 1; lineNumber <= strings; lineNumber++) {
       const openNote = tuning[strings - lineNumber]; // 해당 줄의 개방현 음계
       for (let flatNumber = 0; flatNumber <= frets; flatNumber++) {
         const chord = getNextNote(openNote, flatNumber);
+
+        // 스케일 음계와 일치하는 경우만 추가
         if (scaleNotes.includes(chord)) {
-          scale.push({ lineNumber, flatNumber, chord });
+          scale.push({
+            lineNumber,
+            flatNumber,
+            chord,
+            codeTone: chordNotes.includes(chord), // 코드 구성음 여부
+          });
         }
       }
     }
@@ -178,6 +219,53 @@ const Flatboard: React.FC<PropsType> = ({ rootChord, selectedScale }) => {
         r="6"
         fill="#c0c0c0"
       />
+
+      {/* 디스플레이: Root, Code Tone, Scale Tone */}
+      <g transform={`translate(${totalWidth / 2 - 150}, ${totalHeight - 30})`}>
+        {/* Root */}
+        <g transform="translate(0, 0)">
+          <circle
+            cx="0"
+            cy="0"
+            r="12"
+            fill="#ec5555"
+            stroke="black"
+            strokeWidth="1"
+          />
+          <text x="20" y="4" fontSize="12" textAnchor="start" fill="black">
+            : Root
+          </text>
+        </g>
+        {/* Code Tone */}
+        <g transform="translate(100, 0)">
+          <circle
+            cx="0"
+            cy="0"
+            r="12"
+            fill="#7ba871"
+            stroke="black"
+            strokeWidth="1"
+          />
+          <text x="20" y="4" fontSize="12" textAnchor="start" fill="black">
+            : Code Tone
+          </text>
+        </g>
+        {/* Nothing */}
+        <g transform="translate(220, 0)">
+          <circle
+            cx="0"
+            cy="0"
+            r="12"
+            fill="#ffd700"
+            stroke="black"
+            strokeWidth="1"
+          />
+          <text x="20" y="4" fontSize="12" textAnchor="start" fill="black">
+            : Scale Tone
+          </text>
+        </g>
+      </g>
+
       {/*<NoteMarker fret={1} string={6} note="F" color="red" />*/}
       {displayScale &&
         displayScale.map((chord, index) => (
@@ -186,7 +274,13 @@ const Flatboard: React.FC<PropsType> = ({ rootChord, selectedScale }) => {
             fret={chord.flatNumber}
             string={chord.lineNumber}
             note={chord.chord}
-            color={chord.chord === rootChord ? 'red' : ''}
+            color={
+              chord.chord === rootChord
+                ? '#ec5555'
+                : chord.codeTone
+                  ? '#7ba871'
+                  : ''
+            }
           />
         ))}
     </svg>

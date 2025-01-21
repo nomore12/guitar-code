@@ -29,43 +29,55 @@ const FlatboardPage: React.FC = () => {
         rootChord={rootChord}
         selectedScale={selectedScale as 'major' | 'minor'}
       />
-      <div>
-        <Box sx={{ display: 'flex' }}>
-          <Box>
-            <InputLabel id="demo-simple-select-label-chord">코드</InputLabel>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={rootChord}
-              label="코드"
-              onChange={handleChangeRootChord}
-            >
-              <MenuItem value="A">A</MenuItem>
-              <MenuItem value="B">B</MenuItem>
-              <MenuItem value="C">C</MenuItem>
-              <MenuItem value="D">D</MenuItem>
-              <MenuItem value="E">E</MenuItem>
-              <MenuItem value="F">F</MenuItem>
-              <MenuItem value="G">G</MenuItem>
-            </Select>
-          </Box>
-          <Box>
-            <InputLabel id="demo-simple-select-label-scale">스케일</InputLabel>
-            <Select
-              labelId="demo-simple-select-label-scale"
-              id="demo-simple-select-scale"
-              value={selectedScale}
-              label="스케일"
-              onChange={handleChangeSelectedScale}
-            >
-              <MenuItem value="major">Major</MenuItem>
-              <MenuItem value="minor">Minor</MenuItem>
-              <MenuItem value="pentatonicMajor">Pentatonic Major</MenuItem>
-              <MenuItem value="pentatonicMinor">Pentatonic Minor</MenuItem>
-            </Select>
-          </Box>
+      <Box
+        sx={{
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          gap: 2,
+        }}
+      >
+        <Box>
+          <InputLabel id="demo-simple-select-label-chord">코드</InputLabel>
+          <Select
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+            value={rootChord}
+            label="코드"
+            onChange={handleChangeRootChord}
+          >
+            <MenuItem value="A">A</MenuItem>
+            <MenuItem value="B">B</MenuItem>
+            <MenuItem value="C">C</MenuItem>
+            <MenuItem value="D">D</MenuItem>
+            <MenuItem value="E">E</MenuItem>
+            <MenuItem value="F">F</MenuItem>
+            <MenuItem value="G">G</MenuItem>
+          </Select>
         </Box>
-      </div>
+        <Box>
+          <InputLabel id="demo-simple-select-label-scale">스케일</InputLabel>
+          <Select
+            labelId="demo-simple-select-label-scale"
+            id="demo-simple-select-scale"
+            value={selectedScale}
+            label="스케일"
+            onChange={handleChangeSelectedScale}
+          >
+            <MenuItem value="major">Major</MenuItem>
+            <MenuItem value="minor">Minor</MenuItem>
+            <MenuItem value="pentatonicMajor">Pentatonic Major</MenuItem>
+            <MenuItem value="pentatonicMinor">Pentatonic Minor</MenuItem>
+            <MenuItem value="ionian">Ionian</MenuItem>
+            <MenuItem value="dorian">Dorian</MenuItem>
+            <MenuItem value="phrygian">Phrygian</MenuItem>
+            <MenuItem value="lydian">Lydian</MenuItem>
+            <MenuItem value="mixolydian">Mixolydian</MenuItem>
+            <MenuItem value="aeolian">Aeolian</MenuItem>
+            <MenuItem value="locrian">Locrian</MenuItem>
+          </Select>
+        </Box>
+      </Box>
     </div>
   );
 };
