@@ -35,6 +35,15 @@ const MainPage: React.FC = () => {
       >
         백킹트랙 플레이어 페이지로 이동
       </Button>
+      <Button
+        component={Link}
+        to="/flatboard"
+        variant="contained"
+        color="secondary"
+        size="large"
+      >
+        프랫보드
+      </Button>
     </Box>
   );
 };
