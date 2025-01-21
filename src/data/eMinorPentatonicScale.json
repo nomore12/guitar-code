@@ -1,0 +1,182 @@
+[
+  {
+    "lineNumber": 1,
+    "flatNumber": 0,
+    "chord": "E"
+  },
+  {
+    "lineNumber": 1,
+    "flatNumber": 3,
+    "chord": "G"
+  },
+  {
+    "lineNumber": 1,
+    "flatNumber": 5,
+    "chord": "A"
+  },
+  {
+    "lineNumber": 1,
+    "flatNumber": 7,
+    "chord": "B"
+  },
+  {
+    "lineNumber": 1,
+    "flatNumber": 10,
+    "chord": "D"
+  },
+  {
+    "lineNumber": 1,
+    "flatNumber": 12,
+    "chord": "E"
+  },
+  {
+    "lineNumber": 2,
+    "flatNumber": 0,
+    "chord": "B"
+  },
+  {
+    "lineNumber": 2,
+    "flatNumber": 3,
+    "chord": "D"
+  },
+  {
+    "lineNumber": 2,
+    "flatNumber": 5,
+    "chord": "E"
+  },
+  {
+    "lineNumber": 2,
+    "flatNumber": 8,
+    "chord": "G"
+  },
+  {
+    "lineNumber": 2,
+    "flatNumber": 10,
+    "chord": "A"
+  },
+  {
+    "lineNumber": 2,
+    "flatNumber": 12,
+    "chord": "B"
+  },
+  {
+    "lineNumber": 3,
+    "flatNumber": 0,
+    "chord": "G"
+  },
+  {
+    "lineNumber": 3,
+    "flatNumber": 2,
+    "chord": "A"
+  },
+  {
+    "lineNumber": 3,
+    "flatNumber": 4,
+    "chord": "B"
+  },
+  {
+    "lineNumber": 3,
+    "flatNumber": 7,
+    "chord": "D"
+  },
+  {
+    "lineNumber": 3,
+    "flatNumber": 9,
+    "chord": "E"
+  },
+  {
+    "lineNumber": 3,
+    "flatNumber": 12,
+    "chord": "G"
+  },
+  {
+    "lineNumber": 4,
+    "flatNumber": 0,
+    "chord": "D"
+  },
+  {
+    "lineNumber": 4,
+    "flatNumber": 2,
+    "chord": "E"
+  },
+  {
+    "lineNumber": 4,
+    "flatNumber": 5,
+    "chord": "G"
+  },
+  {
+    "lineNumber": 4,
+    "flatNumber": 7,
+    "chord": "A"
+  },
+  {
+    "lineNumber": 4,
+    "flatNumber": 9,
+    "chord": "B"
+  },
+  {
+    "lineNumber": 4,
+    "flatNumber": 12,
+    "chord": "D"
+  },
+  {
+    "lineNumber": 5,
+    "flatNumber": 0,
+    "chord": "A"
+  },
+  {
+    "lineNumber": 5,
+    "flatNumber": 2,
+    "chord": "B"
+  },
+  {
+    "lineNumber": 5,
+    "flatNumber": 5,
+    "chord": "D"
+  },
+  {
+    "lineNumber": 5,
+    "flatNumber": 7,
+    "chord": "E"
+  },
+  {
+    "lineNumber": 5,
+    "flatNumber": 10,
+    "chord": "G"
+  },
+  {
+    "lineNumber": 5,
+    "flatNumber": 12,
+    "chord": "A"
+  },
+  {
+    "lineNumber": 6,
+    "flatNumber": 0,
+    "chord": "E"
+  },
+  {
+    "lineNumber": 6,
+    "flatNumber": 3,
+    "chord": "G"
+  },
+  {
+    "lineNumber": 6,
+    "flatNumber": 5,
+    "chord": "A"
+  },
+  {
+    "lineNumber": 6,
+    "flatNumber": 7,
+    "chord": "B"
+  },
+  {
+    "lineNumber": 6,
+    "flatNumber": 10,
+    "chord": "D"
+  },
+  {
+    "lineNumber": 6,
+    "flatNumber": 12,
+    "chord": "E"
+  }
+]

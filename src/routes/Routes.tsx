@@ -4,6 +4,7 @@ import ChordsPage from '../pages/chordsPage/ChordsPage';
 import { Route } from 'react-router-dom';
 import MainPage from '../pages/MainPage';
 import ChordTest from '../pages/ChordTest';
+import FlatboardPage from '../pages/flatboardPage/FlatboardPage';
 
 export interface RouteItem {
   path: string;
@@ -40,6 +41,11 @@ const routes: RouteItem[] = [
   {
     path: '/test',
     element: <ChordTest />,
+    exact: true,
+  },
+  {
+    path: '/flatboard',
+    element: <FlatboardPage />,
     exact: true,
   },
 ];

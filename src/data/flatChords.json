@@ -1,0 +1,392 @@
+[
+  {
+    "lineNumber": 1,
+    "flatNumber": 0,
+    "chord": "E"
+  },
+  {
+    "lineNumber": 1,
+    "flatNumber": 1,
+    "chord": "F"
+  },
+  {
+    "lineNumber": 1,
+    "flatNumber": 2,
+    "chord": "F#"
+  },
+  {
+    "lineNumber": 1,
+    "flatNumber": 3,
+    "chord": "G"
+  },
+  {
+    "lineNumber": 1,
+    "flatNumber": 4,
+    "chord": "G#"
+  },
+  {
+    "lineNumber": 1,
+    "flatNumber": 5,
+    "chord": "A"
+  },
+  {
+    "lineNumber": 1,
+    "flatNumber": 6,
+    "chord": "A#"
+  },
+  {
+    "lineNumber": 1,
+    "flatNumber": 7,
+    "chord": "B"
+  },
+  {
+    "lineNumber": 1,
+    "flatNumber": 8,
+    "chord": "C"
+  },
+  {
+    "lineNumber": 1,
+    "flatNumber": 9,
+    "chord": "C#"
+  },
+  {
+    "lineNumber": 1,
+    "flatNumber": 10,
+    "chord": "D"
+  },
+  {
+    "lineNumber": 1,
+    "flatNumber": 11,
+    "chord": "D#"
+  },
+  {
+    "lineNumber": 1,
+    "flatNumber": 12,
+    "chord": "E"
+  },
+  {
+    "lineNumber": 2,
+    "flatNumber": 0,
+    "chord": "B"
+  },
+  {
+    "lineNumber": 2,
+    "flatNumber": 1,
+    "chord": "C"
+  },
+  {
+    "lineNumber": 2,
+    "flatNumber": 2,
+    "chord": "C#"
+  },
+  {
+    "lineNumber": 2,
+    "flatNumber": 3,
+    "chord": "D"
+  },
+  {
+    "lineNumber": 2,
+    "flatNumber": 4,
+    "chord": "D#"
+  },
+  {
+    "lineNumber": 2,
+    "flatNumber": 5,
+    "chord": "E"
+  },
+  {
+    "lineNumber": 2,
+    "flatNumber": 6,
+    "chord": "F"
+  },
+  {
+    "lineNumber": 2,
+    "flatNumber": 7,
+    "chord": "F#"
+  },
+  {
+    "lineNumber": 2,
+    "flatNumber": 8,
+    "chord": "G"
+  },
+  {
+    "lineNumber": 2,
+    "flatNumber": 9,
+    "chord": "G#"
+  },
+  {
+    "lineNumber": 2,
+    "flatNumber": 10,
+    "chord": "A"
+  },
+  {
+    "lineNumber": 2,
+    "flatNumber": 11,
+    "chord": "A#"
+  },
+  {
+    "lineNumber": 2,
+    "flatNumber": 12,
+    "chord": "B"
+  },
+  {
+    "lineNumber": 3,
+    "flatNumber": 0,
+    "chord": "G"
+  },
+  {
+    "lineNumber": 3,
+    "flatNumber": 1,
+    "chord": "G#"
+  },
+  {
+    "lineNumber": 3,
+    "flatNumber": 2,
+    "chord": "A"
+  },
+  {
+    "lineNumber": 3,
+    "flatNumber": 3,
+    "chord": "A#"
+  },
+  {
+    "lineNumber": 3,
+    "flatNumber": 4,
+    "chord": "B"
+  },
+  {
+    "lineNumber": 3,
+    "flatNumber": 5,
+    "chord": "C"
+  },
+  {
+    "lineNumber": 3,
+    "flatNumber": 6,
+    "chord": "C#"
+  },
+  {
+    "lineNumber": 3,
+    "flatNumber": 7,
+    "chord": "D"
+  },
+  {
+    "lineNumber": 3,
+    "flatNumber": 8,
+    "chord": "D#"
+  },
+  {
+    "lineNumber": 3,
+    "flatNumber": 9,
+    "chord": "E"
+  },
+  {
+    "lineNumber": 3,
+    "flatNumber": 10,
+    "chord": "F"
+  },
+  {
+    "lineNumber": 3,
+    "flatNumber": 11,
+    "chord": "F#"
+  },
+  {
+    "lineNumber": 3,
+    "flatNumber": 12,
+    "chord": "G"
+  },
+  {
+    "lineNumber": 4,
+    "flatNumber": 0,
+    "chord": "D"
+  },
+  {
+    "lineNumber": 4,
+    "flatNumber": 1,
+    "chord": "D#"
+  },
+  {
+    "lineNumber": 4,
+    "flatNumber": 2,
+    "chord": "E"
+  },
+  {
+    "lineNumber": 4,
+    "flatNumber": 3,
+    "chord": "F"
+  },
+  {
+    "lineNumber": 4,
+    "flatNumber": 4,
+    "chord": "F#"
+  },
+  {
+    "lineNumber": 4,
+    "flatNumber": 5,
+    "chord": "G"
+  },
+  {
+    "lineNumber": 4,
+    "flatNumber": 6,
+    "chord": "G#"
+  },
+  {
+    "lineNumber": 4,
+    "flatNumber": 7,
+    "chord": "A"
+  },
+  {
+    "lineNumber": 4,
+    "flatNumber": 8,
+    "chord": "A#"
+  },
+  {
+    "lineNumber": 4,
+    "flatNumber": 9,
+    "chord": "B"
+  },
+  {
+    "lineNumber": 4,
+    "flatNumber": 10,
+    "chord": "C"
+  },
+  {
+    "lineNumber": 4,
+    "flatNumber": 11,
+    "chord": "C#"
+  },
+  {
+    "lineNumber": 4,
+    "flatNumber": 12,
+    "chord": "D"
+  },
+  {
+    "lineNumber": 5,
+    "flatNumber": 0,
+    "chord": "A"
+  },
+  {
+    "lineNumber": 5,
+    "flatNumber": 1,
+    "chord": "A#"
+  },
+  {
+    "lineNumber": 5,
+    "flatNumber": 2,
+    "chord": "B"
+  },
+  {
+    "lineNumber": 5,
+    "flatNumber": 3,
+    "chord": "C"
+  },
+  {
+    "lineNumber": 5,
+    "flatNumber": 4,
+    "chord": "C#"
+  },
+  {
+    "lineNumber": 5,
+    "flatNumber": 5,
+    "chord": "D"
+  },
+  {
+    "lineNumber": 5,
+    "flatNumber": 6,
+    "chord": "D#"
+  },
+  {
+    "lineNumber": 5,
+    "flatNumber": 7,
+    "chord": "E"
+  },
+  {
+    "lineNumber": 5,
+    "flatNumber": 8,
+    "chord": "F"
+  },
+  {
+    "lineNumber": 5,
+    "flatNumber": 9,
+    "chord": "F#"
+  },
+  {
+    "lineNumber": 5,
+    "flatNumber": 10,
+    "chord": "G"
+  },
+  {
+    "lineNumber": 5,
+    "flatNumber": 11,
+    "chord": "G#"
+  },
+  {
+    "lineNumber": 5,
+    "flatNumber": 12,
+    "chord": "A"
+  },
+  {
+    "lineNumber": 6,
+    "flatNumber": 0,
+    "chord": "E"
+  },
+  {
+    "lineNumber": 6,
+    "flatNumber": 1,
+    "chord": "F"
+  },
+  {
+    "lineNumber": 6,
+    "flatNumber": 2,
+    "chord": "F#"
+  },
+  {
+    "lineNumber": 6,
+    "flatNumber": 3,
+    "chord": "G"
+  },
+  {
+    "lineNumber": 6,
+    "flatNumber": 4,
+    "chord": "G#"
+  },
+  {
+    "lineNumber": 6,
+    "flatNumber": 5,
+    "chord": "A"
+  },
+  {
+    "lineNumber": 6,
+    "flatNumber": 6,
+    "chord": "A#"
+  },
+  {
+    "lineNumber": 6,
+    "flatNumber": 7,
+    "chord": "B"
+  },
+  {
+    "lineNumber": 6,
+    "flatNumber": 8,
+    "chord": "C"
+  },
+  {
+    "lineNumber": 6,
+    "flatNumber": 9,
+    "chord": "C#"
+  },
+  {
+    "lineNumber": 6,
+    "flatNumber": 10,
+    "chord": "D"
+  },
+  {
+    "lineNumber": 6,
+    "flatNumber": 11,
+    "chord": "D#"
+  },
+  {
+    "lineNumber": 6,
+    "flatNumber": 12,
+    "chord": "E"
+  }
+]
