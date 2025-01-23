@@ -41,6 +41,8 @@ const Flatboard: React.FC<PropsType> = ({ rootChord, selectedScale }) => {
       | 'locrian'
       | 'pentatonicMajor'
       | 'pentatonicMinor'
+      | 'melodicMinor'
+      | 'harmonicMinor'
       | 'custom',
     scaleIntervals?: number[],
   ) => {
@@ -73,6 +75,8 @@ const Flatboard: React.FC<PropsType> = ({ rootChord, selectedScale }) => {
       locrian: [0, 1, 3, 5, 6, 8, 10], // Locrian
       pentatonicMajor: [0, 2, 4, 7, 9], // Major Pentatonic
       pentatonicMinor: [0, 3, 5, 7, 10], // Minor Pentatonic
+      melodicMinor: [0, 2, 3, 5, 7, 9, 11], // Melodic Minor
+      harmonicMinor: [0, 2, 3, 5, 7, 8, 11], // Harmonic Minor
     };
 
     // 선택된 스케일 또는 모드 인터벌 계산
@@ -247,7 +251,7 @@ const Flatboard: React.FC<PropsType> = ({ rootChord, selectedScale }) => {
             strokeWidth="1"
           />
           <text x="20" y="4" fontSize="12" textAnchor="start" fill="black">
-            : Code Tone
+            : Chord Tone
           </text>
         </g>
         {/* Nothing */}

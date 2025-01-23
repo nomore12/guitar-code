@@ -37,7 +37,7 @@ const MainPage: React.FC = () => {
       </Button>
       <Button
         component={Link}
-        to="/flatboard"
+        to="/fretboard"
         variant="contained"
         color="secondary"
         size="large"
