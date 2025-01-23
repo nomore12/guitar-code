@@ -44,7 +44,7 @@ const routes: RouteItem[] = [
     exact: true,
   },
   {
-    path: '/flatboard',
+    path: '/fretboard',
     element: <FlatboardPage />,
     exact: true,
   },
