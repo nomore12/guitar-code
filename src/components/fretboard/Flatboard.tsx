@@ -43,6 +43,8 @@ const Flatboard: React.FC<PropsType> = ({ rootChord, selectedScale }) => {
       | 'pentatonicMinor'
       | 'melodicMinor'
       | 'harmonicMinor'
+      | 'minorBlues'
+      | 'majorBlues'
       | 'custom',
     scaleIntervals?: number[],
   ) => {
@@ -77,6 +79,8 @@ const Flatboard: React.FC<PropsType> = ({ rootChord, selectedScale }) => {
       pentatonicMinor: [0, 3, 5, 7, 10], // Minor Pentatonic
       melodicMinor: [0, 2, 3, 5, 7, 9, 11], // Melodic Minor
       harmonicMinor: [0, 2, 3, 5, 7, 8, 11], // Harmonic Minor
+      minorBlues: [0, 3, 5, 6, 7, 10], // Minor Blues
+      majorBlues: [0, 2, 3, 4, 7, 9], // Major Blues
     };
 
     // 선택된 스케일 또는 모드 인터벌 계산
@@ -99,7 +103,8 @@ const Flatboard: React.FC<PropsType> = ({ rootChord, selectedScale }) => {
     const isMajor =
       scaleType === 'major' ||
       scaleType === 'ionian' ||
-      scaleType === 'pentatonicMajor';
+      scaleType === 'pentatonicMajor' ||
+      scaleType === 'majorBlues';
     const chordIntervals = isMajor ? [0, 4, 7] : [0, 3, 7]; // Major: Root, 3rd, 5th; Minor: Root, b3rd, 5th
     const chordNotes = chordIntervals.map(
       (interval) => notes[(rootIndex + interval) % notes.length],

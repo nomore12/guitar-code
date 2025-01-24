@@ -7,7 +7,6 @@ import {
   Select,
   Slider,
   Stack,
-  TextField,
   Typography,
 } from '@mui/material';
 import React, { useState, useRef, useEffect } from 'react';

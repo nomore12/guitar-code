@@ -78,6 +78,8 @@ const FlatboardPage: React.FC = () => {
             <MenuItem value="locrian">Locrian</MenuItem>
             <MenuItem value="melodicMinor">Melodic Minor</MenuItem>
             <MenuItem value="harmonicMinor">Harmonic Minor</MenuItem>
+            <MenuItem value="minorBlues">Minor Blues</MenuItem>
+            <MenuItem value="majorBlues">Major Blues</MenuItem>
           </Select>
         </Box>
       </Box>
