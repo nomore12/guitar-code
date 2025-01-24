@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import Flatboard from '../../components/flatboard/Flatboard';
+import Flatboard from '../../components/fretboard/Flatboard';
 import Box from '@mui/material/Box';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import { Select, SelectChangeEvent } from '@mui/material';
+import Metronome from '../../components/metronome/Metronome';
 
 const FlatboardPage: React.FC = () => {
   const [rootChord, setrootChord] = useState('A');
@@ -79,6 +80,9 @@ const FlatboardPage: React.FC = () => {
             <MenuItem value="harmonicMinor">Harmonic Minor</MenuItem>
           </Select>
         </Box>
+      </Box>
+      <Box>
+        <Metronome />
       </Box>
     </div>
   );

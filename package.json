@@ -9,9 +9,10 @@
   ],
   "main": "src/index.tsx",
   "dependencies": {
-    "@emotion/react": "^11.13.3",
-    "@emotion/styled": "^11.13.0",
-    "@mui/material": "^6.1.6",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.4.1",
+    "@mui/material": "^6.4.1",
     "@radix-ui/themes": "^3.0.5",
     "loader-utils": "3.2.1",
     "react": "18.2.0",
