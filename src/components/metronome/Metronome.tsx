@@ -15,6 +15,7 @@ import {
   PlayArrow as PlayArrowIcon,
   Stop as StopIcon,
 } from '@mui/icons-material';
+import useNoteStore from '../../store/PracticeStore';
 
 const BEAT_PATTERNS: Record<number, string[][]> = {
   4: [
@@ -52,10 +53,10 @@ const BEAT_PATTERNS: Record<number, string[][]> = {
     ['hihat'],
   ],
 };
-
 function Metronome() {
   const [bpm, setBpm] = useState(100);
   const [subdivision, setSubdivision] = useState(4); // 기본값 변경
+  const [beatNumber, setBeatNumber] = useState(0); // 현재 박자
   const audioContextRef = useRef<AudioContext | null>(null);
   const playerRef = useRef<Soundfont.Player | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -64,6 +65,8 @@ function Metronome() {
   const scheduleAheadTime = 0.1;
   const nextNoteTimeRef = useRef(0);
   const currentBeatIndexRef = useRef(0);
+  const { isPracticePlaying, setIsPracticePlaying, incrementIndex } =
+    useNoteStore();
 
   useEffect(() => {
     audioContextRef.current = new AudioContext();
@@ -89,6 +92,9 @@ function Metronome() {
 
     nextNoteTimeRef.current += interval;
     currentBeatIndexRef.current += 1;
+
+    // BeatNumber를 계속 증가
+    setBeatNumber((prevBeat) => prevBeat + 1);
   }
 
   function scheduleNote(beatIndex: number, time: number) {
@@ -131,12 +137,14 @@ function Metronome() {
     if (isPlaying) {
       nextNoteTimeRef.current = audioContextRef.current!.currentTime;
       currentBeatIndexRef.current = 0;
+      // beatNumber를 초기화하지 않음
       timerIDRef.current = window.setInterval(scheduler, lookahead);
     } else {
       if (timerIDRef.current !== null) {
         clearInterval(timerIDRef.current);
         timerIDRef.current = null;
       }
+      setBeatNumber(0); // Stop 버튼을 눌렀을 때만 초기화
     }
 
     return () => {
@@ -146,6 +154,11 @@ function Metronome() {
       }
     };
   }, [isPlaying, bpm, subdivision]);
+
+  useEffect(() => {
+    console.log(beatNumber);
+    incrementIndex();
+  }, [beatNumber]);
 
   return (
     <Box
@@ -159,6 +172,7 @@ function Metronome() {
       <Typography variant="h4" gutterBottom>
         Metronome
       </Typography>
+      {/* <Typography variant="h6">Current Beat: {beatNumber + 1}</Typography> */}
       <Stack spacing={3} direction="row" alignItems="center">
         <FormControl>
           <Stack spacing={2} direction="row" alignItems="center">
@@ -192,7 +206,11 @@ function Metronome() {
         <Button
           variant="contained"
           size="large"
-          onClick={() => setIsPlaying((prev) => !prev)}
+          onClick={() => {
+            setIsPlaying((prev) => !prev);
+            setIsPracticePlaying(!isPracticePlaying);
+            setBeatNumber(0);
+          }}
           startIcon={isPlaying ? <StopIcon /> : <PlayArrowIcon />}
           sx={{ width: '120px' }}
         >

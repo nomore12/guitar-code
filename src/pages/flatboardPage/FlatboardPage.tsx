@@ -3,13 +3,26 @@ import Flatboard from '../../components/fretboard/Flatboard';
 import Box from '@mui/material/Box';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
 import { Select, SelectChangeEvent } from '@mui/material';
 import Metronome from '../../components/metronome/Metronome';
+import useNoteStore from '../../store/PracticeStore';
 
 const FlatboardPage: React.FC = () => {
   const [rootChord, setrootChord] = useState('A');
   const [selectedScale, setSelectedScale] = useState('major');
+  const [practiceNodes, setPracticeNodes] = useState<Note[]>([]);
+  const { notes, currentIndex, incrementIndex, addNote, clearNotes } =
+    useNoteStore();
+
+  const handleNodeClick = (node: Note) => {
+    // setPracticeNodes([...practiceNodes, node]);
+    addNote(node);
+    // incrementIndex();
+  };
+
+  const handleReset = () => {
+    clearNotes();
+  };
 
   const handleChangeRootChord = (event: SelectChangeEvent) => {
     console.log(event.target.value);
@@ -20,15 +33,20 @@ const FlatboardPage: React.FC = () => {
     setSelectedScale(event.target.value as string);
   };
 
-  useEffect(() => {
-    console.log(rootChord);
-  }, []);
-
   return (
     <div>
       <Flatboard
         rootChord={rootChord}
         selectedScale={selectedScale as 'major' | 'minor'}
+        handleNodeClick={handleNodeClick}
+        practiceNodes={[]}
+      />
+      <Flatboard
+        rootChord={''}
+        selectedScale={undefined}
+        handleNodeClick={() => console.log('handleNodeClick')}
+        practiceNodes={notes}
+        handleReset={handleReset}
       />
       <Box
         sx={{

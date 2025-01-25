@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface NoteMarkerProps {
   fret: number; // 프렛 번호 (1 ~ 12)
   string: number; // 줄 번호 (1 ~ 6, 1번줄이 하이 E)
   note: string; // 출력할 음계
   color?: string;
+  handleNodeClick?: (node: Note) => void;
 }
 
 const NoteMarker: React.FC<NoteMarkerProps> = ({
@@ -12,6 +13,7 @@ const NoteMarker: React.FC<NoteMarkerProps> = ({
   string,
   note,
   color,
+  handleNodeClick,
 }) => {
   // 프렛보드 설정값
   const fretboardWidth = 960; // 프렛보드 너비
@@ -30,11 +32,26 @@ const NoteMarker: React.FC<NoteMarkerProps> = ({
   const cy = stringSpacing * (string - 1) + stringSpacing + extraPadding;
 
   const onClick = () => {
-    console.log(fret, string, note, color);
+    const nodeNote: Note = {
+      flatNumber: fret,
+      lineNumber: string,
+      chord: note,
+    };
+    handleNodeClick && handleNodeClick(nodeNote);
   };
 
   return (
-    <g onClick={onClick}>
+    <g
+      onClick={() => {
+        const nodeNote: Note = {
+          flatNumber: fret,
+          lineNumber: string,
+          chord: note,
+        };
+        handleNodeClick && handleNodeClick(nodeNote);
+      }}
+      style={{ cursor: 'pointer' }}
+    >
       {/* 원형 */}
       <circle
         cx={cx}
@@ -51,6 +68,7 @@ const NoteMarker: React.FC<NoteMarkerProps> = ({
         fontSize="10"
         textAnchor="middle"
         fill="black"
+        style={{ userSelect: 'none' }}
       >
         {note}
       </text>

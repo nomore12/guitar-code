@@ -1,18 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import NoteMarker from './NoteMarker';
+import useNoteStore from '../../store/PracticeStore';
 
 interface PropsType {
   rootChord: string;
-  selectedScale: 'major' | 'minor';
+  selectedScale: 'major' | 'minor' | undefined;
+  handleNodeClick: (node: Note) => void;
+  practiceNodes: Note[];
+  handleReset?: () => void;
 }
 
-const Flatboard: React.FC<PropsType> = ({ rootChord, selectedScale }) => {
+const Flatboard: React.FC<PropsType> = ({
+  rootChord,
+  selectedScale,
+  handleNodeClick,
+  practiceNodes,
+  handleReset,
+}) => {
   const [displayScale, setDisplayScale] = useState<
     {
       flatNumber: number;
       lineNumber: number;
       chord: string;
-      codeTone: boolean;
+      codeTone?: boolean | number;
     }[]
   >([]);
 
@@ -26,6 +36,15 @@ const Flatboard: React.FC<PropsType> = ({ rootChord, selectedScale }) => {
   const totalHeight = fretboardHeight + extraPadding * 2; // Total SVG height
   const fretWidth = (fretboardWidth - paddingLeft) / frets; // Dynamically calculate fret width
   const stringSpacing = fretboardHeight / (strings + 1); // Dynamically calculate string spacing
+
+  const {
+    notes,
+    currentIndex,
+    incrementIndex,
+    clearNotes,
+    isPracticePlaying,
+    setPracticeNotes,
+  } = useNoteStore();
 
   const generateScale = (
     root: string,
@@ -143,9 +162,27 @@ const Flatboard: React.FC<PropsType> = ({ rootChord, selectedScale }) => {
   };
 
   useEffect(() => {
-    const scale = generateScale(rootChord, selectedScale);
+    const scale = generateScale(rootChord, selectedScale || 'major');
     setDisplayScale(scale);
   }, [rootChord, selectedScale]);
+
+  useEffect(() => {
+    const playingNotes = practiceNodes.map((note, index) => {
+      if (index === currentIndex - 1) {
+        note.codeTone = 1;
+        console.log(note);
+      } else if (index === currentIndex) {
+        note.codeTone = 2;
+      } else if (index === currentIndex + 1) {
+        note.codeTone = 3;
+      } else {
+        note.codeTone = 0;
+      }
+      return note;
+    });
+    setPracticeNotes(playingNotes);
+    console.log(currentIndex, isPracticePlaying);
+  }, [currentIndex, isPracticePlaying]);
 
   return (
     <svg
@@ -230,68 +267,121 @@ const Flatboard: React.FC<PropsType> = ({ rootChord, selectedScale }) => {
       />
 
       {/* 디스플레이: Root, Code Tone, Scale Tone */}
-      <g transform={`translate(${totalWidth / 2 - 150}, ${totalHeight - 30})`}>
-        {/* Root */}
-        <g transform="translate(0, 0)">
-          <circle
-            cx="0"
-            cy="0"
-            r="12"
-            fill="#ec5555"
-            stroke="black"
-            strokeWidth="1"
-          />
-          <text x="20" y="4" fontSize="12" textAnchor="start" fill="black">
-            : Root
-          </text>
+      {selectedScale && (
+        <g
+          transform={`translate(${totalWidth / 2 - 150}, ${totalHeight - 30})`}
+        >
+          {/* Root */}
+          <g transform="translate(0, 0)">
+            <circle
+              cx="0"
+              cy="0"
+              r="12"
+              fill="#ec5555"
+              stroke="black"
+              strokeWidth="1"
+            />
+            <text x="20" y="4" fontSize="12" textAnchor="start" fill="black">
+              : Root
+            </text>
+          </g>
+          {/* Code Tone */}
+          <g transform="translate(100, 0)">
+            <circle
+              cx="0"
+              cy="0"
+              r="12"
+              fill="#7ba871"
+              stroke="black"
+              strokeWidth="1"
+            />
+            <text x="20" y="4" fontSize="12" textAnchor="start" fill="black">
+              : Chord Tone
+            </text>
+          </g>
+          {/* Nothing */}
+          <g transform="translate(220, 0)">
+            <circle
+              cx="0"
+              cy="0"
+              r="12"
+              fill="#ffd700"
+              stroke="black"
+              strokeWidth="1"
+            />
+            <text x="20" y="4" fontSize="12" textAnchor="start" fill="black">
+              : Scale Tone
+            </text>
+          </g>
         </g>
-        {/* Code Tone */}
-        <g transform="translate(100, 0)">
-          <circle
-            cx="0"
-            cy="0"
-            r="12"
-            fill="#7ba871"
-            stroke="black"
-            strokeWidth="1"
-          />
-          <text x="20" y="4" fontSize="12" textAnchor="start" fill="black">
-            : Chord Tone
-          </text>
-        </g>
-        {/* Nothing */}
-        <g transform="translate(220, 0)">
-          <circle
-            cx="0"
-            cy="0"
-            r="12"
-            fill="#ffd700"
-            stroke="black"
-            strokeWidth="1"
-          />
-          <text x="20" y="4" fontSize="12" textAnchor="start" fill="black">
-            : Scale Tone
-          </text>
-        </g>
-      </g>
+      )}
 
       {/*<NoteMarker fret={1} string={6} note="F" color="red" />*/}
-      {displayScale &&
-        displayScale.map((chord, index) => (
-          <NoteMarker
-            key={`chord-${index}`}
-            fret={chord.flatNumber}
-            string={chord.lineNumber}
-            note={chord.chord}
-            color={
-              chord.chord === rootChord
-                ? '#ec5555'
-                : chord.codeTone
-                  ? '#7ba871'
-                  : ''
-            }
-          />
-        ))}
+      {!selectedScale
+        ? practiceNodes &&
+          practiceNodes
+            // .filter(
+            //   (node, index, self) =>
+            //     index ===
+            //     self.findIndex(
+            //       (n) =>
+            //         n.flatNumber === node.flatNumber &&
+            //         n.lineNumber === node.lineNumber,
+            //     ),
+            // )
+            .map((node, index) => (
+              <NoteMarker
+                key={`practice-${index}`}
+                fret={node.flatNumber}
+                string={node.lineNumber}
+                note={String(index + 1)}
+                color={
+                  node.codeTone === 1
+                    ? '#ec5555'
+                    : node.codeTone === 2
+                      ? '#7ba871'
+                      : node.codeTone === 3
+                        ? '#ffd700'
+                        : 'rgba(0,0,0,0)'
+                }
+                handleNodeClick={handleNodeClick}
+              />
+            ))
+        : displayScale &&
+          displayScale.map((chord, index) => (
+            <NoteMarker
+              key={`chord-${index}`}
+              fret={chord.flatNumber}
+              string={chord.lineNumber}
+              note={chord.chord}
+              color={
+                chord.chord === rootChord
+                  ? '#ec5555'
+                  : chord.codeTone
+                    ? '#7ba871'
+                    : ''
+              }
+              handleNodeClick={handleNodeClick}
+            />
+          ))}
+      {!selectedScale && (
+        <foreignObject x="900" y={totalHeight - 50} width="100" height="40">
+          <div>
+            <button
+              style={{
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'lightblue',
+                border: '1px solid black',
+                borderRadius: '5px',
+              }}
+              onClick={() => clearNotes()}
+            >
+              Reset
+            </button>
+          </div>
+        </foreignObject>
+      )}
     </svg>
   );
 };
