@@ -24,6 +24,8 @@ const chordNames = [
   'B7',
   'Bm',
   'Bdim',
+  'Bb',
+  'Bbm',
   'C7',
   'Cmaj7',
   'D7',
@@ -33,6 +35,8 @@ const chordNames = [
   'Em7',
   'F#m',
   'Fmaj7',
+  'G',
+  'Gb',
   'G7',
   'X',
 ];

@@ -5,7 +5,6 @@ import {
   Flex,
   RadioGroup,
   Text,
-  TextField,
   Tabs,
   Slider,
 } from '@radix-ui/themes';
@@ -13,7 +12,6 @@ import Chords from '../../components/chords/Chords';
 import chordsData from '../../data/openChords.json';
 import useTonePlayer from '../../hooks/useTonePlayer';
 import CustomChordDisplay from './CustomChordDisplay';
-import useDrumPlayer from '../../hooks/useDrumPlayer';
 
 const dynatonicChords = [
   chordsData.C,
@@ -58,8 +56,8 @@ const ChordsPage = () => {
   const [currentChord, setCurrentChord] = useState<ChordProps>(chordsData.X);
   const [nextChord, setNextChord] = useState<ChordProps>(chordsData.X);
   const [chordArr, setChordArr] = useState<ChordProps[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [nextIndex, setNextIndex] = useState(1);
+  const [, setCurrentIndex] = useState(0);
+  const [, setNextIndex] = useState(1);
   const [bpm, setBpm] = useState<number>(60);
   const [volume, setVolume] = useState(10);
   const [beat, setBeat] = useState<'4' | '8' | '16'>('4');
@@ -246,7 +244,6 @@ const ChordsPage = () => {
         >
           <RadioGroup.Item value="1">4 beat</RadioGroup.Item>
           <RadioGroup.Item value="2">8 beat</RadioGroup.Item>
-          {/*<RadioGroup.Item value="3">16 beat</RadioGroup.Item>*/}
         </RadioGroup.Root>
       </Box>
       <Box>
