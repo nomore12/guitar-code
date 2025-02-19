@@ -22,7 +22,40 @@ interface FormState {
   errors: FormErrors;
 }
 
-// 2. 인라인 스타일 객체
+const initialState: FormState = {
+  data: {
+    name: '',
+    phone: '',
+    address: '',
+    age: '',
+    gender: '',
+  },
+  errors: {},
+};
+
+// 2. 액션 타입 및 리듀서
+type FormAction =
+  | { type: 'SET_FIELD'; payload: { field: keyof FormData; value: string } }
+  | { type: 'SET_ERRORS'; payload: FormErrors }
+  | { type: 'RESET' };
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  switch (action.type) {
+    case 'SET_FIELD':
+      return {
+        ...state,
+        data: { ...state.data, [action.payload.field]: action.payload.value },
+      };
+    case 'SET_ERRORS':
+      return { ...state, errors: action.payload };
+    case 'RESET':
+      return initialState;
+    default:
+      return state;
+  }
+}
+
+// 3. 인라인 스타일 객체
 const styles = {
   container: {
     maxWidth: '400px',
@@ -66,7 +99,7 @@ const styles = {
   } as React.CSSProperties,
 };
 
-// 3. 재사용 가능한 FormField 컴포넌트
+// 4. 재사용 가능한 FormField 컴포넌트
 interface FormFieldProps {
   id: string;
   label: string;
@@ -89,40 +122,82 @@ const FormField: React.FC<FormFieldProps> = ({
   </div>
 );
 
-// 4. 리듀서 및 액션 정의
-type FormAction =
-  | { type: 'SET_FIELD'; payload: { field: keyof FormData; value: string } }
-  | { type: 'SET_ERRORS'; payload: FormErrors }
-  | { type: 'RESET' };
-
-const initialState: FormState = {
-  data: {
-    name: '',
-    phone: '',
-    address: '',
-    age: '',
-    gender: '',
-  },
-  errors: {},
-};
-
-function formReducer(state: FormState, action: FormAction): FormState {
-  switch (action.type) {
-    case 'SET_FIELD':
-      return {
-        ...state,
-        data: { ...state.data, [action.payload.field]: action.payload.value },
-      };
-    case 'SET_ERRORS':
-      return { ...state, errors: action.payload };
-    case 'RESET':
-      return initialState;
-    default:
-      return state;
-  }
+// 5. 필드 구성 배열 (확장 및 수정이 용이)
+interface FieldDefinition {
+  id: keyof FormData;
+  label: string;
+  type: 'text' | 'number' | 'select';
+  placeholder?: string;
+  options?: { value: string; label: string }[];
 }
 
-// 5. 메인 컴포넌트: UserForm
+const fields: FieldDefinition[] = [
+  {
+    id: 'name',
+    label: '이름:',
+    type: 'text',
+    placeholder: '이름을 입력하세요',
+  },
+  {
+    id: 'phone',
+    label: '전화번호:',
+    type: 'text',
+    placeholder: '전화번호를 입력하세요',
+  },
+  {
+    id: 'address',
+    label: '주소:',
+    type: 'text',
+    placeholder: '주소를 입력하세요',
+  },
+  {
+    id: 'age',
+    label: '나이:',
+    type: 'number',
+    placeholder: '나이를 입력하세요',
+  },
+  {
+    id: 'gender',
+    label: '성별:',
+    type: 'select',
+    options: [
+      { value: '', label: '선택하세요' },
+      { value: 'male', label: '남성' },
+      { value: 'female', label: '여성' },
+      { value: 'other', label: '기타' },
+    ],
+  },
+];
+
+// 6. 검증 로직을 분리하여 별도 함수로 정의
+const validateForm = (data: FormData): FormErrors => {
+  const errors: FormErrors = {};
+  if (!data.name.trim()) {
+    errors.name = '이름은 필수입니다.';
+  }
+  if (!data.phone.trim()) {
+    errors.phone = '전화번호는 필수입니다.';
+  } else if (!/^\d+$/.test(data.phone)) {
+    errors.phone = '전화번호는 숫자만 포함해야 합니다.';
+  }
+  if (!data.address.trim()) {
+    errors.address = '주소는 필수입니다.';
+  }
+  if (!data.age.trim()) {
+    errors.age = '나이는 필수입니다.';
+  } else {
+    const ageNum = Number(data.age);
+    if (isNaN(ageNum) || ageNum <= 0) {
+      errors.age = '유효한 나이를 입력해주세요.';
+    }
+  }
+  if (!data.gender.trim()) {
+    errors.gender = '성별을 선택해주세요.';
+  }
+  return errors;
+};
+
+// 7. 메인 컴포넌트: UserForm
 const UserForm: React.FC = () => {
   const [state, dispatch] = useReducer(formReducer, initialState);
 
@@ -138,117 +213,58 @@ const UserForm: React.FC = () => {
     [],
   );
 
-  // 유효성 검사 함수 (useCallback 적용)
-  const validate = useCallback((): boolean => {
-    const { name, phone, address, age, gender } = state.data;
-    const errors: FormErrors = {};
-
-    if (!name.trim()) {
-      errors.name = '이름은 필수입니다.';
-    }
-    if (!phone.trim()) {
-      errors.phone = '전화번호는 필수입니다.';
-    } else if (!/^\d+$/.test(phone)) {
-      errors.phone = '전화번호는 숫자만 포함해야 합니다.';
-    }
-    if (!address.trim()) {
-      errors.address = '주소는 필수입니다.';
-    }
-    if (!age.trim()) {
-      errors.age = '나이는 필수입니다.';
-    } else {
-      const ageNum = Number(age);
-      if (isNaN(ageNum) || ageNum <= 0) {
-        errors.age = '유효한 나이를 입력해주세요.';
-      }
-    }
-    if (!gender.trim()) {
-      errors.gender = '성별을 선택해주세요.';
-    }
-
-    dispatch({ type: 'SET_ERRORS', payload: errors });
-    return Object.keys(errors).length === 0;
-  }, [state.data]);
-
-  // 폼 제출 핸들러 (useCallback 적용)
+  // 폼 제출 핸들러 (검증 후 성공 시 RESET)
   const handleSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      if (validate()) {
+      const errors = validateForm(state.data);
+      dispatch({ type: 'SET_ERRORS', payload: errors });
+      if (Object.keys(errors).length === 0) {
         console.log('제출된 데이터:', state.data);
         alert('폼 제출 성공!');
         dispatch({ type: 'RESET' });
       }
     },
-    [validate, state.data],
+    [state.data],
   );
 
   return (
     <div style={styles.container}>
       <form onSubmit={handleSubmit} noValidate>
-        <FormField id="name" label="이름:" error={state.errors.name}>
-          <input
-            style={styles.input}
-            type="text"
-            id="name"
-            name="name"
-            value={state.data.name}
-            onChange={handleChange}
-            placeholder="이름을 입력하세요"
-          />
-        </FormField>
-
-        <FormField id="phone" label="전화번호:" error={state.errors.phone}>
-          <input
-            style={styles.input}
-            type="text"
-            id="phone"
-            name="phone"
-            value={state.data.phone}
-            onChange={handleChange}
-            placeholder="전화번호를 입력하세요"
-          />
-        </FormField>
-
-        <FormField id="address" label="주소:" error={state.errors.address}>
-          <input
-            style={styles.input}
-            type="text"
-            id="address"
-            name="address"
-            value={state.data.address}
-            onChange={handleChange}
-            placeholder="주소를 입력하세요"
-          />
-        </FormField>
-
-        <FormField id="age" label="나이:" error={state.errors.age}>
-          <input
-            style={styles.input}
-            type="number"
-            id="age"
-            name="age"
-            value={state.data.age}
-            onChange={handleChange}
-            placeholder="나이를 입력하세요"
-          />
-        </FormField>
-
-        <FormField id="gender" label="성별:" error={state.errors.gender}>
-          <select
-            style={styles.input}
-            id="gender"
-            name="gender"
-            value={state.data.gender}
-            onChange={handleChange}
+        {fields.map((field) => (
+          <FormField
+            key={field.id}
+            id={field.id}
+            label={field.label}
+            error={state.errors[field.id]}
           >
-            <option value="">선택하세요</option>
-            <option value="male">남성</option>
-            <option value="female">여성</option>
-            <option value="other">기타</option>
-          </select>
-        </FormField>
-
+            {field.type === 'select' ? (
+              <select
+                style={styles.input}
+                id={field.id}
+                name={field.id}
+                value={state.data[field.id]}
+                onChange={handleChange}
+              >
+                {field.options?.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                style={styles.input}
+                type={field.type}
+                id={field.id}
+                name={field.id}
+                value={state.data[field.id]}
+                onChange={handleChange}
+                placeholder={field.placeholder}
+              />
+            )}
+          </FormField>
+        ))}
         <button style={styles.button} type="submit">
           제출
         </button>
