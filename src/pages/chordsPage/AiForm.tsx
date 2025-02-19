@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-// 폼 데이터 타입
+// 1. 타입 정의
 interface FormData {
   name: string;
   phone: string;
@@ -9,7 +9,6 @@ interface FormData {
   gender: string;
 }
 
-// 각 필드별 에러 메시지 타입
 interface FormErrors {
   name?: string;
   phone?: string;
@@ -18,7 +17,7 @@ interface FormErrors {
   gender?: string;
 }
 
-// 스타일 객체
+// 2. 인라인 스타일 객체
 const styles = {
   container: {
     maxWidth: '400px',
@@ -28,9 +27,10 @@ const styles = {
     borderRadius: '8px',
     boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
     fontFamily: 'Arial, sans-serif',
+    backgroundColor: '#fff',
   } as React.CSSProperties,
   field: {
-    marginBottom: '1rem',
+    marginBottom: '1.25rem',
   } as React.CSSProperties,
   label: {
     display: 'block',
@@ -42,10 +42,11 @@ const styles = {
     padding: '0.5rem',
     border: '1px solid #ccc',
     borderRadius: '4px',
+    fontSize: '1rem',
   } as React.CSSProperties,
   error: {
     color: 'red',
-    fontSize: '0.9rem',
+    fontSize: '0.85rem',
     marginTop: '0.25rem',
   } as React.CSSProperties,
   button: {
@@ -55,28 +56,71 @@ const styles = {
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
-    marginTop: '1rem',
+    fontSize: '1rem',
+    width: '100%',
   } as React.CSSProperties,
 };
 
+// 3. FormField 컴포넌트 (재사용 가능한 입력 필드 래퍼)
+interface FormFieldProps {
+  id: string;
+  label: string;
+  error?: string;
+  children: React.ReactNode;
+}
+
+const FormField: React.FC<FormFieldProps> = ({
+  id,
+  label,
+  error,
+  children,
+}) => (
+  <div style={styles.field}>
+    <label htmlFor={id} style={styles.label}>
+      {label}
+    </label>
+    {children}
+    {error && <div style={styles.error}>{error}</div>}
+  </div>
+);
+
+// 4. 커스텀 훅: 폼 상태 및 에러 관리
+const useForm = (initialState: FormData) => {
+  const [data, setData] = useState<FormData>(initialState);
+  const [errors, setErrors] = useState<FormErrors>({});
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target;
+    setData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const resetForm = () => {
+    setData(initialState);
+    setErrors({});
+  };
+
+  return { data, errors, setErrors, handleChange, resetForm };
+};
+
+// 5. 메인 컴포넌트: UserForm
 const UserForm: React.FC = () => {
-  const [formData, setFormData] = useState<FormData>({
+  const initialState: FormData = {
     name: '',
     phone: '',
     address: '',
     age: '',
     gender: '',
-  });
-
-  const [errors, setErrors] = useState<FormErrors>({});
-
-  // 입력값 변경 핸들러
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  const {
+    data: formData,
+    errors,
+    setErrors,
+    handleChange,
+    resetForm,
+  } = useForm(initialState);
 
   // 유효성 검사 함수
   const validate = (): boolean => {
@@ -116,15 +160,7 @@ const UserForm: React.FC = () => {
       if (validate()) {
         console.log('제출된 데이터:', formData);
         alert('폼 제출 성공!');
-        // 제출 후 초기화
-        setFormData({
-          name: '',
-          phone: '',
-          address: '',
-          age: '',
-          gender: '',
-        });
-        setErrors({});
+        resetForm();
       }
     } catch (error) {
       console.error('폼 제출 중 오류 발생:', error);
@@ -134,10 +170,7 @@ const UserForm: React.FC = () => {
   return (
     <div style={styles.container}>
       <form onSubmit={handleSubmit} noValidate>
-        <div style={styles.field}>
-          <label htmlFor="name" style={styles.label}>
-            이름:
-          </label>
+        <FormField id="name" label="이름:" error={errors.name}>
           <input
             style={styles.input}
             type="text"
@@ -147,13 +180,9 @@ const UserForm: React.FC = () => {
             onChange={handleChange}
             placeholder="이름을 입력하세요"
           />
-          {errors.name && <div style={styles.error}>{errors.name}</div>}
-        </div>
+        </FormField>
 
-        <div style={styles.field}>
-          <label htmlFor="phone" style={styles.label}>
-            전화번호:
-          </label>
+        <FormField id="phone" label="전화번호:" error={errors.phone}>
           <input
             style={styles.input}
             type="text"
@@ -163,13 +192,9 @@ const UserForm: React.FC = () => {
             onChange={handleChange}
             placeholder="전화번호를 입력하세요"
           />
-          {errors.phone && <div style={styles.error}>{errors.phone}</div>}
-        </div>
+        </FormField>
 
-        <div style={styles.field}>
-          <label htmlFor="address" style={styles.label}>
-            주소:
-          </label>
+        <FormField id="address" label="주소:" error={errors.address}>
           <input
             style={styles.input}
             type="text"
@@ -179,13 +204,9 @@ const UserForm: React.FC = () => {
             onChange={handleChange}
             placeholder="주소를 입력하세요"
           />
-          {errors.address && <div style={styles.error}>{errors.address}</div>}
-        </div>
+        </FormField>
 
-        <div style={styles.field}>
-          <label htmlFor="age" style={styles.label}>
-            나이:
-          </label>
+        <FormField id="age" label="나이:" error={errors.age}>
           <input
             style={styles.input}
             type="number"
@@ -195,13 +216,9 @@ const UserForm: React.FC = () => {
             onChange={handleChange}
             placeholder="나이를 입력하세요"
           />
-          {errors.age && <div style={styles.error}>{errors.age}</div>}
-        </div>
+        </FormField>
 
-        <div style={styles.field}>
-          <label htmlFor="gender" style={styles.label}>
-            성별:
-          </label>
+        <FormField id="gender" label="성별:" error={errors.gender}>
           <select
             style={styles.input}
             id="gender"
@@ -214,8 +231,7 @@ const UserForm: React.FC = () => {
             <option value="female">여성</option>
             <option value="other">기타</option>
           </select>
-          {errors.gender && <div style={styles.error}>{errors.gender}</div>}
-        </div>
+        </FormField>
 
         <button style={styles.button} type="submit">
           제출
