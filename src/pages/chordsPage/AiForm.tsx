@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 
-// 폼에 사용할 데이터 타입 정의
+// 폼 데이터 타입
 interface FormData {
   name: string;
   phone: string;
   address: string;
-  age: string; // input에서 받는 값은 string이므로 string으로 관리하고, 제출 시 변환합니다.
+  age: string;
   gender: string;
 }
 
-// 에러 메시지 타입 (각 필드에 선택적으로 에러 메시지가 존재)
+// 각 필드별 에러 메시지 타입
 interface FormErrors {
   name?: string;
   phone?: string;
@@ -17,6 +17,47 @@ interface FormErrors {
   age?: string;
   gender?: string;
 }
+
+// 스타일 객체
+const styles = {
+  container: {
+    maxWidth: '400px',
+    margin: '2rem auto',
+    padding: '2rem',
+    border: '1px solid #ccc',
+    borderRadius: '8px',
+    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+    fontFamily: 'Arial, sans-serif',
+  } as React.CSSProperties,
+  field: {
+    marginBottom: '1rem',
+  } as React.CSSProperties,
+  label: {
+    display: 'block',
+    fontWeight: 'bold',
+    marginBottom: '0.5rem',
+  } as React.CSSProperties,
+  input: {
+    width: '100%',
+    padding: '0.5rem',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+  } as React.CSSProperties,
+  error: {
+    color: 'red',
+    fontSize: '0.9rem',
+    marginTop: '0.25rem',
+  } as React.CSSProperties,
+  button: {
+    backgroundColor: '#007BFF',
+    color: '#fff',
+    padding: '0.75rem 1.5rem',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    marginTop: '1rem',
+  } as React.CSSProperties,
+};
 
 const UserForm: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
@@ -29,39 +70,29 @@ const UserForm: React.FC = () => {
 
   const [errors, setErrors] = useState<FormErrors>({});
 
-  // 입력 필드 변경 핸들러
+  // 입력값 변경 핸들러
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   // 유효성 검사 함수
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
 
-    // 이름 필수 검사
     if (!formData.name.trim()) {
       newErrors.name = '이름은 필수입니다.';
     }
-
-    // 전화번호 필수 및 숫자만 포함 검사
     if (!formData.phone.trim()) {
       newErrors.phone = '전화번호는 필수입니다.';
     } else if (!/^\d+$/.test(formData.phone)) {
       newErrors.phone = '전화번호는 숫자만 포함해야 합니다.';
     }
-
-    // 주소 필수 검사
     if (!formData.address.trim()) {
       newErrors.address = '주소는 필수입니다.';
     }
-
-    // 나이 필수 및 유효한 숫자 검사
     if (!formData.age.trim()) {
       newErrors.age = '나이는 필수입니다.';
     } else {
@@ -70,28 +101,22 @@ const UserForm: React.FC = () => {
         newErrors.age = '유효한 나이를 입력해주세요.';
       }
     }
-
-    // 성별 필수 검사
     if (!formData.gender.trim()) {
       newErrors.gender = '성별을 선택해주세요.';
     }
 
     setErrors(newErrors);
-
-    // 에러가 없으면 true 반환
     return Object.keys(newErrors).length === 0;
   };
 
   // 폼 제출 핸들러
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     try {
       if (validate()) {
-        // 유효성 검사를 통과한 경우 폼 데이터 사용 (예: 서버 전송)
         console.log('제출된 데이터:', formData);
-
-        // 폼 전송 후 초기화
+        alert('폼 제출 성공!');
+        // 제출 후 초기화
         setFormData({
           name: '',
           phone: '',
@@ -102,82 +127,101 @@ const UserForm: React.FC = () => {
         setErrors({});
       }
     } catch (error) {
-      // 예기치 못한 오류에 대한 핸들링
       console.error('폼 제출 중 오류 발생:', error);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label>
-          이름:
+    <div style={styles.container}>
+      <form onSubmit={handleSubmit} noValidate>
+        <div style={styles.field}>
+          <label htmlFor="name" style={styles.label}>
+            이름:
+          </label>
           <input
+            style={styles.input}
             type="text"
+            id="name"
             name="name"
             value={formData.name}
             onChange={handleChange}
+            placeholder="이름을 입력하세요"
           />
-        </label>
-        {errors.name && <span style={{ color: 'red' }}>{errors.name}</span>}
-      </div>
+          {errors.name && <div style={styles.error}>{errors.name}</div>}
+        </div>
 
-      <div>
-        <label>
-          전화번호:
+        <div style={styles.field}>
+          <label htmlFor="phone" style={styles.label}>
+            전화번호:
+          </label>
           <input
+            style={styles.input}
             type="text"
+            id="phone"
             name="phone"
             value={formData.phone}
             onChange={handleChange}
+            placeholder="전화번호를 입력하세요"
           />
-        </label>
-        {errors.phone && <span style={{ color: 'red' }}>{errors.phone}</span>}
-      </div>
+          {errors.phone && <div style={styles.error}>{errors.phone}</div>}
+        </div>
 
-      <div>
-        <label>
-          주소:
+        <div style={styles.field}>
+          <label htmlFor="address" style={styles.label}>
+            주소:
+          </label>
           <input
+            style={styles.input}
             type="text"
+            id="address"
             name="address"
             value={formData.address}
             onChange={handleChange}
+            placeholder="주소를 입력하세요"
           />
-        </label>
-        {errors.address && (
-          <span style={{ color: 'red' }}>{errors.address}</span>
-        )}
-      </div>
+          {errors.address && <div style={styles.error}>{errors.address}</div>}
+        </div>
 
-      <div>
-        <label>
-          나이:
+        <div style={styles.field}>
+          <label htmlFor="age" style={styles.label}>
+            나이:
+          </label>
           <input
+            style={styles.input}
             type="number"
+            id="age"
             name="age"
             value={formData.age}
             onChange={handleChange}
+            placeholder="나이를 입력하세요"
           />
-        </label>
-        {errors.age && <span style={{ color: 'red' }}>{errors.age}</span>}
-      </div>
+          {errors.age && <div style={styles.error}>{errors.age}</div>}
+        </div>
 
-      <div>
-        <label>
-          성별:
-          <select name="gender" value={formData.gender} onChange={handleChange}>
+        <div style={styles.field}>
+          <label htmlFor="gender" style={styles.label}>
+            성별:
+          </label>
+          <select
+            style={styles.input}
+            id="gender"
+            name="gender"
+            value={formData.gender}
+            onChange={handleChange}
+          >
             <option value="">선택하세요</option>
             <option value="male">남성</option>
             <option value="female">여성</option>
             <option value="other">기타</option>
           </select>
-        </label>
-        {errors.gender && <span style={{ color: 'red' }}>{errors.gender}</span>}
-      </div>
+          {errors.gender && <div style={styles.error}>{errors.gender}</div>}
+        </div>
 
-      <button type="submit">제출</button>
-    </form>
+        <button style={styles.button} type="submit">
+          제출
+        </button>
+      </form>
+    </div>
   );
 };
 
