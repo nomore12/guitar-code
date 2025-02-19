@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useReducer, useCallback } from 'react';
 
 // 1. 타입 정의
 interface FormData {
@@ -15,6 +15,11 @@ interface FormErrors {
   address?: string;
   age?: string;
   gender?: string;
+}
+
+interface FormState {
+  data: FormData;
+  errors: FormErrors;
 }
 
 // 2. 인라인 스타일 객체
@@ -61,7 +66,7 @@ const styles = {
   } as React.CSSProperties,
 };
 
-// 3. FormField 컴포넌트 (재사용 가능한 입력 필드 래퍼)
+// 3. 재사용 가능한 FormField 컴포넌트
 interface FormFieldProps {
   id: string;
   label: string;
@@ -84,146 +89,157 @@ const FormField: React.FC<FormFieldProps> = ({
   </div>
 );
 
-// 4. 커스텀 훅: 폼 상태 및 에러 관리
-const useForm = (initialState: FormData) => {
-  const [data, setData] = useState<FormData>(initialState);
-  const [errors, setErrors] = useState<FormErrors>({});
+// 4. 리듀서 및 액션 정의
+type FormAction =
+  | { type: 'SET_FIELD'; payload: { field: keyof FormData; value: string } }
+  | { type: 'SET_ERRORS'; payload: FormErrors }
+  | { type: 'RESET' };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    const { name, value } = e.target;
-    setData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const resetForm = () => {
-    setData(initialState);
-    setErrors({});
-  };
-
-  return { data, errors, setErrors, handleChange, resetForm };
-};
-
-// 5. 메인 컴포넌트: UserForm
-const UserForm: React.FC = () => {
-  const initialState: FormData = {
+const initialState: FormState = {
+  data: {
     name: '',
     phone: '',
     address: '',
     age: '',
     gender: '',
-  };
+  },
+  errors: {},
+};
 
-  const {
-    data: formData,
-    errors,
-    setErrors,
-    handleChange,
-    resetForm,
-  } = useForm(initialState);
+function formReducer(state: FormState, action: FormAction): FormState {
+  switch (action.type) {
+    case 'SET_FIELD':
+      return {
+        ...state,
+        data: { ...state.data, [action.payload.field]: action.payload.value },
+      };
+    case 'SET_ERRORS':
+      return { ...state, errors: action.payload };
+    case 'RESET':
+      return initialState;
+    default:
+      return state;
+  }
+}
 
-  // 유효성 검사 함수
-  const validate = (): boolean => {
-    const newErrors: FormErrors = {};
+// 5. 메인 컴포넌트: UserForm
+const UserForm: React.FC = () => {
+  const [state, dispatch] = useReducer(formReducer, initialState);
 
-    if (!formData.name.trim()) {
-      newErrors.name = '이름은 필수입니다.';
+  // 입력값 변경 핸들러 (useCallback 적용)
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const { name, value } = e.target;
+      dispatch({
+        type: 'SET_FIELD',
+        payload: { field: name as keyof FormData, value },
+      });
+    },
+    [],
+  );
+
+  // 유효성 검사 함수 (useCallback 적용)
+  const validate = useCallback((): boolean => {
+    const { name, phone, address, age, gender } = state.data;
+    const errors: FormErrors = {};
+
+    if (!name.trim()) {
+      errors.name = '이름은 필수입니다.';
     }
-    if (!formData.phone.trim()) {
-      newErrors.phone = '전화번호는 필수입니다.';
-    } else if (!/^\d+$/.test(formData.phone)) {
-      newErrors.phone = '전화번호는 숫자만 포함해야 합니다.';
+    if (!phone.trim()) {
+      errors.phone = '전화번호는 필수입니다.';
+    } else if (!/^\d+$/.test(phone)) {
+      errors.phone = '전화번호는 숫자만 포함해야 합니다.';
     }
-    if (!formData.address.trim()) {
-      newErrors.address = '주소는 필수입니다.';
+    if (!address.trim()) {
+      errors.address = '주소는 필수입니다.';
     }
-    if (!formData.age.trim()) {
-      newErrors.age = '나이는 필수입니다.';
+    if (!age.trim()) {
+      errors.age = '나이는 필수입니다.';
     } else {
-      const ageNum = Number(formData.age);
+      const ageNum = Number(age);
       if (isNaN(ageNum) || ageNum <= 0) {
-        newErrors.age = '유효한 나이를 입력해주세요.';
+        errors.age = '유효한 나이를 입력해주세요.';
       }
     }
-    if (!formData.gender.trim()) {
-      newErrors.gender = '성별을 선택해주세요.';
+    if (!gender.trim()) {
+      errors.gender = '성별을 선택해주세요.';
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    dispatch({ type: 'SET_ERRORS', payload: errors });
+    return Object.keys(errors).length === 0;
+  }, [state.data]);
 
-  // 폼 제출 핸들러
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    try {
+  // 폼 제출 핸들러 (useCallback 적용)
+  const handleSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
       if (validate()) {
-        console.log('제출된 데이터:', formData);
+        console.log('제출된 데이터:', state.data);
         alert('폼 제출 성공!');
-        resetForm();
+        dispatch({ type: 'RESET' });
       }
-    } catch (error) {
-      console.error('폼 제출 중 오류 발생:', error);
-    }
-  };
+    },
+    [validate, state.data],
+  );
 
   return (
     <div style={styles.container}>
       <form onSubmit={handleSubmit} noValidate>
-        <FormField id="name" label="이름:" error={errors.name}>
+        <FormField id="name" label="이름:" error={state.errors.name}>
           <input
             style={styles.input}
             type="text"
             id="name"
             name="name"
-            value={formData.name}
+            value={state.data.name}
             onChange={handleChange}
             placeholder="이름을 입력하세요"
           />
         </FormField>
 
-        <FormField id="phone" label="전화번호:" error={errors.phone}>
+        <FormField id="phone" label="전화번호:" error={state.errors.phone}>
           <input
             style={styles.input}
             type="text"
             id="phone"
             name="phone"
-            value={formData.phone}
+            value={state.data.phone}
             onChange={handleChange}
             placeholder="전화번호를 입력하세요"
           />
         </FormField>
 
-        <FormField id="address" label="주소:" error={errors.address}>
+        <FormField id="address" label="주소:" error={state.errors.address}>
           <input
             style={styles.input}
             type="text"
             id="address"
             name="address"
-            value={formData.address}
+            value={state.data.address}
             onChange={handleChange}
             placeholder="주소를 입력하세요"
           />
         </FormField>
 
-        <FormField id="age" label="나이:" error={errors.age}>
+        <FormField id="age" label="나이:" error={state.errors.age}>
           <input
             style={styles.input}
             type="number"
             id="age"
             name="age"
-            value={formData.age}
+            value={state.data.age}
             onChange={handleChange}
             placeholder="나이를 입력하세요"
           />
         </FormField>
 
-        <FormField id="gender" label="성별:" error={errors.gender}>
+        <FormField id="gender" label="성별:" error={state.errors.gender}>
           <select
             style={styles.input}
             id="gender"
             name="gender"
-            value={formData.gender}
+            value={state.data.gender}
             onChange={handleChange}
           >
             <option value="">선택하세요</option>
