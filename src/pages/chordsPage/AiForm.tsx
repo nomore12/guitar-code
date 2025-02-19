@@ -1,111 +1,184 @@
-import React from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import * as yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as Form from '@radix-ui/react-form';
+import React, { useState } from 'react';
 
+// 폼에 사용할 데이터 타입 정의
 interface FormData {
   name: string;
   phone: string;
   address: string;
-  age: number;
+  age: string; // input에서 받는 값은 string이므로 string으로 관리하고, 제출 시 변환합니다.
   gender: string;
 }
 
-const schema = yup.object().shape({
-  name: yup.string().required('이름을 입력해주세요.'),
-  phone: yup
-    .string()
-    .matches(/^\d{3}-\d{3,4}-\d{4}$/, '유효한 전화번호를 입력해주세요.')
-    .required('전화번호를 입력해주세요.'),
-  address: yup.string().required('주소를 입력해주세요.'),
-  age: yup
-    .number()
-    .positive('유효한 나이를 입력해주세요.')
-    .integer('유효한 나이를 입력해주세요.')
-    .required('나이를 입력해주세요.'),
-  gender: yup
-    .string()
-    .oneOf(['male', 'female'], '성별을 선택해주세요.')
-    .required('성별을 선택해주세요.'),
-});
+// 에러 메시지 타입 (각 필드에 선택적으로 에러 메시지가 존재)
+interface FormErrors {
+  name?: string;
+  phone?: string;
+  address?: string;
+  age?: string;
+  gender?: string;
+}
 
-const AiForm: React.FC = () => {
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>({
-    resolver: yupResolver(schema),
+const UserForm: React.FC = () => {
+  const [formData, setFormData] = useState<FormData>({
+    name: '',
+    phone: '',
+    address: '',
+    age: '',
+    gender: '',
   });
 
-  const onSubmit = (data: FormData) => {
-    console.log(data);
+  const [errors, setErrors] = useState<FormErrors>({});
+
+  // 입력 필드 변경 핸들러
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // 유효성 검사 함수
+  const validate = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    // 이름 필수 검사
+    if (!formData.name.trim()) {
+      newErrors.name = '이름은 필수입니다.';
+    }
+
+    // 전화번호 필수 및 숫자만 포함 검사
+    if (!formData.phone.trim()) {
+      newErrors.phone = '전화번호는 필수입니다.';
+    } else if (!/^\d+$/.test(formData.phone)) {
+      newErrors.phone = '전화번호는 숫자만 포함해야 합니다.';
+    }
+
+    // 주소 필수 검사
+    if (!formData.address.trim()) {
+      newErrors.address = '주소는 필수입니다.';
+    }
+
+    // 나이 필수 및 유효한 숫자 검사
+    if (!formData.age.trim()) {
+      newErrors.age = '나이는 필수입니다.';
+    } else {
+      const ageNum = Number(formData.age);
+      if (isNaN(ageNum) || ageNum <= 0) {
+        newErrors.age = '유효한 나이를 입력해주세요.';
+      }
+    }
+
+    // 성별 필수 검사
+    if (!formData.gender.trim()) {
+      newErrors.gender = '성별을 선택해주세요.';
+    }
+
+    setErrors(newErrors);
+
+    // 에러가 없으면 true 반환
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // 폼 제출 핸들러
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    try {
+      if (validate()) {
+        // 유효성 검사를 통과한 경우 폼 데이터 사용 (예: 서버 전송)
+        console.log('제출된 데이터:', formData);
+
+        // 폼 전송 후 초기화
+        setFormData({
+          name: '',
+          phone: '',
+          address: '',
+          age: '',
+          gender: '',
+        });
+        setErrors({});
+      }
+    } catch (error) {
+      // 예기치 못한 오류에 대한 핸들링
+      console.error('폼 제출 중 오류 발생:', error);
+    }
   };
 
   return (
-    <Form.Root onSubmit={handleSubmit(onSubmit)}>
-      <Form.Field name="name">
-        <Form.Label>이름</Form.Label>
-        <Controller
-          name="name"
-          control={control}
-          render={({ field }) => <Form.Input {...field} />}
-        />
-        {errors.name && <Form.Message>{errors.name.message}</Form.Message>}
-      </Form.Field>
+    <form onSubmit={handleSubmit}>
+      <div>
+        <label>
+          이름:
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+          />
+        </label>
+        {errors.name && <span style={{ color: 'red' }}>{errors.name}</span>}
+      </div>
 
-      <Form.Field name="phone">
-        <Form.Label>전화번호</Form.Label>
-        <Controller
-          name="phone"
-          control={control}
-          render={({ field }) => <Form.Input {...field} />}
-        />
-        {errors.phone && <Form.Message>{errors.phone.message}</Form.Message>}
-      </Form.Field>
+      <div>
+        <label>
+          전화번호:
+          <input
+            type="text"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+          />
+        </label>
+        {errors.phone && <span style={{ color: 'red' }}>{errors.phone}</span>}
+      </div>
 
-      <Form.Field name="address">
-        <Form.Label>주소</Form.Label>
-        <Controller
-          name="address"
-          control={control}
-          render={({ field }) => <Form.Input {...field} />}
-        />
+      <div>
+        <label>
+          주소:
+          <input
+            type="text"
+            name="address"
+            value={formData.address}
+            onChange={handleChange}
+          />
+        </label>
         {errors.address && (
-          <Form.Message>{errors.address.message}</Form.Message>
+          <span style={{ color: 'red' }}>{errors.address}</span>
         )}
-      </Form.Field>
+      </div>
 
-      <Form.Field name="age">
-        <Form.Label>나이</Form.Label>
-        <Controller
-          name="age"
-          control={control}
-          render={({ field }) => <Form.Input type="number" {...field} />}
-        />
-        {errors.age && <Form.Message>{errors.age.message}</Form.Message>}
-      </Form.Field>
+      <div>
+        <label>
+          나이:
+          <input
+            type="number"
+            name="age"
+            value={formData.age}
+            onChange={handleChange}
+          />
+        </label>
+        {errors.age && <span style={{ color: 'red' }}>{errors.age}</span>}
+      </div>
 
-      <Form.Field name="gender">
-        <Form.Label>성별</Form.Label>
-        <Controller
-          name="gender"
-          control={control}
-          render={({ field }) => (
-            <Form.Select {...field}>
-              <option value="">선택하세요</option>
-              <option value="male">남성</option>
-              <option value="female">여성</option>
-            </Form.Select>
-          )}
-        />
-        {errors.gender && <Form.Message>{errors.gender.message}</Form.Message>}
-      </Form.Field>
+      <div>
+        <label>
+          성별:
+          <select name="gender" value={formData.gender} onChange={handleChange}>
+            <option value="">선택하세요</option>
+            <option value="male">남성</option>
+            <option value="female">여성</option>
+            <option value="other">기타</option>
+          </select>
+        </label>
+        {errors.gender && <span style={{ color: 'red' }}>{errors.gender}</span>}
+      </div>
 
-      <Form.Submit>제출</Form.Submit>
-    </Form.Root>
+      <button type="submit">제출</button>
+    </form>
   );
 };
 
-export default AiForm;
+export default UserForm;
