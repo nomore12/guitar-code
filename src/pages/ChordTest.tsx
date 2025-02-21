@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Soundfont, { InstrumentName } from 'soundfont-player';
 import * as Tone from 'tone';
 import CustomChordDisplay from './chordsPage/CustomChordDisplay';
 import ChordBadge from './chordsPage/ChordBadge';
 import { Box, Button, Flex } from '@radix-ui/themes';
+import ChordMeasure from '../components/dnd/ChordMeasure';
 
 const guitarStyles: string[] = [
   'acoustic_guitar_nylon',
@@ -82,11 +83,17 @@ const openPositionChords: Record<string, string[]> = {
 const openStrings = ['E3', 'A3', 'D4', 'G4', 'B4', 'E5']; // 옥타브 상향
 
 const GuitarChordPlayer = () => {
-  const [selectedStyle, setSelectedStyle] = useState<string>(guitarStyles[0]);
-  const [chordArr, setChordArr] = useState<string[]>([]);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [chordProgression, setChordProgression] = useState<string[]>([]);
+  const [bit, setBit] = useState<string>('4');
+  const [bpmValue, setBpmValue] = useState<number>(100);
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedStyle(event.target.value);
+    setBit(event.target.value);
+  };
+
+  const addChord = (chord: string) => {
+    setChordProgression([...chordProgression, chord]);
   };
 
   const playChord = async (chord: string, stroke: boolean = true) => {
@@ -94,7 +101,7 @@ const GuitarChordPlayer = () => {
       (window as any).webkitAudioContext)();
     const player = await Soundfont.instrument(
       audioContext,
-      selectedStyle as InstrumentName,
+      'acoustic_guitar_steel',
     );
 
     // 코드에 해당하는 음 가져오기
@@ -115,37 +122,90 @@ const GuitarChordPlayer = () => {
     });
   };
 
+  const deleteChord = (chord: string) => {
+    setChordProgression(chordProgression.filter((item) => item !== chord));
+  };
+
+  const playChordProgression = () => {
+    // 비트 수(예: 4, 8, 16)
+    const beatsPerMeasure = parseInt(bit);
+
+    // 한 마디 시간 (초) = (60 / BPM) * 4
+    const measureDuration = (60 / bpmValue) * 4;
+
+    // 한 박자(비트)마다 연주할 간격 (초)
+    // 예: 4비트라면 한 마디가 4박자이므로 measureDuration / 4
+    const strokeDuration = measureDuration / beatsPerMeasure;
+
+    chordProgression.forEach((chord, index) => {
+      // 해당 코드가 시작될 마디의 시작 시점(초)
+      const measureStartTime = index * measureDuration;
+
+      // beatsPerMeasure(4번)만큼 각각 시간을 두고 코드(strum)를 연주
+      for (let i = 0; i < beatsPerMeasure; i++) {
+        // i번째 박자에서 연주될 실제 시간(초)
+        // 이전 마디들이 끝난 시점 + (박자 수 × 박자 간격)
+        const strokeTime = measureStartTime + i * strokeDuration;
+
+        // setTimeout을 이용해 실제 시간차를 두고 연주
+        setTimeout(() => {
+          // playChord(chord, direction)
+          // i가 짝수면 다운스트럼, 홀수면 업스트럼처럼 구현 가능
+          playChord(chord, i % 2 === 0);
+        }, strokeTime * 1000);
+      }
+    });
+  };
+
   return (
     <div>
+      <ChordMeasure />
       <div>
-        <label htmlFor="guitarStyle">Select Guitar Style:</label>
+        <label htmlFor="bitSelect">Select Bit</label>
         <select
-          id="guitarStyle"
-          value={selectedStyle}
+          id="bitSelect"
+          value={bit}
           onChange={handleChange}
           style={{ marginLeft: '10px' }}
         >
-          {guitarStyles.map((style) => (
-            <option key={style} value={style}>
-              {style.replace(/_/g, ' ')} {/* 스타일을 보기 좋게 변환 */}
+          {['4', '8', '16'].map((bit) => (
+            <option key={bit} value={bit}>
+              {bit + ' bit'}
             </option>
           ))}
         </select>
-        <p style={{ marginTop: '10px' }}>
-          Selected Style: <strong>{selectedStyle}</strong>
-        </p>
+      </div>
+      <div>
+        <label htmlFor="bpmSelect">Select BPM</label>
+        <input
+          id="bpmSelect"
+          type="number"
+          value={bpmValue}
+          onChange={(e) => setBpmValue(parseInt(e.target.value))}
+        />
+      </div>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        {chordProgression &&
+          chordProgression.map((item, index) => (
+            <div key={`${item}-${index}`}>
+              <ChordBadge
+                chord={item}
+                onDelete={() => deleteChord(item)}
+              ></ChordBadge>
+            </div>
+          ))}
       </div>
       <Flex wrap="wrap" gap="2">
         {openPositionChordKeys.map((key, index) => (
-          <Box key={key}>
-            <Button variant="outline" size="1" onClick={() => playChord(key)}>
+          <Box key={`${key}-${index}`}>
+            <Button variant="outline" size="1" onClick={() => addChord(key)}>
               {key}
             </Button>
           </Box>
         ))}
       </Flex>
       <div>
-        <button>Play</button>
+        <button onClick={playChordProgression}>Play</button>
       </div>
     </div>
   );

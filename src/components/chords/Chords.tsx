@@ -78,7 +78,7 @@ const Chords: React.FC<PropsType> = ({ chord }) => {
       (item) => !removeSet.has(item),
     );
     setOpenFingers([...resultArray]);
-  }, [chord.fingers]);
+  }, [chord.fingers, chord.mute]);
 
   return (
     <ContainerStyle>
@@ -90,10 +90,10 @@ const Chords: React.FC<PropsType> = ({ chord }) => {
           width={cellSize * columnCount + cellSize * 2 + 10}
           height={cellSizeY * rowCount + cellSizeY * 2}
         >
-          <FlatChord flat={chord.flat} position={chord.flat} />
-          <FlatChord flat={chord.flat + 1} position={chord.flat + 1} />
-          <FlatChord flat={chord.flat + 2} position={chord.flat + 2} />
-          <FlatChord flat={chord.flat + 3} position={chord.flat + 3} />
+          <FlatChord flat={chord.flat} position={1} />
+          <FlatChord flat={chord.flat + 1} position={2} />
+          <FlatChord flat={chord.flat + 2} position={3} />
+          <FlatChord flat={chord.flat + 3} position={4} />
           {lines}
 
           {chord.mute &&
@@ -106,7 +106,13 @@ const Chords: React.FC<PropsType> = ({ chord }) => {
             })}
           {chord.fingers &&
             chord.fingers.map((item, index) => {
-              return <FingerMark key={index} line={item[0]} flat={item[1]} />;
+              return (
+                <FingerMark
+                  key={index}
+                  line={item[0]}
+                  flat={item[1] < 4 ? item[1] : item[1] - chord.flat + 1}
+                />
+              );
             })}
         </svg>
       </div>

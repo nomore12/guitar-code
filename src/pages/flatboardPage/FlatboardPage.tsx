@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import { Select, SelectChangeEvent } from '@mui/material';
-import Metronome from '../../components/metronome/Metronome';
+import Metronome from '../../components/metronome/Metronome2';
 import useNoteStore from '../../store/PracticeStore';
 
 const FlatboardPage: React.FC = () => {
@@ -41,13 +41,13 @@ const FlatboardPage: React.FC = () => {
         handleNodeClick={handleNodeClick}
         practiceNodes={[]}
       />
-      <Flatboard
+      {/* <Flatboard
         rootChord={''}
         selectedScale={undefined}
         handleNodeClick={() => console.log('handleNodeClick')}
         practiceNodes={notes}
         handleReset={handleReset}
-      />
+      /> */}
       <Box
         sx={{
           width: '100%',
@@ -101,7 +101,7 @@ const FlatboardPage: React.FC = () => {
           </Select>
         </Box>
       </Box>
-      <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
         <Metronome />
       </Box>
     </div>

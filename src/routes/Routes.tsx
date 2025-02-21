@@ -5,6 +5,7 @@ import { Route } from 'react-router-dom';
 import MainPage from '../pages/MainPage';
 import ChordTest from '../pages/ChordTest';
 import FlatboardPage from '../pages/flatboardPage/FlatboardPage';
+import AiForm from '../pages/chordsPage/AiForm';
 
 export interface RouteItem {
   path: string;
@@ -46,6 +47,11 @@ const routes: RouteItem[] = [
   {
     path: '/fretboard',
     element: <FlatboardPage />,
+    exact: true,
+  },
+  {
+    path: '/aiForm',
+    element: <AiForm />,
     exact: true,
   },
 ];

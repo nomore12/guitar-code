@@ -12,7 +12,7 @@ import Chords from '../../components/chords/Chords';
 import chordsData from '../../data/openChords.json';
 import useTonePlayer from '../../hooks/useTonePlayer';
 import CustomChordDisplay from './CustomChordDisplay';
-
+import { ChordShape, generateMajorChordShapes } from '../../utils/chordsUtils';
 const dynatonicChords = [
   chordsData.C,
   chordsData.Dm,
@@ -61,6 +61,7 @@ const ChordsPage = () => {
   const [bpm, setBpm] = useState<number>(60);
   const [volume, setVolume] = useState(10);
   const [beat, setBeat] = useState<'4' | '8' | '16'>('4');
+  // const [shapes, setShapes] = useState<ChordShape[]>([]);
 
   const { handlePlay, handleStop } = useTonePlayer({
     bpm,
@@ -105,6 +106,12 @@ const ChordsPage = () => {
       setNextChord(chordArr[1]);
     }
   }, [chordArr]);
+
+  // useEffect(() => {
+  //   const chordShapes = generateMajorChordShapes('C');
+  //   console.log(chordShapes);
+  //   setShapes(chordShapes);
+  // }, [currentChord]);
 
   const onChangeBpm = (value: number[]) => {
     if (value[0] < 40 || value[0] >= 300) {
@@ -167,6 +174,15 @@ const ChordsPage = () => {
       <Box py="6">
         <Text size="9">Chords! Chord! Chords!</Text>
       </Box>
+      {/* 일단 실패... */}
+      {/* <Box>
+        {shapes &&
+          shapes.map((item, index) => (
+            <div key={index}>
+              <Chords chord={item} />
+            </div>
+          ))}
+      </Box> */}
       <Box>
         <Flex gap="5" justify="center">
           <Box>
