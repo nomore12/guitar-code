@@ -20,7 +20,7 @@ const chordNames = [
   'A7',
   'Am7',
   'Amaj7',
-  'Bb',
+  'B',
   'B7',
   'Bm',
   'Bdim',
