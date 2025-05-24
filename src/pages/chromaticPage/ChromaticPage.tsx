@@ -15,14 +15,23 @@ import Button from '@mui/material/Button';
 
 // Note 타입은 src/types/Note.d.ts 에 전역 선언되어 있다고 가정합니다.
 
-const availableFrets = [1, 2, 3, 4];
+// 연습 모드 타입 정의
+type PracticeMode = 'loop' | 'traverse_6th_start' | 'traverse_1st_start';
+
+// 프렛 이동 방향 타입 정의
+type FretTraversalDirection = 'increasing' | 'decreasing' | 'done';
+
+const AVAILABLE_FRETS_FOR_LOOP_MODE = [1, 2, 3, 4]; // 루프 모드에서 사용자가 선택 가능한 프렛
 const GUITAR_STRINGS = [6, 5, 4, 3, 2, 1]; // 줄 번호 배열 (6번줄이 위)
 const availableBeatTypes = [4]; // Beat Type을 4 하나만 포함하도록 수정
+const MAX_FRET_OFFSET = 8; // 9-12번 프렛 (1-4 프렛 기준, 0부터 시작하는 offset이므로 12-4 = 8)
+const DEFAULT_FRET_SEQUENCE_LENGTH = 4; // 한 번에 연습하는 프렛 구간의 길이
 
 type PracticeDirection = 'asc' | 'desc';
 
 const ChromaticPage: React.FC = () => {
   const [bpm, setBpm] = useState(100);
+  // selectedFretSequence는 traverse 모드에서는 동적으로, loop 모드에서는 사용자가 설정
   const [selectedFretSequence, setSelectedFretSequence] = useState<number[]>([
     1, 2, 3, 4,
   ]);
@@ -34,6 +43,13 @@ const ChromaticPage: React.FC = () => {
   const [beatType, setBeatType] = useState<number>(4); // 기본값 4 유지
   const practiceStartTimerRef = useRef<NodeJS.Timeout | null>(null); // 타이머 ID 저장용 ref
 
+  // 새로운 연습 모드 관련 상태
+  const [practiceMode, setPracticeMode] = useState<PracticeMode>('loop');
+  const [currentFretOffset, setCurrentFretOffset] = useState<number>(0); // traverse 모드용: 0 ~ MAX_FRET_OFFSET
+  const [fretTraversalDirection, setFretTraversalDirection] =
+    useState<FretTraversalDirection>('increasing'); // traverse 모드용
+  const [isPreparingToPlay, setIsPreparingToPlay] = useState<boolean>(false); // 2초 대기 상태
+
   const {
     // practiceNotes, // 스토어의 practiceNotes (직접 사용하지 않음, 디버깅용 currentNoteIndex만 사용)
     currentNoteIndex,
@@ -44,17 +60,95 @@ const ChromaticPage: React.FC = () => {
     setOnMeasureEndCallback,
   } = useNoteStore();
 
+  // traverse 모드일 때 currentFretOffset이 변경되면 selectedFretSequence를 업데이트
+  useEffect(() => {
+    if (practiceMode.startsWith('traverse')) {
+      const newSequence = Array.from(
+        { length: DEFAULT_FRET_SEQUENCE_LENGTH },
+        (_, i) => i + 1 + currentFretOffset,
+      );
+      setSelectedFretSequence(newSequence);
+    }
+    // loop 모드일 때는 사용자가 직접 설정하므로, 여기서는 변경하지 않음
+    // (또는 loop 모드로 전환될 때 기본값으로 리셋할 수 있음. 예: [1,2,3,4])
+  }, [practiceMode, currentFretOffset]);
+
+  // 연습 상태를 초기 설정으로 리셋하는 함수
+  // handleMeasureEnd보다 먼저 선언되어야 함
+  const resetToInitialPracticeState = useCallback(
+    (modeToResetTo: PracticeMode) => {
+      console.log(
+        `ChromaticPage: Resetting practice state for mode: ${modeToResetTo}`,
+      );
+      if (practiceStartTimerRef.current) {
+        clearTimeout(practiceStartTimerRef.current);
+        practiceStartTimerRef.current = null;
+      }
+      setIsPreparingToPlay(false);
+      setIsPracticePlaying(false);
+
+      setCurrentFretOffset(0);
+      setFretTraversalDirection('increasing');
+
+      if (modeToResetTo === 'loop') {
+        setSelectedFretSequence(AVAILABLE_FRETS_FOR_LOOP_MODE);
+        setCurrentLineNumber(GUITAR_STRINGS[0]);
+        setPracticeDirection('asc');
+      } else if (modeToResetTo === 'traverse_6th_start') {
+        setCurrentLineNumber(GUITAR_STRINGS[0]);
+        setPracticeDirection('asc');
+        const initialTraverseSequence = Array.from(
+          { length: DEFAULT_FRET_SEQUENCE_LENGTH },
+          (_, i) => i + 1 + 0,
+        );
+        setSelectedFretSequence(initialTraverseSequence);
+      } else if (modeToResetTo === 'traverse_1st_start') {
+        setCurrentLineNumber(GUITAR_STRINGS[GUITAR_STRINGS.length - 1]);
+        setPracticeDirection('desc');
+        const initialTraverseSequence = Array.from(
+          { length: DEFAULT_FRET_SEQUENCE_LENGTH },
+          (_, i) => i + 1 + 0,
+        );
+        setSelectedFretSequence(initialTraverseSequence);
+      }
+    },
+    [
+      setIsPracticePlaying,
+      setCurrentFretOffset,
+      setFretTraversalDirection,
+      setSelectedFretSequence,
+      setCurrentLineNumber,
+      setPracticeDirection,
+    ],
+  ); // 의존성 추가
+
+  // 음표 배열을 생성하는 순수 헬퍼 함수
+  const generateChromaticNotesArray = (
+    line: number,
+    sequence: number[], // direction 파라미터 제거 (현재 사용 안 함)
+  ): ChromaticNote[] => {
+    return sequence.map((fretNumber, index) => ({
+      flatNumber: fretNumber,
+      lineNumber: line,
+      chromaticNumber: index + 1,
+      chord: String(index + 1),
+    }));
+  };
+
   const generateAndSetPracticeNotes = useCallback(() => {
+    let sequenceToUse = selectedFretSequence;
+    if (practiceMode.startsWith('traverse')) {
+      sequenceToUse = Array.from(
+        { length: DEFAULT_FRET_SEQUENCE_LENGTH },
+        (_, i) => i + 1 + currentFretOffset,
+      );
+    }
     console.log(
-      `ChromaticPage: Generating notes for line ${currentLineNumber}, direction ${practiceDirection}`,
+      `ChromaticPage: Generating notes (useCallback) for line ${currentLineNumber}, direction ${practiceDirection}, mode: ${practiceMode}, offset: ${currentFretOffset}, sequence: ${sequenceToUse.join(',')}`,
     );
-    const newPracticeNotes: ChromaticNote[] = selectedFretSequence.map(
-      (fretNumber, index) => ({
-        flatNumber: fretNumber,
-        lineNumber: currentLineNumber,
-        chromaticNumber: index + 1,
-        chord: String(index + 1),
-      }),
+    const newPracticeNotes = generateChromaticNotesArray(
+      currentLineNumber,
+      sequenceToUse,
     );
     setPracticeNotes(newPracticeNotes);
   }, [
@@ -62,18 +156,23 @@ const ChromaticPage: React.FC = () => {
     currentLineNumber,
     practiceDirection,
     setPracticeNotes,
+    practiceMode,
+    currentFretOffset,
   ]);
 
   useEffect(() => {
+    // 이 useEffect는 주로 사용자 인터랙션(모드 변경, 프렛 패턴 변경 등)이나
+    // traverse 모드에서의 offset 변경 시 노트를 업데이트하는 역할을 합니다.
+    // handleMeasureEnd에서의 노트 업데이트는 직접 setPracticeNotes를 호출하여 더 즉각적으로 반응합니다.
     console.log(
-      'ChromaticPage: Line, direction or fret sequence changed, regenerating notes.',
+      'ChromaticPage: useEffect[line,dir,seq] triggered, regenerating notes if necessary.',
     );
     generateAndSetPracticeNotes();
   }, [
-    currentLineNumber,
-    practiceDirection,
-    selectedFretSequence,
-    generateAndSetPracticeNotes,
+    currentLineNumber, // handleMeasureEnd에서 상태 변경 후 이 useEffect도 호출됨
+    practiceDirection, // handleMeasureEnd에서 상태 변경 후 이 useEffect도 호출됨
+    selectedFretSequence, // 사용자가 루프 모드에서 패턴 변경 시 또는 트래버스에서 오프셋 변경 시
+    generateAndSetPracticeNotes, // useCallback이므로 안정적
   ]);
 
   const handleNodeClick = (node: ChromaticNote) => {
@@ -105,73 +204,235 @@ const ChromaticPage: React.FC = () => {
     }
   };
 
-  // 한 마디 종료 시 호출될 콜백 함수 (무한 루프 로직, 중복 연주 방지)
-  const handleMeasureEnd = useCallback(() => {
-    console.log(
-      `ChromaticPage: Measure ended on line ${currentLineNumber}, direction: ${practiceDirection}`,
-    );
-    let nextLineNumber = currentLineNumber;
-    let nextDirection = practiceDirection;
-    let directionJustSwitched = false;
+  // 연습 모드 변경 핸들러
+  const handlePracticeModeChange = (event: SelectChangeEvent<PracticeMode>) => {
+    const newMode = event.target.value as PracticeMode;
+    console.log(`ChromaticPage: Practice mode changed to ${newMode}`);
+    setPracticeMode(newMode);
 
-    if (practiceDirection === 'asc') {
-      const currentLineStringIndex = GUITAR_STRINGS.indexOf(currentLineNumber);
-      if (currentLineStringIndex < GUITAR_STRINGS.length - 1) {
-        // 아직 마지막 줄(1번)이 아님
-        nextLineNumber = GUITAR_STRINGS[currentLineStringIndex + 1];
-      } else {
-        // 1번 줄 (상행) 마침 -> 2번 줄 하행으로 전환
-        console.log(
-          'ChromaticPage: Ascending finished at 1st string. Switching to descending on 2nd string.',
-        );
-        nextDirection = 'desc';
-        // 1번 줄에서 상행이 끝났으므로 다음은 2번 줄에서 하행 시작
-        if (GUITAR_STRINGS.length > 1) {
-          // 줄이 2개 이상 있을 때만 의미 있음
-          nextLineNumber = GUITAR_STRINGS[GUITAR_STRINGS.length - 2]; // 2번 줄
+    setIsPracticePlaying(false);
+    if (practiceStartTimerRef.current) {
+      clearTimeout(practiceStartTimerRef.current);
+      practiceStartTimerRef.current = null;
+    }
+
+    setCurrentFretOffset(0);
+    setFretTraversalDirection('increasing');
+
+    if (newMode === 'loop') {
+      setSelectedFretSequence(AVAILABLE_FRETS_FOR_LOOP_MODE);
+      setCurrentLineNumber(GUITAR_STRINGS[0]);
+      setPracticeDirection('asc');
+    } else if (newMode === 'traverse_6th_start') {
+      setCurrentLineNumber(GUITAR_STRINGS[0]); // 6번줄
+      setPracticeDirection('asc'); // 상행 시작
+      // selectedFretSequence는 useEffect에 의해 자동 설정
+    } else if (newMode === 'traverse_1st_start') {
+      setCurrentLineNumber(GUITAR_STRINGS[GUITAR_STRINGS.length - 1]); // 1번줄
+      setPracticeDirection('desc'); // 하행 시작
+      // selectedFretSequence는 useEffect에 의해 자동 설정
+    }
+  };
+
+  const handleMeasureEnd = useCallback(() => {
+    if (!isPracticePlaying) return;
+
+    const originalLineNumber = currentLineNumber;
+    const originalPracticeDirection = practiceDirection;
+    const originalFretOffset = currentFretOffset;
+    const originalSelectedFretSequence = selectedFretSequence;
+
+    let nextLine = originalLineNumber;
+    let nextDir = originalPracticeDirection;
+    let nextFretOff = originalFretOffset;
+    let nextFretTravDir = fretTraversalDirection;
+    let stopPractice = false;
+
+    console.log(
+      `ChromaticPage: handleMeasureEnd CALLED. Current: L=${originalLineNumber}, D=${originalPracticeDirection}, M=${practiceMode}, FO=${originalFretOffset}, FTD=${fretTraversalDirection}`,
+    );
+
+    const currentLineIdx = GUITAR_STRINGS.indexOf(originalLineNumber);
+
+    if (practiceMode === 'loop') {
+      if (originalPracticeDirection === 'asc') {
+        if (currentLineIdx < GUITAR_STRINGS.length - 1) {
+          nextLine = GUITAR_STRINGS[currentLineIdx + 1];
         } else {
-          // 줄이 하나뿐이면 방향만 바꾸고 줄은 그대로 (이 경우 루프가 의미 없어지지만 방어 코드)
-          nextLineNumber = GUITAR_STRINGS[GUITAR_STRINGS.length - 1];
+          // 1번 줄 도달
+          nextDir = 'desc';
         }
-        directionJustSwitched = true;
+      } else {
+        // desc
+        if (currentLineIdx > 0) {
+          nextLine = GUITAR_STRINGS[currentLineIdx - 1];
+        } else {
+          // 6번 줄 도달
+          nextDir = 'asc';
+        }
+      }
+
+      if (
+        originalLineNumber !== nextLine ||
+        originalPracticeDirection !== nextDir
+      ) {
+        console.log(
+          `Loop: State change. New L=${nextLine}, D=${nextDir}. Old L=${originalLineNumber}, D=${originalPracticeDirection}`,
+        );
+        const newNotes = generateChromaticNotesArray(
+          nextLine,
+          originalSelectedFretSequence,
+        );
+        setPracticeNotes(newNotes);
+        if (currentLineNumber !== nextLine) setCurrentLineNumber(nextLine);
+        if (practiceDirection !== nextDir) setPracticeDirection(nextDir);
+      }
+    } else if (practiceMode.startsWith('traverse')) {
+      let tempNextLine = originalLineNumber;
+      let tempNextDir = originalPracticeDirection;
+      let tempNextFretOffset = originalFretOffset;
+      let tempNextFretTravDir = fretTraversalDirection;
+      let tempStopPractice = false;
+
+      if (fretTraversalDirection === 'increasing') {
+        if (practiceDirection === 'asc') {
+          if (currentLineIdx < GUITAR_STRINGS.length - 1) {
+            tempNextLine = GUITAR_STRINGS[currentLineIdx + 1];
+          } else {
+            if (originalFretOffset < MAX_FRET_OFFSET) {
+              tempNextFretOffset = originalFretOffset + 1;
+              tempNextLine = GUITAR_STRINGS[GUITAR_STRINGS.length - 1];
+              tempNextDir = 'desc';
+            } else {
+              tempNextFretTravDir = 'decreasing';
+              tempNextFretOffset = originalFretOffset - 1;
+              tempNextLine = GUITAR_STRINGS[GUITAR_STRINGS.length - 1];
+              tempNextDir = 'desc';
+            }
+          }
+        } else {
+          // practiceDirection === 'desc'
+          if (currentLineIdx > 0) {
+            tempNextLine = GUITAR_STRINGS[currentLineIdx - 1];
+          } else {
+            if (originalFretOffset < MAX_FRET_OFFSET) {
+              tempNextFretOffset = originalFretOffset + 1;
+              tempNextLine = GUITAR_STRINGS[0];
+              tempNextDir = 'asc';
+            } else {
+              if (practiceMode === 'traverse_1st_start') {
+                tempNextFretTravDir = 'decreasing';
+                tempNextFretOffset = originalFretOffset - 1;
+                tempNextLine = GUITAR_STRINGS[0];
+                tempNextDir = 'asc';
+              } else {
+                tempNextLine = GUITAR_STRINGS[0];
+                tempNextDir = 'asc';
+              }
+            }
+          }
+        }
+      } else if (fretTraversalDirection === 'decreasing') {
+        if (practiceDirection === 'desc') {
+          if (currentLineIdx > 0) {
+            tempNextLine = GUITAR_STRINGS[currentLineIdx - 1];
+          } else {
+            if (originalFretOffset > 0) {
+              tempNextFretOffset = originalFretOffset - 1;
+              tempNextLine = GUITAR_STRINGS[0];
+              tempNextDir = 'asc';
+            } else {
+              tempStopPractice = true;
+              tempNextFretTravDir = 'done';
+            }
+          }
+        } else {
+          // practiceDirection === 'asc'
+          if (currentLineIdx < GUITAR_STRINGS.length - 1) {
+            tempNextLine = GUITAR_STRINGS[currentLineIdx + 1];
+          } else {
+            if (originalFretOffset > 0) {
+              tempNextFretOffset = originalFretOffset - 1;
+              tempNextLine = GUITAR_STRINGS[GUITAR_STRINGS.length - 1];
+              tempNextDir = 'desc';
+            } else {
+              tempStopPractice = true;
+              tempNextFretTravDir = 'done';
+            }
+          }
+        }
+      }
+
+      nextLine = tempNextLine;
+      nextDir = tempNextDir;
+      nextFretOff = tempNextFretOffset;
+      nextFretTravDir = tempNextFretTravDir;
+      stopPractice = tempStopPractice;
+
+      const nextFretSequenceNumbers = Array.from(
+        { length: DEFAULT_FRET_SEQUENCE_LENGTH },
+        (_, i) => i + 1 + nextFretOff,
+      );
+      const currentTraverseFretSequenceNumbers = Array.from(
+        { length: DEFAULT_FRET_SEQUENCE_LENGTH },
+        (_, i) => i + 1 + originalFretOffset,
+      );
+
+      let notesShouldChangeForTraverse = false;
+      if (
+        originalLineNumber !== nextLine ||
+        originalPracticeDirection !== nextDir ||
+        originalFretOffset !== nextFretOff || // Fret offset 변경도 노트 변경 유발
+        currentTraverseFretSequenceNumbers.join('-') !==
+          nextFretSequenceNumbers.join('-')
+      ) {
+        notesShouldChangeForTraverse = true;
+      }
+
+      if (notesShouldChangeForTraverse) {
+        console.log(
+          `Traverse: State change. New L=${nextLine}, D=${nextDir}, FO=${nextFretOff}`,
+        );
+        const newNotes = generateChromaticNotesArray(
+          nextLine,
+          nextFretSequenceNumbers,
+        );
+        setPracticeNotes(newNotes);
+      }
+      // Traverse 모드의 React 상태 업데이트는 아래 공통 블록에서 처리
+    }
+
+    if (stopPractice) {
+      setIsPracticePlaying(false);
+      if (nextFretTravDir === 'done') {
+        resetToInitialPracticeState(practiceMode);
       }
     } else {
-      // practiceDirection === 'desc'
-      const currentLineStringIndex = GUITAR_STRINGS.indexOf(currentLineNumber);
-      if (currentLineStringIndex > 0) {
-        // 아직 첫 줄(6번)이 아님
-        nextLineNumber = GUITAR_STRINGS[currentLineStringIndex - 1];
-      } else {
-        // 6번 줄 (하행) 마침 -> 5번 줄 상행으로 전환
-        console.log(
-          'ChromaticPage: Descending finished at 6th string. Switching to ascending on 5th string.',
-        );
-        nextDirection = 'asc';
-        // 6번 줄에서 하행이 끝났으므로 다음은 5번 줄에서 상행 시작
-        if (GUITAR_STRINGS.length > 1) {
-          // 줄이 2개 이상 있을 때만 의미 있음
-          nextLineNumber = GUITAR_STRINGS[1]; // 5번 줄
-        } else {
-          nextLineNumber = GUITAR_STRINGS[0];
-        }
-        directionJustSwitched = true;
+      // 공통 React 상태 업데이트 (Loop 모드는 위에서 이미 처리됨)
+      if (practiceMode.startsWith('traverse')) {
+        if (currentLineNumber !== nextLine) setCurrentLineNumber(nextLine);
+        if (practiceDirection !== nextDir) setPracticeDirection(nextDir);
+        if (currentFretOffset !== nextFretOff)
+          setCurrentFretOffset(nextFretOff);
+        if (fretTraversalDirection !== nextFretTravDir)
+          setFretTraversalDirection(nextFretTravDir);
       }
     }
-
-    if (currentLineNumber !== nextLineNumber) {
-      setCurrentLineNumber(nextLineNumber);
-    }
-    if (practiceDirection !== nextDirection) {
-      setPracticeDirection(nextDirection);
-    }
-    // 줄 또는 방향이 바뀌면 useEffect가 새 노트를 로드하고, isPracticePlaying은 유지됨.
-    // 만약 방향만 바뀌고 줄은 그대로인 경우 (예: GUITAR_STRINGS.length === 1 일 때의 극단적 상황)
-    // 또는 방향과 줄이 모두 바뀌는 경우 모두 useEffect가 처리.
   }, [
+    isPracticePlaying,
+    practiceMode,
     currentLineNumber,
     practiceDirection,
+    selectedFretSequence, // originalSelectedFretSequence를 위해 필요
+    currentFretOffset,
+    fretTraversalDirection,
+    setPracticeNotes,
+    setIsPracticePlaying,
     setCurrentLineNumber,
     setPracticeDirection,
+    setCurrentFretOffset,
+    setFretTraversalDirection,
+    resetToInitialPracticeState,
   ]);
 
   useEffect(() => {
@@ -187,54 +448,57 @@ const ChromaticPage: React.FC = () => {
 
   const handleResetAndStop = () => {
     console.log('ChromaticPage: handleResetAndStop called.');
-    if (practiceStartTimerRef.current) {
-      // 리셋 시 지연 시작 타이머가 있다면 취소
-      clearTimeout(practiceStartTimerRef.current);
-      practiceStartTimerRef.current = null;
-    }
-    setIsPracticePlaying(false);
-    setPracticeDirection('asc');
-    setCurrentLineNumber(GUITAR_STRINGS[0]);
-    setSelectedFretSequence([1, 2, 3, 4]);
-    setBeatType(4);
+    resetToInitialPracticeState(practiceMode); // 현재 모드의 초기 상태로 리셋
   };
 
   const togglePractice = () => {
-    const wasPlaying = isPracticePlaying;
+    const storeIsPlaying = useNoteStore.getState().isPracticePlaying;
 
-    // 기존 타이머가 있다면 취소 (연속 클릭 방지 및 상태 변경 시 정리)
     if (practiceStartTimerRef.current) {
       clearTimeout(practiceStartTimerRef.current);
       practiceStartTimerRef.current = null;
     }
 
-    if (wasPlaying) {
-      // 연습을 중지시키는 경우
-      setIsPracticePlaying(false); // 즉시 중지
+    if (storeIsPlaying || isPreparingToPlay) {
+      // 연습을 중지시키는 경우 (Stop 버튼 클릭 또는 준비 중 취소)
       console.log(
-        'ChromaticPage: Stopping practice. Resetting to 6th string, ascending.',
+        'ChromaticPage: Stopping/Cancelling practice. Resetting to initial state.',
       );
-      setPracticeDirection('asc');
-      setCurrentLineNumber(GUITAR_STRINGS[0]);
+      setIsPreparingToPlay(false); // 준비 상태 해제
+      // setIsPracticePlaying(false); // resetToInitialPracticeState 내부에서 isPracticePlaying: false 처리 및 스토어 업데이트
+      resetToInitialPracticeState(practiceMode);
     } else {
-      // 연습을 시작하는 경우
+      // 연습을 시작하는 경우 (Start 버튼 클릭)
       console.log(
-        'ChromaticPage: Attempting to start practice in 2 seconds...',
+        'ChromaticPage: Start button clicked. Preparing to start in 2s...',
       );
-      // 먼저 노트가 준비되었는지 확인하고 생성 (만약 없다면)
+      setIsPreparingToPlay(true); // UI를 즉시 변경하기 위해 준비 상태로 설정
+
+      // 노트가 준비되었는지 확인하고 생성 (만약 없다면)
       const store = useNoteStore.getState();
       if (!store.practiceNotes || store.practiceNotes.length === 0) {
         console.log(
           'ChromaticPage: No notes in store when starting, generating...',
         );
-        generateAndSetPracticeNotes(); // 동기적으로 노트 먼저 생성
+        generateAndSetPracticeNotes();
       }
+      useNoteStore.getState().setCurrentNoteIndex(0);
 
-      // 2초 후 연습 시작
       practiceStartTimerRef.current = setTimeout(() => {
-        console.log('ChromaticPage: Starting practice now (after 2s delay).');
-        setIsPracticePlaying(true);
-        practiceStartTimerRef.current = null; // 타이머 실행 후 ID 초기화
+        setIsPreparingToPlay(false); // 준비 상태 해제
+        // 2초 후 실제 연습 시작: 스토어의 isPracticePlaying을 true로 설정
+        // 이 시점에 isPracticePlaying이 false여야만 시작 (Stop으로 중간에 취소되지 않은 경우)
+        if (!useNoteStore.getState().isPracticePlaying) {
+          console.log(
+            'ChromaticPage: 2s delay over. Starting practice now by setting store state.',
+          );
+          setIsPracticePlaying(true); // 스토어 상태 변경 -> MetronomeEngine 등 반응
+        } else {
+          console.log(
+            'ChromaticPage: 2s delay over, but practice was already stopped/cancelled.',
+          );
+        }
+        practiceStartTimerRef.current = null;
       }, 2000);
     }
   };
@@ -282,13 +546,36 @@ const ChromaticPage: React.FC = () => {
             <MenuItem value={4}>4 Beats</MenuItem>
           </Select>
         </FormControl>
+
+        {/* 연습 모드 선택 드롭다운 */}
+        <FormControl sx={{ minWidth: 180 }}>
+          <InputLabel id="practice-mode-label">Practice Mode</InputLabel>
+          <Select<PracticeMode>
+            labelId="practice-mode-label"
+            value={practiceMode}
+            label="Practice Mode"
+            onChange={handlePracticeModeChange}
+          >
+            <MenuItem value="loop">Loop Current Frets</MenuItem>
+            <MenuItem value="traverse_6th_start">
+              Traverse 6th String Start
+            </MenuItem>
+            <MenuItem value="traverse_1st_start">
+              Traverse 1st String Start
+            </MenuItem>
+          </Select>
+        </FormControl>
+
         <FormControl sx={{ minWidth: 240 }}>
-          <InputLabel id="fret-sequence-label">Finger Pattern</InputLabel>
+          <InputLabel id="fret-sequence-label">
+            {practiceMode === 'loop' ? 'Finger Pattern' : 'Current Fret Range'}
+          </InputLabel>
           <Select
             labelId="fret-sequence-label"
             multiple
             value={selectedFretSequence}
             onChange={handleFretSequenceChange}
+            disabled={practiceMode.startsWith('traverse')} // Traverse 모드에서는 비활성화
             renderValue={(selected) => (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                 {(selected as number[]).map((value) => (
@@ -296,9 +583,13 @@ const ChromaticPage: React.FC = () => {
                 ))}
               </Box>
             )}
-            label="Finger Pattern (1st to 4th Fret)"
+            label={
+              practiceMode === 'loop'
+                ? 'Finger Pattern (1st to 4th Fret)'
+                : 'Current Fret Range'
+            }
           >
-            {availableFrets.map((fretNum) => (
+            {AVAILABLE_FRETS_FOR_LOOP_MODE.map((fretNum) => (
               <MenuItem key={fretNum} value={fretNum}>
                 {`Fret ${fretNum}`}
               </MenuItem>
@@ -308,10 +599,16 @@ const ChromaticPage: React.FC = () => {
         <Button
           variant="contained"
           onClick={togglePractice}
-          color={isPracticePlaying ? 'warning' : 'primary'}
+          color={
+            useNoteStore.getState().isPracticePlaying || isPreparingToPlay
+              ? 'warning'
+              : 'primary'
+          }
           sx={{ height: 56 }}
         >
-          {isPracticePlaying ? 'Stop' : 'Start'}
+          {useNoteStore.getState().isPracticePlaying || isPreparingToPlay
+            ? 'Stop'
+            : 'Start'}
         </Button>
       </Box>
 
@@ -321,8 +618,8 @@ const ChromaticPage: React.FC = () => {
       />
       <Typography sx={{ textAlign: 'center', mt: 1, minHeight: '1.5em' }}>
         {isPracticePlaying
-          ? `Current String: ${currentLineNumber} (${practiceDirection === 'asc' ? 'Ascending' : 'Descending'}) - Beat: ${beatType}/4`
-          : `Stopped. Next start: String ${currentLineNumber} (Ascending) - Beat: ${beatType}/4`}
+          ? `Mode: ${practiceMode.replace('_', ' ')} - String: ${currentLineNumber} (${practiceDirection === 'asc' ? 'Ascending' : 'Descending'}) - Frets: ${selectedFretSequence.join('-')} - Beat: ${beatType}/4`
+          : `Stopped. Next start: Mode: ${practiceMode.replace('_', ' ')} - String ${currentLineNumber} (Ascending) - Frets: ${selectedFretSequence.join('-')} - Beat: ${beatType}/4`}
       </Typography>
       {/* MetronomeEngine을 렌더링하지만 보이지 않게 처리 (또는 DOM에서 완전히 제거하고 커스텀 훅 등으로 관리) */}
       {/* <Box sx={{ display: 'none' }}> */}
