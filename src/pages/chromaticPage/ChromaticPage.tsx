@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ChromaticFlatboard from '../../components/fretboard/ChromaticFlatboard';
 // import Metronome from '../../components/metronome/Metronome3'; // 이전 메트로놈 주석 처리
 import MetronomeEngine from '../../components/metronome/MetronomeEngine'; // 파일 이름 변경 반영
@@ -32,6 +32,7 @@ const ChromaticPage: React.FC = () => {
     GUITAR_STRINGS[0],
   ); // 기본 시작: 6번줄
   const [beatType, setBeatType] = useState<number>(4); // 기본값 4 유지
+  const practiceStartTimerRef = useRef<NodeJS.Timeout | null>(null); // 타이머 ID 저장용 ref
 
   const {
     // practiceNotes, // 스토어의 practiceNotes (직접 사용하지 않음, 디버깅용 currentNoteIndex만 사용)
@@ -186,48 +187,66 @@ const ChromaticPage: React.FC = () => {
 
   const handleResetAndStop = () => {
     console.log('ChromaticPage: handleResetAndStop called.');
-    setIsPracticePlaying(false); // 1. 연습 중지
-    setPracticeDirection('asc'); // 2. 방향 초기화 (상행)
-    setCurrentLineNumber(GUITAR_STRINGS[0]); // 3. 6번줄로 설정
-    setSelectedFretSequence([1, 2, 3, 4]); // 4. 기본 프렛 패턴 설정
-    setBeatType(4); // 리셋 시 beatType도 기본값으로
-    // 위 상태 변경으로 인해 useEffect가 6번줄 기본 노트를 스토어에 자동 로드함.
-    // useNoteStore의 setPracticeNotes는 currentNoteIndex를 0으로 리셋.
+    if (practiceStartTimerRef.current) {
+      // 리셋 시 지연 시작 타이머가 있다면 취소
+      clearTimeout(practiceStartTimerRef.current);
+      practiceStartTimerRef.current = null;
+    }
+    setIsPracticePlaying(false);
+    setPracticeDirection('asc');
+    setCurrentLineNumber(GUITAR_STRINGS[0]);
+    setSelectedFretSequence([1, 2, 3, 4]);
+    setBeatType(4);
   };
 
   const togglePractice = () => {
     const wasPlaying = isPracticePlaying;
-    setIsPracticePlaying(!wasPlaying);
+
+    // 기존 타이머가 있다면 취소 (연속 클릭 방지 및 상태 변경 시 정리)
+    if (practiceStartTimerRef.current) {
+      clearTimeout(practiceStartTimerRef.current);
+      practiceStartTimerRef.current = null;
+    }
 
     if (wasPlaying) {
       // 연습을 중지시키는 경우
+      setIsPracticePlaying(false); // 즉시 중지
       console.log(
         'ChromaticPage: Stopping practice. Resetting to 6th string, ascending.',
       );
       setPracticeDirection('asc');
       setCurrentLineNumber(GUITAR_STRINGS[0]);
-      // selectedFretSequence는 유지. useEffect가 6번줄의 현재 선택된 프렛으로 노트를 로드.
-      // 만약 노트가 없는 상태에서 Stop을 누르는 경우는 없으므로, generateAndSetPracticeNotes 불필요
     } else {
       // 연습을 시작하는 경우
-      // 현재 currentLineNumber와 practiceDirection, selectedFretSequence로 노트 생성 및 연습 시작
-      // 만약 이전에 노트가 없었다면 (예: 페이지 첫 로드 후 바로 Start)
-      // generateAndSetPracticeNotes()가 useEffect에 의해 이미 호출되었거나 호출될 것임.
-      // 또는, 명시적으로 여기서 한 번 더 호출해줄 수 있지만, 중복 가능성.
-      // 현재 로직: isPracticePlaying이 true가 되면 Metronome이 시작되고, 스토어의 노트를 사용.
-      // 노트가 이미 현재 줄/방향/패턴에 맞게 로드되어 있어야 함.
-      // 이는 useEffect [currentLineNumber, practiceDirection, selectedFretSequence] 가 담당.
-      console.log('ChromaticPage: Starting practice.');
-      // 만약 스토어에 노트가 없는 극단적인 경우, 여기서 생성해줄 수 있음.
+      console.log(
+        'ChromaticPage: Attempting to start practice in 2 seconds...',
+      );
+      // 먼저 노트가 준비되었는지 확인하고 생성 (만약 없다면)
       const store = useNoteStore.getState();
       if (!store.practiceNotes || store.practiceNotes.length === 0) {
         console.log(
           'ChromaticPage: No notes in store when starting, generating...',
         );
-        generateAndSetPracticeNotes();
+        generateAndSetPracticeNotes(); // 동기적으로 노트 먼저 생성
       }
+
+      // 2초 후 연습 시작
+      practiceStartTimerRef.current = setTimeout(() => {
+        console.log('ChromaticPage: Starting practice now (after 2s delay).');
+        setIsPracticePlaying(true);
+        practiceStartTimerRef.current = null; // 타이머 실행 후 ID 초기화
+      }, 2000);
     }
   };
+
+  // 컴포넌트 언마운트 시 타이머 정리
+  useEffect(() => {
+    return () => {
+      if (practiceStartTimerRef.current) {
+        clearTimeout(practiceStartTimerRef.current);
+      }
+    };
+  }, []); // 빈 의존성 배열로 마운트/언마운트 시 한 번만 실행
 
   return (
     <Box sx={{ padding: 2, maxWidth: 'lg', margin: 'auto' }}>
