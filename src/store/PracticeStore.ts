@@ -1,14 +1,6 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
-// Note 타입 정의
-// interface Note {
-//   flatNumber: number;
-//   lineNumber: number;
-//   chord: string;
-//   codeTone?: boolean;
-// }
-
 // Zustand 상태 타입 정의
 interface NoteStore {
   notes: Note[];

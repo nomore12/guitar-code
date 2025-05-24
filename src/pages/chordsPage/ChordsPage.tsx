@@ -263,7 +263,7 @@ const ChordsPage = () => {
         </RadioGroup.Root>
       </Box>
       <Box>
-        <Text size="5" m={10}>
+        <Text size="5" m="10">
           연습 방식
         </Text>
         <Tabs.Root defaultValue="chordsArr">

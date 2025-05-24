@@ -11,7 +11,7 @@
       "es2015"
     ],
     "jsx": "react-jsx",
-    "disableDeepTypeOptimization": true,
-    "maxNodeModuleJsDepth": 2
+    "maxNodeModuleJsDepth": 2,
+    "downlevelIteration": true
   }
 }
