@@ -37,6 +37,26 @@ const ChromaticFlatboard: React.FC<PropsType> = ({
     notesLength: practiceNodesFromStore?.length,
   });
 
+  // 스토어의 첫 번째 노트 및 전체 노트 정보 로깅 추가
+  if (practiceNodesFromStore && practiceNodesFromStore.length > 0) {
+    console.log(
+      '[Flatboard Debug] First note from store:',
+      JSON.stringify({
+        line: practiceNodesFromStore[0].lineNumber,
+        chord: practiceNodesFromStore[0].chord,
+        cn: practiceNodesFromStore[0].chromaticNumber,
+      }),
+    );
+    // 전체 노트 정보도 필요하다면 여기서 더 자세히 로깅할 수 있습니다.
+    // console.log('[Flatboard Debug] All notes for Y-coord check:',
+    //   JSON.stringify(practiceNodesFromStore.map(n => ({ l: n.lineNumber, c: n.chord, cn: n.chromaticNumber })))
+    // );
+  } else {
+    console.log(
+      '[Flatboard Debug] No practice notes in store or store is empty.',
+    );
+  }
+
   return (
     <svg
       width={totalWidth}
@@ -100,20 +120,20 @@ const ChromaticFlatboard: React.FC<PropsType> = ({
         <circle
           key={`marker-single-${fret}`}
           cx={(fret - 0.5) * fretWidth + paddingLeft + extraPadding}
-          cy={fretboardHeight / 2 + extraPadding + stringSpacing / 2}
+          cy={extraPadding + 3.5 * stringSpacing}
           r="6"
           fill="#c0c0c0"
         />
       ))}
       <circle
         cx={(12 - 0.5) * fretWidth + paddingLeft + extraPadding}
-        cy={extraPadding + stringSpacing * 2 + stringSpacing / 2}
+        cy={extraPadding + 2.5 * stringSpacing}
         r="6"
         fill="#c0c0c0"
       />
       <circle
         cx={(12 - 0.5) * fretWidth + paddingLeft + extraPadding}
-        cy={extraPadding + stringSpacing * 4 + stringSpacing / 2}
+        cy={extraPadding + 4.5 * stringSpacing}
         r="6"
         fill="#c0c0c0"
       />
@@ -125,21 +145,35 @@ const ChromaticFlatboard: React.FC<PropsType> = ({
             practiceNodesFromStore.length > 0 &&
             currentIndex === mapIndex;
 
-          // y 좌표 계산: note.lineNumber (1~6)를 사용.
-          // ChromaticFlatboard는 줄을 위에서부터 아래로 stringIndex 0~5 로 그림.
-          // stringIndex 0은 6번줄 (E, 가장 위), stringIndex 5는 1번줄 (e, 가장 아래).
-          // lineNumber 6 (6번줄) => stringIndex 0
-          // lineNumber 1 (1번줄) => stringIndex 5
-          // 변환: stringIndex_for_note = strings - note.lineNumber
-          const stringIndexForNote = strings - note.lineNumber;
+          // y 좌표 계산 테스트: lineNumber 1을 SVG 상단(index 0)으로 매핑 시도
+          // 기존: strings - note.lineNumber (6번줄 -> 0, 1번줄 -> 5)
+          // 테스트: note.lineNumber - 1 (1번줄 -> 0, 6번줄 -> 5)
+          const stringIndexForNote_TEST = note.lineNumber - 1;
+
+          // Y 좌표 계산 시 위 테스트 인덱스 사용
           const calculatedY =
-            extraPadding + (stringIndexForNote + 1) * stringSpacing;
+            extraPadding + (stringIndexForNote_TEST + 1) * stringSpacing;
+
+          // X 좌표 계산 (이전 제안대로 Flatboard에서 계산)
+          const calculatedX =
+            (note.flatNumber - 0.5) * fretWidth + paddingLeft + extraPadding;
+
+          if (note.lineNumber === 6 || note.lineNumber === 1) {
+            // 1번 또는 6번 줄 노트만 로깅
+            console.log('[Y-Test Debug]', {
+              lineNumber: note.lineNumber,
+              stringIndexForNote_TEST,
+              calculatedY,
+              isActive,
+            });
+          }
 
           return (
             <NoteMarker
               key={`practice-${note.lineNumber}-${note.flatNumber}-${mapIndex}`}
               fret={note.flatNumber}
               lineNumber={note.lineNumber}
+              calculatedX={calculatedX}
               calculatedY={calculatedY}
               note={note.chord}
               color={

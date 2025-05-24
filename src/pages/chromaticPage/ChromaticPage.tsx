@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ChromaticFlatboard from '../../components/fretboard/ChromaticFlatboard';
-import Metronome from '../../components/metronome/Metronome3';
+// import Metronome from '../../components/metronome/Metronome3'; // 이전 메트로놈 주석 처리
+import MetronomeEngine from '../../components/metronome/MetronomeEngine'; // 파일 이름 변경 반영
 import useNoteStore from '../../store/useNoteStore';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
@@ -16,6 +17,7 @@ import Button from '@mui/material/Button';
 
 const availableFrets = [1, 2, 3, 4];
 const GUITAR_STRINGS = [6, 5, 4, 3, 2, 1]; // 줄 번호 배열 (6번줄이 위)
+const availableBeatTypes = [4]; // Beat Type을 4 하나만 포함하도록 수정
 
 type PracticeDirection = 'asc' | 'desc';
 
@@ -29,6 +31,7 @@ const ChromaticPage: React.FC = () => {
   const [currentLineNumber, setCurrentLineNumber] = useState<number>(
     GUITAR_STRINGS[0],
   ); // 기본 시작: 6번줄
+  const [beatType, setBeatType] = useState<number>(4); // 기본값 4 유지
 
   const {
     // practiceNotes, // 스토어의 practiceNotes (직접 사용하지 않음, 디버깅용 currentNoteIndex만 사용)
@@ -88,13 +91,27 @@ const ChromaticPage: React.FC = () => {
     setSelectedFretSequence(Array.from(new Set(value)));
   };
 
-  // 한 마디 종료 시 호출될 콜백 함수 (무한 루프 로직)
+  const handleBeatTypeChange = (event: SelectChangeEvent<number>) => {
+    const newBeatType = event.target.value as number;
+    setBeatType(newBeatType);
+    if (isPracticePlaying) {
+      // 재생 중에 박자가 바뀌면 일단 정지시켰다가 다시 시작하는게 안전할 수 있음
+      // setIsPracticePlaying(false); // 또는 MetronomeEngine이 beatType 변경을 감지하고 스스로 재시작하도록 둘 수도 있음
+      // 현재 MetronomeEngine은 beatType을 useEffect 의존성에 포함하므로, 자동으로 루프를 재설정함.
+      console.log(
+        'ChromaticPage: Beat type changed. MetronomeEngine will re-initialize.',
+      );
+    }
+  };
+
+  // 한 마디 종료 시 호출될 콜백 함수 (무한 루프 로직, 중복 연주 방지)
   const handleMeasureEnd = useCallback(() => {
     console.log(
       `ChromaticPage: Measure ended on line ${currentLineNumber}, direction: ${practiceDirection}`,
     );
     let nextLineNumber = currentLineNumber;
     let nextDirection = practiceDirection;
+    let directionJustSwitched = false;
 
     if (practiceDirection === 'asc') {
       const currentLineStringIndex = GUITAR_STRINGS.indexOf(currentLineNumber);
@@ -102,12 +119,20 @@ const ChromaticPage: React.FC = () => {
         // 아직 마지막 줄(1번)이 아님
         nextLineNumber = GUITAR_STRINGS[currentLineStringIndex + 1];
       } else {
-        // 1번 줄 (상행) 마침 -> 하행으로 전환, 줄은 그대로 1번
+        // 1번 줄 (상행) 마침 -> 2번 줄 하행으로 전환
         console.log(
-          'ChromaticPage: Ascending finished at 1st string. Switching to descending.',
+          'ChromaticPage: Ascending finished at 1st string. Switching to descending on 2nd string.',
         );
         nextDirection = 'desc';
-        nextLineNumber = GUITAR_STRINGS[GUITAR_STRINGS.length - 1]; // 1번 줄에서 시작
+        // 1번 줄에서 상행이 끝났으므로 다음은 2번 줄에서 하행 시작
+        if (GUITAR_STRINGS.length > 1) {
+          // 줄이 2개 이상 있을 때만 의미 있음
+          nextLineNumber = GUITAR_STRINGS[GUITAR_STRINGS.length - 2]; // 2번 줄
+        } else {
+          // 줄이 하나뿐이면 방향만 바꾸고 줄은 그대로 (이 경우 루프가 의미 없어지지만 방어 코드)
+          nextLineNumber = GUITAR_STRINGS[GUITAR_STRINGS.length - 1];
+        }
+        directionJustSwitched = true;
       }
     } else {
       // practiceDirection === 'desc'
@@ -116,17 +141,22 @@ const ChromaticPage: React.FC = () => {
         // 아직 첫 줄(6번)이 아님
         nextLineNumber = GUITAR_STRINGS[currentLineStringIndex - 1];
       } else {
-        // 6번 줄 (하행) 마침 -> 상행으로 전환, 줄은 그대로 6번
+        // 6번 줄 (하행) 마침 -> 5번 줄 상행으로 전환
         console.log(
-          'ChromaticPage: Descending finished at 6th string. Switching to ascending.',
+          'ChromaticPage: Descending finished at 6th string. Switching to ascending on 5th string.',
         );
         nextDirection = 'asc';
-        nextLineNumber = GUITAR_STRINGS[0]; // 6번 줄에서 시작
+        // 6번 줄에서 하행이 끝났으므로 다음은 5번 줄에서 상행 시작
+        if (GUITAR_STRINGS.length > 1) {
+          // 줄이 2개 이상 있을 때만 의미 있음
+          nextLineNumber = GUITAR_STRINGS[1]; // 5번 줄
+        } else {
+          nextLineNumber = GUITAR_STRINGS[0];
+        }
+        directionJustSwitched = true;
       }
     }
 
-    // 상태 업데이트: setCurrentLineNumber 또는 setPracticeDirection이 먼저 호출되어도
-    // useEffect는 모든 의존성 변경에 대해 한 번만 실행되도록 React가 보장 (배치 업데이트)
     if (currentLineNumber !== nextLineNumber) {
       setCurrentLineNumber(nextLineNumber);
     }
@@ -134,6 +164,8 @@ const ChromaticPage: React.FC = () => {
       setPracticeDirection(nextDirection);
     }
     // 줄 또는 방향이 바뀌면 useEffect가 새 노트를 로드하고, isPracticePlaying은 유지됨.
+    // 만약 방향만 바뀌고 줄은 그대로인 경우 (예: GUITAR_STRINGS.length === 1 일 때의 극단적 상황)
+    // 또는 방향과 줄이 모두 바뀌는 경우 모두 useEffect가 처리.
   }, [
     currentLineNumber,
     practiceDirection,
@@ -158,6 +190,7 @@ const ChromaticPage: React.FC = () => {
     setPracticeDirection('asc'); // 2. 방향 초기화 (상행)
     setCurrentLineNumber(GUITAR_STRINGS[0]); // 3. 6번줄로 설정
     setSelectedFretSequence([1, 2, 3, 4]); // 4. 기본 프렛 패턴 설정
+    setBeatType(4); // 리셋 시 beatType도 기본값으로
     // 위 상태 변경으로 인해 useEffect가 6번줄 기본 노트를 스토어에 자동 로드함.
     // useNoteStore의 setPracticeNotes는 currentNoteIndex를 0으로 리셋.
   };
@@ -219,7 +252,17 @@ const ChromaticPage: React.FC = () => {
           inputProps={{ min: 40, max: 300 }}
           sx={{ width: 100 }}
         />
-        {/* 연습 방향 선택 UI 제거됨 */}
+        <FormControl sx={{ minWidth: 120 }}>
+          <InputLabel id="beat-type-label">Beat Type</InputLabel>
+          <Select<number> // Select의 value 타입 명시
+            labelId="beat-type-label"
+            value={beatType}
+            label="Beat Type"
+            onChange={handleBeatTypeChange}
+          >
+            <MenuItem value={4}>4 Beats</MenuItem>
+          </Select>
+        </FormControl>
         <FormControl sx={{ minWidth: 240 }}>
           <InputLabel id="fret-sequence-label">Finger Pattern</InputLabel>
           <Select
@@ -259,12 +302,15 @@ const ChromaticPage: React.FC = () => {
       />
       <Typography sx={{ textAlign: 'center', mt: 1, minHeight: '1.5em' }}>
         {isPracticePlaying
-          ? `Current String: ${currentLineNumber} (${practiceDirection === 'asc' ? 'Ascending' : 'Descending'})`
-          : `Stopped. Next start: String ${currentLineNumber} (Ascending)`}
+          ? `Current String: ${currentLineNumber} (${practiceDirection === 'asc' ? 'Ascending' : 'Descending'}) - Beat: ${beatType}/4`
+          : `Stopped. Next start: String ${currentLineNumber} (Ascending) - Beat: ${beatType}/4`}
       </Typography>
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-        <Metronome bpm={bpm} />
-      </Box>
+      {/* MetronomeEngine을 렌더링하지만 보이지 않게 처리 (또는 DOM에서 완전히 제거하고 커스텀 훅 등으로 관리) */}
+      {/* <Box sx={{ display: 'none' }}> */}
+      <MetronomeEngine bpm={bpm} beatType={beatType} />
+      {/* </Box> */}
+      {/* 위 MetronomeEngine을 Box로 감싸서 display:none 처리하거나, 아예 렌더링 트리에서 제외하는 방법도 고려 */}
+      {/* 여기서는 일단 보이도록 두되, 실제로는 숨김 처리 또는 로직만 실행되도록 해야 함 */}
       <Typography>
         Current Store Index (for debugging): {currentNoteIndex}
       </Typography>
