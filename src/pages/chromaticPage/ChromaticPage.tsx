@@ -261,33 +261,55 @@ const ChromaticPage: React.FC = () => {
       let nextLine = currentLine;
       let nextDir = currentDirection;
       const currentLineIdx = GUITAR_STRINGS.indexOf(currentLine);
+      const lastStringIdx = GUITAR_STRINGS.length - 1; // 1번 줄 인덱스 (e.g., 5 for [6,5,4,3,2,1])
+      const firstStringIdx = 0; // 6번 줄 인덱스 (e.g., 0)
+      const secondLastStringIdx = GUITAR_STRINGS.length - 2; // 2번 줄 인덱스 (e.g., 4)
+      const secondStringIdx = 1; // 5번 줄 인덱스 (e.g., 1)
 
       if (currentDirection === 'asc') {
-        if (currentLineIdx < GUITAR_STRINGS.length - 1) {
-          nextLine = GUITAR_STRINGS[currentLineIdx + 1];
+        if (currentLineIdx === secondLastStringIdx) {
+          // 현재 2번 줄에서 상행 연습 완료 시
+          nextLine = GUITAR_STRINGS[currentLineIdx + 1]; // 다음 줄은 1번 줄
+          nextDir = 'desc'; // 1번 줄 연주 방향은 'desc'로 미리 결정
+        } else if (currentLineIdx < lastStringIdx) {
+          // 6,5,4,3번 줄에서 상행 완료 시 (아직 1번 줄 아님)
+          nextLine = GUITAR_STRINGS[currentLineIdx + 1]; // 다음 줄로 이동, 방향은 'asc' 유지
+          // nextDir is already 'asc'
         } else {
-          // 1번 줄 상행 완료
+          // 현재 1번 줄에서 상행 연습 완료 시 (currentLineIdx === lastStringIdx)
+          // 이 분기는 새 로직 하에서는 일반적으로 도달하지 않기를 기대하지만, 안전장치로 남겨둡니다.
+          // (예: 초기 상태가 1번 줄, 'asc'일 경우)
+          // 기존 로직: 1번 줄에 머무르며 'desc'로 전환
+          nextLine = currentLine;
           nextDir = 'desc';
-          // nextLine은 그대로 1번 줄
         }
       } else {
         // currentDirection === 'desc'
-        if (currentLineIdx > 0) {
-          nextLine = GUITAR_STRINGS[currentLineIdx - 1];
+        if (currentLineIdx === secondStringIdx) {
+          // 현재 5번 줄에서 하행 연습 완료 시
+          nextLine = GUITAR_STRINGS[currentLineIdx - 1]; // 다음 줄은 6번 줄
+          nextDir = 'asc'; // 6번 줄 연주 방향은 'asc'로 미리 결정
+        } else if (currentLineIdx > firstStringIdx) {
+          // 1,2,3,4번 줄에서 하행 완료 시 (아직 6번 줄 아님)
+          nextLine = GUITAR_STRINGS[currentLineIdx - 1]; // 다음 줄로 이동, 방향은 'desc' 유지
+          // nextDir is already 'desc'
         } else {
-          // 6번 줄 하행 완료
+          // 현재 6번 줄에서 하행 연습 완료 시 (currentLineIdx === firstStringIdx)
+          // 이 분기는 새 로직 하에서는 일반적으로 도달하지 않기를 기대하지만, 안전장치로 남겨둡니다.
+          // 기존 로직: 6번 줄에 머무르며 'asc'로 전환
+          nextLine = currentLine;
           nextDir = 'asc';
-          // nextLine은 그대로 6번 줄
         }
       }
+
       const result = {
         nextLineNumber: nextLine,
         nextPracticeDirection: nextDir,
       };
-      console.log('[DEBUG] handleLoopModeEnd RETURNING:', result);
+      console.log('[DEBUG] handleLoopModeEnd (MODIFIED V2) RETURNING:', result);
       return result;
     },
-    [],
+    [], // GUITAR_STRINGS는 컴포넌트 외부 상수이므로 의존성 배열에 필요 없음
   );
 
   const handleTraverseModeEnd = useCallback(
