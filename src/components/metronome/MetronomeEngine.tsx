@@ -105,11 +105,17 @@ const MetronomeEngine: React.FC<MetronomeEngineProps> = ({ bpm, beatType }) => {
           }
 
           const currentBeatInLoop = beatCounterRef.current % beatType; // 현재 루프 내에서의 비트
+          const currentTotalBeatCount = beatCounterRef.current;
 
-          // 첫 번째 전체 비트(beatCounterRef.current === 0)에서는 incrementCurrentNoteIndex를 호출하지 않음.
-          // 두 번째 전체 비트부터 노트 인덱스 증가
-          if (beatCounterRef.current > 0) {
-            incrementCurrentNoteIndex();
+          // console.log(`[DEBUG MetronomeEngine] Loop callback: totalBeat=${currentTotalBeatCount}, currentBeatInLoop=${currentBeatInLoop}, isPracticePlaying=${useNoteStore.getState().isPracticePlaying}`);
+
+          if (useNoteStore.getState().isPracticePlaying) {
+            // 첫 번째 전체 비트(currentTotalBeatCount === 0)에서는 incrementCurrentNoteIndex를 호출하지 않음.
+            // 두 번째 전체 비트부터 노트 인덱스 증가 시작.
+            if (currentTotalBeatCount > 0) {
+              // console.log('[DEBUG MetronomeEngine] Calling incrementCurrentNoteIndex');
+              incrementCurrentNoteIndex();
+            }
           }
 
           try {

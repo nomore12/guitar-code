@@ -23,13 +23,12 @@ const useNoteStore = create<PracticeNoteState>()(
       practiceNotes: [],
       currentNoteIndex: 0,
       isPracticePlaying: false,
-      onMeasureEndCallback: null, // 초기값 null
+      onMeasureEndCallback: null,
 
       setPracticeNotes: (notes) => {
         set((state) => ({
           practiceNotes: notes,
           currentNoteIndex: 0,
-          // isPracticePlaying: false, // 새 노트 설정 시 isPracticePlaying 상태는 유지
         }));
       },
 
@@ -38,7 +37,6 @@ const useNoteStore = create<PracticeNoteState>()(
           practiceNotes: [],
           currentNoteIndex: 0,
           isPracticePlaying: false,
-          // onMeasureEndCallback: null // 필요하다면 여기서 콜백도 초기화
         });
       },
 
@@ -53,22 +51,34 @@ const useNoteStore = create<PracticeNoteState>()(
 
       incrementCurrentNoteIndex: () => {
         set((state) => {
-          if (state.practiceNotes.length === 0) {
-            return { currentNoteIndex: 0 };
-          }
-          const nextIndex =
-            (state.currentNoteIndex + 1) % state.practiceNotes.length;
-          if (
-            nextIndex === 0 &&
-            state.practiceNotes.length > 0 &&
-            state.onMeasureEndCallback
-          ) {
+          if (!state.isPracticePlaying || state.practiceNotes.length === 0) {
             console.log(
-              'useNoteStore: End of measure detected, calling onMeasureEndCallback.',
+              '[DEBUG useNoteStore] incrementCurrentNoteIndex: Not playing or no notes, returning.',
             );
-            state.onMeasureEndCallback();
+            return {};
           }
-          return { currentNoteIndex: nextIndex };
+
+          const isLastNote =
+            state.currentNoteIndex >= state.practiceNotes.length - 1;
+          // console.log(`[DEBUG useNoteStore] incrementCurrentNoteIndex: currentIdx=${state.currentNoteIndex}, notesLen=${state.practiceNotes.length}, isLastNote=${isLastNote}`);
+
+          if (isLastNote) {
+            if (state.onMeasureEndCallback) {
+              // console.log('[DEBUG useNoteStore] incrementCurrentNoteIndex: Last note, calling onMeasureEndCallback.');
+              state.onMeasureEndCallback();
+              // onMeasureEndCallback is expected to call setPracticeNotes, which resets currentNoteIndex to 0.
+              // Thus, no explicit change to currentNoteIndex here to avoid race conditions or overwrites.
+            } else {
+              // Fallback if no callback, though unlikely in current app structure
+              // console.log('[DEBUG useNoteStore] incrementCurrentNoteIndex: Last note, no callback, resetting index to 0.');
+              return { currentNoteIndex: 0 };
+            }
+            return {}; // 상태 변경을 콜백에 맡기거나, 콜백이 없다면 위에서 이미 처리됨.
+          } else {
+            // Not the last note, so increment currentNoteIndex.
+            // console.log(`[DEBUG useNoteStore] incrementCurrentNoteIndex: Not last note, incrementing index to ${state.currentNoteIndex + 1}.`);
+            return { currentNoteIndex: state.currentNoteIndex + 1 };
+          }
         });
       },
 
@@ -81,15 +91,11 @@ const useNoteStore = create<PracticeNoteState>()(
             isPlaying &&
             state.currentNoteIndex >= state.practiceNotes.length
           ) {
-            // 재생 시작 시 인덱스가 범위를 벗어나면 0으로 설정하고 재생
             return { isPracticePlaying: true, currentNoteIndex: 0 };
           }
-          // isPracticePlaying 상태가 명시적으로 false로 설정되거나,
-          // 혹은 practiceNotes가 있는 상태에서 true로 설정될 때만 업데이트
           if (!isPlaying || state.practiceNotes.length > 0) {
             return { isPracticePlaying: isPlaying };
           }
-          // 위의 조건에 해당하지 않으면 (예: isPlaying true인데 노트가 없는 경우) 상태 변경 없음
           return {};
         });
       },
@@ -98,13 +104,12 @@ const useNoteStore = create<PracticeNoteState>()(
         set((state) => {
           const newIsPlaying = !state.isPracticePlaying;
           if (newIsPlaying && state.practiceNotes.length === 0) {
-            return { isPracticePlaying: false }; // 시작하려는데 노트 없으면 시작 안함
+            return { isPracticePlaying: false };
           }
           if (
             newIsPlaying &&
             state.currentNoteIndex >= state.practiceNotes.length
           ) {
-            // 시작하려는데 인덱스 벗어나면 0으로 하고 시작
             return { isPracticePlaying: true, currentNoteIndex: 0 };
           }
           return { isPracticePlaying: newIsPlaying };

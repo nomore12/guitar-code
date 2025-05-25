@@ -183,31 +183,6 @@ const ChromaticFlatboard: React.FC<PropsType> = ({
             />
           );
         })}
-
-      {handleReset && (
-        <foreignObject
-          x={totalWidth - extraPadding - 100 - 10}
-          y={totalHeight - extraPadding - 40 - 5}
-          width="100"
-          height="40"
-        >
-          <div>
-            <button
-              style={{
-                width: '100%',
-                height: '100%',
-                backgroundColor: 'lightblue',
-                border: '1px solid black',
-                borderRadius: '5px',
-                cursor: 'pointer',
-              }}
-              onClick={handleReset}
-            >
-              Reset
-            </button>
-          </div>
-        </foreignObject>
-      )}
     </svg>
   );
 };
