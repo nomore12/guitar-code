@@ -14,6 +14,13 @@ import Chip from '@mui/material/Chip';
 import Button from '@mui/material/Button';
 
 // Note 타입은 src/types/Note.d.ts 에 전역 선언되어 있다고 가정합니다.
+// 예시:
+// interface ChromaticNote {
+//   flatNumber: number;
+//   lineNumber: number;
+//   chromaticNumber: number;
+//   chord: string;
+// }
 
 // 연습 모드 타입 정의
 type PracticeMode = 'loop' | 'traverse_6th_start' | 'traverse_1st_start';
@@ -38,92 +45,120 @@ interface ModeEndResult {
   shouldStopPractice?: boolean;
 }
 
+// 새로운 상수 정의
+const AVAILABLE_FINGER_NUMBERS = [1, 2, 3, 4]; // 사용자가 선택 가능한 손가락 번호
+const DEFAULT_FINGER_PATTERN = [1, 2, 3, 4]; // 기본 손가락 패턴 순서
+
+const MIN_BPM = 40; // BPM 최소값 상수 추가
+const MAX_BPM = 300; // BPM 최대값 상수 추가
+
 const ChromaticPage: React.FC = () => {
-  const [bpm, setBpm] = useState(100);
-  // selectedFretSequence는 traverse 모드에서는 동적으로, loop 모드에서는 사용자가 설정
-  const [selectedFretSequence, setSelectedFretSequence] = useState<number[]>([
-    1, 2, 3, 4,
-  ]);
+  const [bpm, setBpm] = useState<number | ''>(100); // 타입 string | number로 변경하여 빈 값 허용
+  const [selectedFretSequence, setSelectedFretSequence] = useState<number[]>(
+    DEFAULT_FINGER_PATTERN,
+  );
   const [practiceDirection, setPracticeDirection] =
     useState<PracticeDirection>('asc');
   const [currentLineNumber, setCurrentLineNumber] = useState<number>(
     GUITAR_STRINGS[0],
-  ); // 기본 시작: 6번줄
-  const [beatType, setBeatType] = useState<number>(4); // 기본값 4 유지
-  const practiceStartTimerRef = useRef<NodeJS.Timeout | null>(null); // 타이머 ID 저장용 ref
+  );
+  const [beatType, setBeatType] = useState<number>(4);
+  const practiceStartTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 새로운 연습 모드 관련 상태
   const [practiceMode, setPracticeMode] = useState<PracticeMode>('loop');
-  const [currentFretOffset, setCurrentFretOffset] = useState<number>(0); // traverse 모드용: 0 ~ MAX_FRET_OFFSET
+  const [currentFretOffset, setCurrentFretOffset] = useState<number>(0);
   const [fretTraversalDirection, setFretTraversalDirection] =
-    useState<FretTraversalDirection>('increasing'); // traverse 모드용
-  const [isPreparingToPlay, setIsPreparingToPlay] = useState<boolean>(false); // 2초 대기 상태
+    useState<FretTraversalDirection>('increasing');
+  const [isPreparingToPlay, setIsPreparingToPlay] = useState<boolean>(false);
+
+  const [selectedFingerPattern, setSelectedFingerPattern] = useState<number[]>(
+    DEFAULT_FINGER_PATTERN,
+  );
 
   const {
-    // practiceNotes, // 스토어의 practiceNotes (직접 사용하지 않음, 디버깅용 currentNoteIndex만 사용)
-    currentNoteIndex,
     isPracticePlaying,
     setPracticeNotes,
-    // clearPracticeNotes, // Reset 로직에서 직접 사용하지 않음
     setIsPracticePlaying,
     setOnMeasureEndCallback,
   } = useNoteStore();
 
-  // This useEffect updates selectedFretSequence for traverse modes when offset changes.
-  // It does NOT generate notes directly.
+  // useEffect to dynamically update selectedFretSequence (actual frets to play)
   useEffect(() => {
-    if (practiceMode.startsWith('traverse')) {
-      const newSequence = Array.from(
-        { length: DEFAULT_FRET_SEQUENCE_LENGTH },
-        (_, i) => i + 1 + currentFretOffset,
+    let newCalculatedSequence: number[];
+    if (practiceMode === 'loop') {
+      newCalculatedSequence = [...selectedFingerPattern];
+    } else {
+      // Traverse mode
+      newCalculatedSequence = selectedFingerPattern.map(
+        (fingerNum) => fingerNum + currentFretOffset,
       );
-      setSelectedFretSequence(newSequence);
     }
-  }, [practiceMode, currentFretOffset]); // setSelectedFretSequence is not in deps
+    if (
+      JSON.stringify(newCalculatedSequence) !==
+      JSON.stringify(selectedFretSequence)
+    ) {
+      console.log(
+        `[DEBUG useEffect/selectedFretSequence] Updating selectedFretSequence from ${selectedFretSequence.join(',')} to ${newCalculatedSequence.join(',')}. Mode: ${practiceMode}, Offset: ${currentFretOffset}, Pattern: ${selectedFingerPattern.join(',')}`,
+      );
+      setSelectedFretSequence(newCalculatedSequence);
+    }
+  }, [selectedFingerPattern, practiceMode, currentFretOffset]);
 
   const generateChromaticNotesArray = useCallback(
     (line: number, sequence: number[]): ChromaticNote[] => {
-      return sequence.map((fretNumber, index) => ({
-        flatNumber: fretNumber,
-        lineNumber: line,
-        chromaticNumber: index + 1,
-        chord: String(index + 1),
-      }));
+      return sequence.map((fretNumber, index) => {
+        const displayFingerNumber =
+          selectedFingerPattern[index] !== undefined
+            ? selectedFingerPattern[index]
+            : index + 1;
+        return {
+          flatNumber: fretNumber,
+          lineNumber: line,
+          chromaticNumber: index + 1,
+          chord: String(displayFingerNumber),
+        };
+      });
     },
-    [],
+    [selectedFingerPattern],
   );
 
   const generateAndSetPracticeNotes = useCallback(() => {
-    let sequenceToUse = selectedFretSequence;
-    // For traverse modes, the sequence is dynamic based on currentFretOffset
-    // The useEffect above should have updated selectedFretSequence if currentFretOffset changed for traverse mode.
-    // However, to be absolutely sure, especially if called outside traverse mode context or if useEffect didn't run yet for some reason:
-    if (practiceMode.startsWith('traverse')) {
-      sequenceToUse = Array.from(
-        { length: DEFAULT_FRET_SEQUENCE_LENGTH },
-        (_, i) => i + 1 + currentFretOffset,
-      );
-    }
-
     console.log(
-      `[DEBUG] generateAndSetPracticeNotes CALLED. Line: ${currentLineNumber}, Direction: ${practiceDirection}, Mode: ${practiceMode}, FretOffset: ${currentFretOffset}, Sequence: ${sequenceToUse.join(',')}`,
+      `[DEBUG] generateAndSetPracticeNotes CALLED. Line: ${currentLineNumber}, Dir: ${practiceDirection}, ActualFretSeq: ${selectedFretSequence.join(',')}, Pattern for chords: ${selectedFingerPattern.join(',')}`,
     );
     const newPracticeNotes = generateChromaticNotesArray(
       currentLineNumber,
-      sequenceToUse,
-    );
-    console.log(
-      `[DEBUG] setPracticeNotes WILL BE CALLED with ${newPracticeNotes.length} notes. First note: ${newPracticeNotes.length > 0 ? JSON.stringify(newPracticeNotes[0]) : 'N/A'}`,
+      selectedFretSequence,
     );
     setPracticeNotes(newPracticeNotes);
   }, [
-    selectedFretSequence,
     currentLineNumber,
     practiceDirection,
+    selectedFretSequence,
+    selectedFingerPattern, // Directly depend on selectedFingerPattern
+    generateChromaticNotesArray, // Keep this as it depends on selectedFingerPattern too.
     setPracticeNotes,
-    practiceMode,
-    currentFretOffset,
-    generateChromaticNotesArray,
+  ]);
+
+  // useEffect to regenerate notes
+  useEffect(() => {
+    console.log(
+      `[DEBUG useEffect/noteGeneration] Triggered. Line: ${currentLineNumber}, Dir: ${practiceDirection}, ActualFretSeq: ${selectedFretSequence.join(',')}`,
+    );
+    if (selectedFretSequence && selectedFretSequence.length > 0) {
+      generateAndSetPracticeNotes();
+    } else if (selectedFretSequence && selectedFretSequence.length === 0) {
+      // If the pattern becomes empty, clear the notes on the fretboard
+      setPracticeNotes([]);
+      console.log(
+        '[DEBUG useEffect/noteGeneration] Empty finger pattern selected, clearing notes.',
+      );
+    }
+  }, [
+    currentLineNumber,
+    practiceDirection,
+    selectedFretSequence,
+    generateAndSetPracticeNotes,
   ]);
 
   const resetToInitialPracticeState = useCallback(
@@ -142,25 +177,15 @@ const ChromaticPage: React.FC = () => {
       setCurrentFretOffset(0);
       setFretTraversalDirection('increasing');
       setPracticeMode(modeToResetTo);
+      setSelectedFingerPattern(DEFAULT_FINGER_PATTERN);
 
       if (modeToResetTo === 'loop') {
-        setSelectedFretSequence(AVAILABLE_FRETS_FOR_LOOP_MODE);
         setCurrentLineNumber(GUITAR_STRINGS[0]);
         setPracticeDirection('asc');
       } else if (modeToResetTo === 'traverse_6th_start') {
-        const initialTraverseSequence = Array.from(
-          { length: DEFAULT_FRET_SEQUENCE_LENGTH },
-          (_, i) => i + 1 + 0, // offset 0
-        );
-        setSelectedFretSequence(initialTraverseSequence);
         setCurrentLineNumber(GUITAR_STRINGS[0]);
         setPracticeDirection('asc');
       } else if (modeToResetTo === 'traverse_1st_start') {
-        const initialTraverseSequence = Array.from(
-          { length: DEFAULT_FRET_SEQUENCE_LENGTH },
-          (_, i) => i + 1 + 0, // offset 0
-        );
-        setSelectedFretSequence(initialTraverseSequence);
         setCurrentLineNumber(GUITAR_STRINGS[GUITAR_STRINGS.length - 1]);
         setPracticeDirection('desc');
       }
@@ -169,85 +194,83 @@ const ChromaticPage: React.FC = () => {
       setIsPracticePlaying,
       setCurrentFretOffset,
       setFretTraversalDirection,
-      setSelectedFretSequence,
       setCurrentLineNumber,
       setPracticeDirection,
       setPracticeMode,
+      setSelectedFingerPattern,
     ],
   );
 
-  useEffect(() => {
-    console.log(
-      `[DEBUG useEffect/noteGeneration] Triggered. Dependencies: line=${currentLineNumber}, dir=${practiceDirection}, mode=${practiceMode}, offset=${currentFretOffset}, fretSeq=${selectedFretSequence.join(',')}`,
-    );
-    generateAndSetPracticeNotes();
-  }, [
-    currentLineNumber,
-    practiceDirection,
-    selectedFretSequence,
-    practiceMode,
-    currentFretOffset,
-    generateAndSetPracticeNotes,
-  ]);
-
   const handleNodeClick = (node: ChromaticNote) => {
-    // No console log needed here for now
+    console.log('Node clicked:', node); //  handleNodeClick 내용 유지 (이전 코드에서 내용 없었음)
   };
 
+  // BPM 변경 핸들러 구현
   const handleBpmChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newBpm = parseInt(event.target.value, 10);
-    if (!isNaN(newBpm) && newBpm > 0 && newBpm <= 300) {
-      setBpm(newBpm);
+    const value = event.target.value;
+    if (value === '') {
+      setBpm(''); // 빈 문자열 허용
+    } else {
+      const numericValue = parseInt(value, 10);
+      if (!isNaN(numericValue)) {
+        // 입력 중에는 최대값을 넘어도 일단 반영 (onBlur에서 최종 조정)
+        // 음수 입력 방지
+        setBpm(numericValue > MAX_BPM ? MAX_BPM : Math.max(0, numericValue));
+      }
     }
   };
 
-  const handleFretSequenceChange = (event: SelectChangeEvent<unknown>) => {
+  // BPM 입력 필드 focus out 핸들러 구현
+  const handleBpmBlur = () => {
+    if (bpm === '') {
+      setBpm(MIN_BPM); // 비어있으면 최소값으로 설정
+      return;
+    }
+    let numericBpm = parseInt(String(bpm), 10);
+
+    if (isNaN(numericBpm)) {
+      numericBpm = MIN_BPM; // 숫자가 아니면 최소값으로
+    }
+
+    setBpm(Math.max(MIN_BPM, Math.min(MAX_BPM, numericBpm))); // 최종적으로 min/max 범위 적용
+  };
+
+  const handleFingerPatternChange = (event: SelectChangeEvent<unknown>) => {
     const value = event.target.value as number[];
-    setSelectedFretSequence(Array.from(new Set(value)));
-    generateAndSetPracticeNotes();
+    if (Array.isArray(value)) {
+      console.log('[DEBUG] handleFingerPatternChange (User Editable):', value);
+      setSelectedFingerPattern([...value]);
+    }
   };
 
   const handleBeatTypeChange = (event: SelectChangeEvent<number>) => {
-    const newBeatType = event.target.value as number;
-    setBeatType(newBeatType);
+    setBeatType(event.target.value as number); // 이전 코드에서 내용 없었으므로 유지
   };
 
   const handlePracticeModeChange = (event: SelectChangeEvent<PracticeMode>) => {
     const newMode = event.target.value as PracticeMode;
     console.log(`[DEBUG] handlePracticeModeChange to ${newMode}`);
-    setPracticeMode(newMode);
-
-    setIsPracticePlaying(false);
     if (practiceStartTimerRef.current) {
       clearTimeout(practiceStartTimerRef.current);
       practiceStartTimerRef.current = null;
     }
+    setIsPracticePlaying(false);
 
+    setPracticeMode(newMode);
     setCurrentFretOffset(0);
     setFretTraversalDirection('increasing');
+    setSelectedFingerPattern(DEFAULT_FINGER_PATTERN);
 
     if (newMode === 'loop') {
-      setSelectedFretSequence(AVAILABLE_FRETS_FOR_LOOP_MODE);
       setCurrentLineNumber(GUITAR_STRINGS[0]);
       setPracticeDirection('asc');
     } else if (newMode === 'traverse_6th_start') {
-      const initialTraverseSequence = Array.from(
-        { length: DEFAULT_FRET_SEQUENCE_LENGTH },
-        (_, i) => i + 1 + 0, // offset 0
-      );
-      setSelectedFretSequence(initialTraverseSequence); // This will be used by generateAndSetPracticeNotes
       setCurrentLineNumber(GUITAR_STRINGS[0]);
       setPracticeDirection('asc');
     } else if (newMode === 'traverse_1st_start') {
-      const initialTraverseSequence = Array.from(
-        { length: DEFAULT_FRET_SEQUENCE_LENGTH },
-        (_, i) => i + 1 + 0, // offset 0
-      );
-      setSelectedFretSequence(initialTraverseSequence); // This will be used by generateAndSetPracticeNotes
       setCurrentLineNumber(GUITAR_STRINGS[GUITAR_STRINGS.length - 1]);
       setPracticeDirection('desc');
     }
-    generateAndSetPracticeNotes();
   };
 
   const handleLoopModeEnd = useCallback(
@@ -306,10 +329,10 @@ const ChromaticPage: React.FC = () => {
         nextLineNumber: nextLine,
         nextPracticeDirection: nextDir,
       };
-      console.log('[DEBUG] handleLoopModeEnd (MODIFIED V2) RETURNING:', result);
+      console.log('[DEBUG] handleLoopModeEnd (MODIFIED V2) RETURNING:', result); // This console log was in user's code
       return result;
     },
-    [], // GUITAR_STRINGS는 컴포넌트 외부 상수이므로 의존성 배열에 필요 없음
+    [],
   );
 
   const handleTraverseModeEnd = useCallback(
@@ -379,9 +402,6 @@ const ChromaticPage: React.FC = () => {
                 // 이 경우는 9-12 프렛의 6번줄 하행 완료 후, 동일 프렛(9-12)에서 6번줄 상행 시작
                 nextLineNum = GUITAR_STRINGS[0]; // 6번줄에서
                 nextPracDir = 'asc'; // 상행 시작
-                // fretTraversalDirection은 여전히 'increasing' (최대 프렛 도달 시 한번 'decreasing'으로 바뀌므로)
-                // 이 부분에서 fretTraversalDirection을 'decreasing'으로 바꿀 필요 없음.
-                // 상행 마치고 1번줄 도달시 decreasing으로 바뀜.
               }
             }
           }
@@ -479,23 +499,21 @@ const ChromaticPage: React.FC = () => {
           resetToInitialPracticeState(practiceMode);
         }
       } else {
-        let nextLineToUse = currentLineNumber;
-        let nextDirectionToUse = practiceDirection;
-        let nextOffsetToUse = currentFretOffset;
+        // 이 부분은 사용자의 원래 코드 구조를 최대한 유지합니다.
+        // nextLineToUse, nextDirectionToUse, nextOffsetToUse 변수들은 사용자의 원래 코드에 명시적으로 선언되어 있지 않았습니다.
+        // result 객체의 속성을 직접 사용하거나, 현재 상태값을 사용합니다.
 
         if (result.nextLineNumber !== undefined) {
           console.log(
             `[DEBUG] handleMeasureEnd - Calling setCurrentLineNumber(${result.nextLineNumber}). Prev: ${currentLineNumber}`,
           );
           setCurrentLineNumber(result.nextLineNumber);
-          nextLineToUse = result.nextLineNumber;
         }
         if (result.nextPracticeDirection !== undefined) {
           console.log(
             `[DEBUG] handleMeasureEnd - Calling setPracticeDirection(${result.nextPracticeDirection}). Prev: ${practiceDirection}`,
           );
           setPracticeDirection(result.nextPracticeDirection);
-          nextDirectionToUse = result.nextPracticeDirection;
         }
 
         if (practiceMode.startsWith('traverse')) {
@@ -504,7 +522,6 @@ const ChromaticPage: React.FC = () => {
               `[DEBUG] handleMeasureEnd - Calling setCurrentFretOffset(${result.nextFretOffset}). Prev: ${currentFretOffset}`,
             );
             setCurrentFretOffset(result.nextFretOffset);
-            nextOffsetToUse = result.nextFretOffset;
           }
           if (result.nextFretTraversalDirection !== undefined) {
             console.log(
@@ -515,19 +532,35 @@ const ChromaticPage: React.FC = () => {
         }
 
         // Determine the sequence for the next set of notes
-        let sequenceForNextNotes = selectedFretSequence;
+        let sequenceForNextNotes = selectedFretSequence; // 사용자의 원래 코드에 있던 'let'
+        // 다음 상태값을 참조해야 하므로, result 값을 우선적으로 사용합니다.
+        const offsetForNextNotes =
+          result.nextFretOffset !== undefined
+            ? result.nextFretOffset
+            : currentFretOffset;
+
         if (practiceMode.startsWith('traverse')) {
           sequenceForNextNotes = Array.from(
             { length: DEFAULT_FRET_SEQUENCE_LENGTH },
-            (_, i) => i + 1 + nextOffsetToUse, // Use the updated offset
+            (_, i) => i + 1 + offsetForNextNotes,
           );
         }
 
+        // 다음 연주될 라인 넘버와 시퀀스를 사용
+        const lineForNextNotes =
+          result.nextLineNumber !== undefined
+            ? result.nextLineNumber
+            : currentLineNumber;
+        const directionForNextNotes =
+          result.nextPracticeDirection !== undefined
+            ? result.nextPracticeDirection
+            : practiceDirection;
+
         console.log(
-          `[DEBUG] handleMeasureEnd - Generating notes for: Line: ${nextLineToUse}, Dir: ${nextDirectionToUse}, Offset: ${nextOffsetToUse}, Seq: ${sequenceForNextNotes.join(',')}`,
+          `[DEBUG] handleMeasureEnd - Generating notes for: Line: ${lineForNextNotes}, Dir: ${directionForNextNotes}, Offset: ${offsetForNextNotes}, Seq: ${sequenceForNextNotes.join(',')}`,
         );
         const newPracticeNotes = generateChromaticNotesArray(
-          nextLineToUse, // Use the updated line number
+          lineForNextNotes,
           sequenceForNextNotes,
         );
         console.log(
@@ -539,11 +572,11 @@ const ChromaticPage: React.FC = () => {
   }, [
     isPracticePlaying,
     practiceMode,
-    currentLineNumber, // Still needed for original values and comparison
-    practiceDirection, // Still needed for original values and comparison
-    currentFretOffset, // Still needed for original values and comparison
+    currentLineNumber,
+    practiceDirection,
+    currentFretOffset,
     fretTraversalDirection,
-    selectedFretSequence, // Needed for sequenceForNextNotes in loop mode
+    selectedFretSequence,
     setIsPracticePlaying,
     setCurrentLineNumber,
     setPracticeDirection,
@@ -552,9 +585,8 @@ const ChromaticPage: React.FC = () => {
     resetToInitialPracticeState,
     handleLoopModeEnd,
     handleTraverseModeEnd,
-    generateChromaticNotesArray, // Added as a dependency
-    setPracticeNotes, // Added as a dependency
-    // DEFAULT_FRET_SEQUENCE_LENGTH is a constant, not needed in deps
+    generateChromaticNotesArray,
+    setPracticeNotes,
   ]);
 
   useEffect(() => {
@@ -630,8 +662,14 @@ const ChromaticPage: React.FC = () => {
           type="number"
           value={bpm}
           onChange={handleBpmChange}
-          inputProps={{ min: 40, max: 300 }}
-          sx={{ width: 100 }}
+          onBlur={handleBpmBlur} // onBlur 핸들러 추가
+          sx={{ width: 100 }} // 사용자의 원래 너비 유지
+          inputProps={{
+            // inputProps 추가
+            min: MIN_BPM,
+            max: MAX_BPM,
+            step: 1, // 스텝 추가 (선택 사항)
+          }}
         />
         <FormControl sx={{ minWidth: 120 }}>
           <InputLabel id="beat-type-label">Beat Type</InputLabel>
@@ -641,7 +679,12 @@ const ChromaticPage: React.FC = () => {
             label="Beat Type"
             onChange={handleBeatTypeChange}
           >
+            {/* 사용자의 원래 코드에서는 <MenuItem value={4}>4 Beats</MenuItem> 만 있었음 */}
+            {/* availableBeatTypes 를 순회하도록 변경된 것은 이전 버전이므로, 사용자의 원래 코드를 따르려면 아래와 같이 직접 명시 */}
             <MenuItem value={4}>4 Beats</MenuItem>
+            {/* {availableBeatTypes.map((bt) => (
+              <MenuItem key={bt} value={bt}>{`${bt} Beats`}</MenuItem>
+            ))} */}
           </Select>
         </FormControl>
 
@@ -664,31 +707,30 @@ const ChromaticPage: React.FC = () => {
         </FormControl>
 
         <FormControl sx={{ minWidth: 240 }}>
-          <InputLabel id="fret-sequence-label">
-            {practiceMode === 'loop' ? 'Finger Pattern' : 'Current Fret Range'}
-          </InputLabel>
-          <Select
-            labelId="fret-sequence-label"
+          <InputLabel id="finger-pattern-label">Finger Pattern</InputLabel>
+          <Select<number[]>
+            labelId="finger-pattern-label"
             multiple
-            value={selectedFretSequence}
-            onChange={handleFretSequenceChange}
-            disabled={practiceMode.startsWith('traverse')}
+            value={selectedFingerPattern}
+            onChange={handleFingerPatternChange}
             renderValue={(selected) => (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {(selected as number[]).map((value) => (
-                  <Chip key={value} label={String(value)} />
-                ))}
+                {selected.map(
+                  (
+                    val,
+                    index, // val 대신 val과 index를 사용한 고유 key
+                  ) => (
+                    <Chip key={`${val}-${index}`} label={String(val)} />
+                  ),
+                )}
               </Box>
             )}
-            label={
-              practiceMode === 'loop'
-                ? 'Finger Pattern (1st to 4th Fret)'
-                : 'Current Fret Range'
-            }
+            label="Finger Pattern"
+            MenuProps={{ PaperProps: { style: { maxHeight: 200 } } }}
           >
-            {AVAILABLE_FRETS_FOR_LOOP_MODE.map((fretNum) => (
-              <MenuItem key={fretNum} value={fretNum}>
-                {`Fret ${fretNum}`}
+            {AVAILABLE_FINGER_NUMBERS.map((fingerNum) => (
+              <MenuItem key={fingerNum} value={fingerNum}>
+                {`Finger ${fingerNum}`}
               </MenuItem>
             ))}
           </Select>
@@ -715,11 +757,18 @@ const ChromaticPage: React.FC = () => {
       />
       <Typography sx={{ textAlign: 'center', mt: 1, minHeight: '1.5em' }}>
         {isPracticePlaying
-          ? `Mode: ${practiceMode.replace(/_/g, ' ')} - String: ${currentLineNumber} (${practiceDirection === 'asc' ? 'Ascending' : 'Descending'}) - Frets: ${selectedFretSequence.join('-')} - Beat: ${beatType}/4`
-          : `Stopped. Next start: Mode: ${practiceMode.replace(/_/g, ' ')} - String ${currentLineNumber} (Ascending) - Frets: ${selectedFretSequence.join('-')} - Beat: ${beatType}/4`}
+          ? `Mode: ${practiceMode.replace(/_/g, ' ')} - String: ${currentLineNumber} (${practiceDirection === 'asc' ? 'Ascending' : 'Descending'}) - Pattern: ${selectedFingerPattern.join('-')} (Frets: ${selectedFretSequence.join('-')}) - Beat: ${beatType}/4`
+          : `Stopped. Next start: Mode: ${practiceMode.replace(/_/g, ' ')} - String ${currentLineNumber} (Ascending) - Pattern: ${selectedFingerPattern.join('-')} (Frets: ${selectedFretSequence.join('-')}) - Beat: ${beatType}/4`}
       </Typography>
 
-      <MetronomeEngine bpm={bpm} beatType={beatType} />
+      <MetronomeEngine
+        bpm={
+          bpm === ''
+            ? MIN_BPM
+            : Math.max(MIN_BPM, Math.min(MAX_BPM, Number(bpm)))
+        } // 유효한 BPM 값 전달
+        beatType={beatType}
+      />
 
       <Typography>
         {/* Display current state or logs here if needed */}
