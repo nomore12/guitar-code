@@ -137,9 +137,11 @@ const ChromaticPage: React.FC = () => {
       }
       setIsPreparingToPlay(false);
       setIsPracticePlaying(false);
+      useNoteStore.getState().setCurrentNoteIndex(0);
 
       setCurrentFretOffset(0);
       setFretTraversalDirection('increasing');
+      setPracticeMode(modeToResetTo);
 
       if (modeToResetTo === 'loop') {
         setSelectedFretSequence(AVAILABLE_FRETS_FOR_LOOP_MODE);
@@ -162,7 +164,6 @@ const ChromaticPage: React.FC = () => {
         setCurrentLineNumber(GUITAR_STRINGS[GUITAR_STRINGS.length - 1]);
         setPracticeDirection('desc');
       }
-      generateAndSetPracticeNotes();
     },
     [
       setIsPracticePlaying,
@@ -171,9 +172,23 @@ const ChromaticPage: React.FC = () => {
       setSelectedFretSequence,
       setCurrentLineNumber,
       setPracticeDirection,
-      generateAndSetPracticeNotes,
+      setPracticeMode,
     ],
   );
+
+  useEffect(() => {
+    console.log(
+      `[DEBUG useEffect/noteGeneration] Triggered. Dependencies: line=${currentLineNumber}, dir=${practiceDirection}, mode=${practiceMode}, offset=${currentFretOffset}, fretSeq=${selectedFretSequence.join(',')}`,
+    );
+    generateAndSetPracticeNotes();
+  }, [
+    currentLineNumber,
+    practiceDirection,
+    selectedFretSequence,
+    practiceMode,
+    currentFretOffset,
+    generateAndSetPracticeNotes,
+  ]);
 
   const handleNodeClick = (node: ChromaticNote) => {
     // No console log needed here for now

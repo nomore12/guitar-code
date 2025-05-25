@@ -66,14 +66,11 @@ const useNoteStore = create<PracticeNoteState>()(
             if (state.onMeasureEndCallback) {
               // console.log('[DEBUG useNoteStore] incrementCurrentNoteIndex: Last note, calling onMeasureEndCallback.');
               state.onMeasureEndCallback();
-              // onMeasureEndCallback is expected to call setPracticeNotes, which resets currentNoteIndex to 0.
-              // Thus, no explicit change to currentNoteIndex here to avoid race conditions or overwrites.
-            } else {
-              // Fallback if no callback, though unlikely in current app structure
-              // console.log('[DEBUG useNoteStore] incrementCurrentNoteIndex: Last note, no callback, resetting index to 0.');
-              return { currentNoteIndex: 0 };
             }
-            return {}; // 상태 변경을 콜백에 맡기거나, 콜백이 없다면 위에서 이미 처리됨.
+            // Crucially, set currentNoteIndex to 0 *here* as well to ensure it's immediately ready for the new measure,
+            // regardless of the exact timing of setPracticeNotes from the callback.
+            // console.log('[DEBUG useNoteStore] incrementCurrentNoteIndex: Last note, setting index to 0 directly.');
+            return { currentNoteIndex: 0 };
           } else {
             // Not the last note, so increment currentNoteIndex.
             // console.log(`[DEBUG useNoteStore] incrementCurrentNoteIndex: Not last note, incrementing index to ${state.currentNoteIndex + 1}.`);
