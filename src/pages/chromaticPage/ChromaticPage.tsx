@@ -642,6 +642,20 @@ const ChromaticPage: React.FC = () => {
     };
   }, []);
 
+  const handleRandomFingerPattern = () => {
+    const numbers = [...AVAILABLE_FINGER_NUMBERS];
+    // Fisher-Yates (aka Knuth) Shuffle Algorithm
+    for (let i = numbers.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+    }
+    console.log(
+      '[DEBUG] handleRandomFingerPattern - New random pattern:',
+      numbers,
+    );
+    setSelectedFingerPattern(numbers);
+  };
+
   return (
     <Box sx={{ padding: 2, maxWidth: 'lg', margin: 'auto' }}>
       <Typography variant="h4" gutterBottom sx={{ textAlign: 'center', mb: 3 }}>
@@ -715,14 +729,9 @@ const ChromaticPage: React.FC = () => {
             onChange={handleFingerPatternChange}
             renderValue={(selected) => (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {selected.map(
-                  (
-                    val,
-                    index, // val 대신 val과 index를 사용한 고유 key
-                  ) => (
-                    <Chip key={`${val}-${index}`} label={String(val)} />
-                  ),
-                )}
+                {selected.map((val, index) => (
+                  <Chip key={`${val}-${index}`} label={String(val)} />
+                ))}
               </Box>
             )}
             label="Finger Pattern"
@@ -735,6 +744,15 @@ const ChromaticPage: React.FC = () => {
             ))}
           </Select>
         </FormControl>
+
+        <Button
+          variant="outlined"
+          onClick={handleRandomFingerPattern}
+          sx={{ height: 56 }} // Match height of other controls
+        >
+          Random
+        </Button>
+
         <Button
           variant="contained"
           onClick={togglePractice}
