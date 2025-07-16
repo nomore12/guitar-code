@@ -35,7 +35,6 @@ const allChords = [
   chordsData.A7,
   chordsData.Am7,
   chordsData.Amaj7,
-  chordsData.Bb,
   chordsData.B7,
   chordsData.Bm,
   chordsData.C7,

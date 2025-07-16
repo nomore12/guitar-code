@@ -7,6 +7,7 @@ import ChordTest from '../pages/ChordTest';
 import FlatboardPage from '../pages/flatboardPage/FlatboardPage';
 import AiForm from '../pages/chordsPage/AiForm';
 import ChromaticPage from '../pages/chromaticPage/ChromaticPage';
+import ChordEditor from '../pages/ChordEditor';
 
 export interface RouteItem {
   path: string;
@@ -58,6 +59,11 @@ const routes: RouteItem[] = [
   {
     path: '/chromatic',
     element: <ChromaticPage />,
+    exact: true,
+  },
+  {
+    path: '/editor',
+    element: <ChordEditor />,
     exact: true,
   },
 ];

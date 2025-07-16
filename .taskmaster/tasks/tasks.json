@@ -1,0 +1,143 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "코드 자동 생성 시스템 완성",
+        "description": "템플릿 기반 바레 코드 생성과 특수 코드(sus, dim, aug) 구현을 통한 동적 코드 생성 시스템 완성",
+        "details": "현재 openChords.json을 기반으로 한 정적 코드 데이터를 동적 생성 시스템으로 확장. chordGenerator.ts를 완성하여 모든 키의 메이저, 마이너, 7th, sus, dim, aug 코드를 프로그래밍적으로 생성. 바레 코드 템플릿을 활용한 position 계산 알고리즘 구현. 음정 관계를 기반으로 한 정확한 운지법 계산 로직 개발.",
+        "testStrategy": "각 코드 타입별 생성 결과 검증, 음악 이론 기반 정확성 테스트, 프렛보드 렌더링 시각 검증, 기존 openChords.json 데이터와의 일치성 확인",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "UI 컴포넌트 시스템 구축",
+        "description": "재사용 가능한 코드 표시 컴포넌트와 프렛보드 시각화 컴포넌트를 Material-UI 기반으로 구축",
+        "details": "Material-UI와 Emotion을 활용한 일관된 디자인 시스템 구축. 프렛보드 컴포넌트에서 운지법, 뮤트 위치, 바레 표시를 위한 SVG 기반 렌더링 시스템 개발. 코드 선택 인터페이스 재설계로 사용자 경험 개선. 다크/라이트 테마 지원을 위한 테마 프로바이더 설정.",
+        "testStrategy": "컴포넌트 단위 테스트, 시각적 회귀 테스트, 다양한 화면 크기에서의 렌더링 확인, 테마 전환 기능 검증",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "모바일 반응형 디자인 최적화",
+        "description": "스마트폰과 태블릿에서 최적화된 사용자 경험을 위한 반응형 디자인 구현",
+        "details": "CSS Grid와 Flexbox를 활용한 반응형 레이아웃 구현. 터치 인터페이스 최적화로 드래그 앤 드롭 기능 개선. 모바일에서의 프렛보드 가독성 향상을 위한 크기 조정 및 줌 기능. Material-UI의 breakpoint 시스템을 활용한 적응형 UI 구성.",
+        "testStrategy": "다양한 디바이스에서의 수동 테스트, Chrome DevTools 반응형 모드 검증, 터치 이벤트 정확성 테스트, 가로/세로 모드 전환 테스트",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "오디오 시스템 안정화",
+        "description": "Tone.js를 활용한 메트로놈 정확도 개선과 백킹 트랙 루프 버그 수정",
+        "details": "Tone.js의 Transport 시스템을 활용한 정확한 BPM 제어 구현. 백킹 트랙의 seamless 루프를 위한 버퍼링 최적화. Web Audio API의 AudioContext 상태 관리 개선. 볼륨 컨트롤과 음소거 기능 추가. 브라우저별 오디오 지연 보상 로직 구현.",
+        "testStrategy": "메트로놈 정확도 측정 (BPM별), 루프 재생 연속성 검증, 다양한 브라우저에서의 오디오 재생 테스트, 볼륨 컨트롤 기능 검증",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Zustand 기반 상태 관리 시스템 구축",
+        "description": "전역 상태 관리를 위한 Zustand 스토어 설정과 컴포넌트 간 데이터 흐름 최적화",
+        "details": "코드 선택, 연습 설정, 사용자 환경설정을 위한 Zustand 스토어 구조 설계. localStorage와의 동기화를 통한 사용자 설정 영속성 구현. 코드 진행 빌더를 위한 상태 관리 로직 개발. 연습 기록 임시 저장을 위한 세션 스토어 구현.",
+        "testStrategy": "상태 변경 플로우 테스트, localStorage 동기화 검증, 컴포넌트 리렌더링 최적화 확인, 메모리 누수 방지 검증",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "스케일 시각화 시스템 구현",
+        "description": "펜타토닉 스케일과 크로매틱 스케일의 프렛보드 시각화 시스템 개발",
+        "details": "음계 데이터 구조 설계 및 JSON 파일 생성. 프렛보드 상에서 스케일 패턴 하이라이팅 시스템 구현. 루트 노트 강조 표시 기능 개발. 다양한 스케일 타입(펜타토닉, 메이저, 마이너, 모드) 지원. 키 변경에 따른 동적 스케일 패턴 생성.",
+        "testStrategy": "스케일 정확성 음악 이론 검증, 시각적 표현 정확성 확인, 키 변경 시 패턴 업데이트 테스트, 다양한 스케일 타입 렌더링 검증",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          5
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "드래그 앤 드롭 코드 진행 빌더 구현",
+        "description": "직관적인 드래그 앤 드롭 인터페이스를 통한 코드 진행 생성 시스템 개발",
+        "details": "React DnD 또는 HTML5 드래그 앤 드롭 API를 활용한 인터페이스 구현. 코드 시퀀스 관리를 위한 상태 로직 개발. 드래그 가능한 코드 카드 컴포넌트 설계. 드롭 존에서의 코드 순서 변경 및 삭제 기능. 코드 진행 재생 및 루프 기능 통합.",
+        "testStrategy": "드래그 앤 드롭 동작 테스트, 터치 디바이스에서의 인터랙션 검증, 코드 순서 변경 정확성 확인, 진행 재생 기능 검증",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          5
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "코드 라이브러리 관리 시스템 구현",
+        "description": "커스텀 코드 생성, 저장, 카테고리별 분류 및 즐겨찾기 기능을 포함한 라이브러리 시스템 개발",
+        "details": "코드 카테고리 분류 시스템(기본, 바레, 특수) 구현. 코드 난이도 자동 계산 알고리즘 개발(프렛 스팬, 바레 여부, 운지 복잡도 기반). 즐겨찾기 기능과 localStorage 기반 저장. 커스텀 코드 생성 인터페이스 개발. 검색 및 필터링 기능 구현.",
+        "testStrategy": "카테고리 분류 정확성 테스트, 난이도 계산 알고리즘 검증, 즐겨찾기 저장/로드 기능 확인, 검색 성능 테스트",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          5
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "연습 기록 및 진행 상황 추적 시스템 구현",
+        "description": "연습 시간 추적, 진행 상황 시각화, 목표 설정 기능을 포함한 연습 관리 시스템 개발",
+        "details": "연습 세션 타이머 구현 및 시간 추적 로직 개발. Chart.js 또는 Recharts를 활용한 진행 상황 시각화. 코드별 연습 시간 및 성공률 기록. 일일/주간/월간 연습 목표 설정 기능. 연습 데이터 로컬 저장 및 내보내기 기능.",
+        "testStrategy": "타이머 정확성 검증, 데이터 수집 정확성 확인, 차트 렌더링 테스트, 목표 달성 알고리즘 검증",
+        "priority": "medium",
+        "dependencies": [
+          5,
+          4
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "접근성 및 사용자 경험 개선",
+        "description": "웹 접근성 표준 준수와 키보드 네비게이션, 스크린 리더 지원 등 포용적 설계 구현",
+        "details": "WCAG 2.1 AA 레벨 접근성 표준 준수. 키보드 네비게이션으로 모든 기능 접근 가능하도록 구현. 스크린 리더를 위한 적절한 ARIA 라벨 및 역할 설정. 고대비 모드 지원 및 색상 의존성 제거. 포커스 인디케이터 개선 및 탭 순서 최적화.",
+        "testStrategy": "WAVE 또는 axe 도구를 활용한 접근성 감사, 키보드 전용 네비게이션 테스트, 스크린 리더(NVDA, JAWS) 호환성 검증, 색각 이상자를 위한 색상 테스트",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-16T05:53:07.726Z",
+      "updated": "2025-07-16T05:53:07.726Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

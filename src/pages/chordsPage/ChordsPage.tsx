@@ -47,9 +47,9 @@ const chords = [
   [chordsData.D, chordsData.A, chordsData.Bm, chordsData.G],
   [chordsData.D, chordsData.G, chordsData.A, chordsData.D],
   [chordsData.D, chordsData.Bm, chordsData.Em, chordsData.A],
-  [chordsData.A, chordsData.E, chordsData['F#m'], chordsData.D],
+  [chordsData.A, chordsData.E, chordsData.D],
   [chordsData.A, chordsData.D, chordsData.E, chordsData.A],
-  [chordsData.A, chordsData['F#m'], chordsData.Bm, chordsData.E],
+  [chordsData.A, chordsData.Bm, chordsData.E],
 ];
 
 const ChordsPage = () => {
