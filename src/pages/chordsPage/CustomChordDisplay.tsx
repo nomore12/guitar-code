@@ -108,11 +108,20 @@ const CustomChordDisplay: React.FC<PropsType> = ({ setCustomChords }) => {
     }
   };
 
-  const handleHighChordGenerate = (line: 6 | 5 | undefined) => {
+  const handleHighChordGenerate = () => {
     const chord = selectedRoot + selectedAccidental + selectedType;
-    const generated = generateChordFromTemplate(chord, line);
+    const generated = generateChordFromTemplate(chord, 6);
     if (generated && generated.length > 0) {
       console.log(generated);
+      setChords([...chords, generated[0]]);
+      setCustomChords([...chords, generated[0]]);
+    }
+  };
+
+  const handleHighChordGenerate5 = () => {
+    const chord = selectedRoot5 + selectedAccidental5 + selectedType5;
+    const generated = generateChordFromTemplate(chord, 5);
+    if (generated && generated.length > 0) {
       setChords([...chords, generated[0]]);
       setCustomChords([...chords, generated[0]]);
     }
@@ -206,15 +215,10 @@ const CustomChordDisplay: React.FC<PropsType> = ({ setCustomChords }) => {
             <MenuItem value="7sus4">7sus4</MenuItem>
           </Select>
         </FormControl>
-        <Button
-          variant="soft"
-          size="1"
-          onClick={() => handleHighChordGenerate(6)}
-        >
+        <Button variant="soft" size="1" onClick={handleHighChordGenerate}>
           코드 생성
         </Button>
       </Flex>
-      <Separator my="3" size="4" />
       {/* 5번줄 하이코드 영역 */}
       <Box mb="1" style={{ fontWeight: 600 }}>
         5번줄 하이코드
@@ -268,15 +272,10 @@ const CustomChordDisplay: React.FC<PropsType> = ({ setCustomChords }) => {
             <MenuItem value="7sus4">7sus4</MenuItem>
           </Select>
         </FormControl>
-        <Button
-          variant="soft"
-          size="1"
-          onClick={() => handleHighChordGenerate(5)}
-        >
+        <Button variant="soft" size="1" onClick={handleHighChordGenerate5}>
           코드 생성
         </Button>
       </Flex>
-      <Separator my="3" size="4" />
     </Box>
   );
 };
