@@ -27,7 +27,7 @@ const ContainerStyle = styled.div`
     align-items: center;
 
     & > h1 {
-      font-size: 4rem;
+      font-size: 3rem;
       font-weight: 700;
     }
   }
@@ -40,6 +40,13 @@ const Chords: React.FC<PropsType> = ({ chord }) => {
   const cellSizeY = 30;
 
   const [openFingers, setOpenFingers] = useState<number[]>([]);
+
+  // 실제 운지된 프렛의 최소값과 최대값 찾기
+  const fingerFrets = chord.fingers.map((f) => f[1]);
+  const minFret =
+    fingerFrets.length > 0 ? Math.min(...fingerFrets) : chord.flat;
+  // const maxFret =
+  //   fingerFrets.length > 0 ? Math.max(...fingerFrets) : chord.flat + 3;
 
   const lines: React.ReactNode[] = [];
 
@@ -71,6 +78,7 @@ const Chords: React.FC<PropsType> = ({ chord }) => {
   }
 
   useEffect(() => {
+    console.log('min fret', minFret);
     const lines = chord.fingers.map((item) => item[0]);
     const resultLines = chord.mute ? lines.concat(chord.mute) : lines;
     const removeSet = new Set(resultLines);
@@ -90,10 +98,27 @@ const Chords: React.FC<PropsType> = ({ chord }) => {
           width={cellSize * columnCount + cellSize * 2 + 10}
           height={cellSizeY * rowCount + cellSizeY * 2}
         >
-          <FlatChord flat={chord.flat} position={1} />
-          <FlatChord flat={chord.flat + 1} position={2} />
-          <FlatChord flat={chord.flat + 2} position={3} />
-          <FlatChord flat={chord.flat + 3} position={4} />
+          {/* 실제 운지 범위에 맞춰 프렛 번호 표시 */}
+          {minFret > 0 ? (
+            <FlatChord flat={minFret} position={1} />
+          ) : (
+            <FlatChord flat={minFret + 1} position={1} />
+          )}
+          {minFret > 0 ? (
+            <FlatChord flat={minFret + 1} position={2} />
+          ) : (
+            <FlatChord flat={minFret + 2} position={2} />
+          )}
+          {minFret > 0 ? (
+            <FlatChord flat={minFret + 2} position={3} />
+          ) : (
+            <FlatChord flat={minFret + 3} position={3} />
+          )}
+          {minFret > 0 ? (
+            <FlatChord flat={minFret + 3} position={4} />
+          ) : (
+            <FlatChord flat={minFret + 4} position={4} />
+          )}
           {lines}
 
           {chord.mute &&
@@ -106,12 +131,13 @@ const Chords: React.FC<PropsType> = ({ chord }) => {
             })}
           {chord.fingers &&
             chord.fingers.map((item, index) => {
+              // 실제 프렛 위치를 디스플레이 위치로 변환
+              const displayFret =
+                minFret <= 1 ? item[1] : item[1] - minFret + 1;
               return (
-                <FingerMark
-                  key={index}
-                  line={item[0]}
-                  flat={item[1] < 4 ? item[1] : item[1] - chord.flat + 1}
-                />
+                displayFret !== 0 && (
+                  <FingerMark key={index} line={item[0]} flat={displayFret} />
+                )
               );
             })}
         </svg>

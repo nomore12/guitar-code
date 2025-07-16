@@ -8,6 +8,7 @@ import FlatboardPage from '../pages/flatboardPage/FlatboardPage';
 import AiForm from '../pages/chordsPage/AiForm';
 import ChromaticPage from '../pages/chromaticPage/ChromaticPage';
 import ChordEditor from '../pages/ChordEditor';
+import ChordGeneratorTest from '../pages/ChordGeneratorTest';
 
 export interface RouteItem {
   path: string;
@@ -64,6 +65,11 @@ const routes: RouteItem[] = [
   {
     path: '/editor',
     element: <ChordEditor />,
+    exact: true,
+  },
+  {
+    path: '/generator-test',
+    element: <ChordGeneratorTest />,
     exact: true,
   },
 ];

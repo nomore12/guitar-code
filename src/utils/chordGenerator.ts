@@ -67,6 +67,23 @@ interface ChordPosition {
   quality?: string; // 코드 품질 (예: 전체 음이 포함되었는지)
 }
 
+// baseChordsForm.json 데이터 임포트
+import baseChordsForm from '../data/baseChordsForm.json';
+
+// 템플릿 기반 코드 생성을 위한 타입 정의
+type BaseChordFormKey = keyof typeof baseChordsForm;
+type ChordSuffix =
+  | 'maj'
+  | 'minor'
+  | '7'
+  | 'maj7'
+  | 'minor7'
+  | 'minmaj7'
+  | 'm7b5'
+  | 'dim7'
+  | 'sus4'
+  | '7sus4';
+
 // 루트 노트를 기반으로 코드 구성음 계산
 function getChordNotes(root: string, chordType: ChordType): number[] {
   const rootIndex =
@@ -343,4 +360,136 @@ export function findEasiestPosition(chordName: string): ChordPosition | null {
       ? current
       : easiest,
   );
+}
+
+//   1. parseChordName(): 코드 이름을 루트음과 서픽스로 분리
+//   2. suffixToTemplateKey(): 코드 서픽스를 템플릿 키로 변환
+//   3. generateChordFromTemplate(): baseChordsForm.json을 활용한 코드 생성
+//   4. findChordEnhanced(): 템플릿 기반과 기존 로직을 모두 지원하는 통합 함수
+
+// 코드 이름에서 루트음과 서픽스 파싱
+function parseChordName(
+  chordName: string,
+): { root: string; suffix: string } | null {
+  const match = chordName.match(/^([A-G][#b]?)(.*)$/);
+  if (!match) return null;
+
+  const [, root, suffix] = match;
+  return { root, suffix };
+}
+
+// 서픽스를 템플릿 키로 변환
+function suffixToTemplateKey(suffix: string): ChordSuffix | null {
+  const suffixMap: Record<string, ChordSuffix> = {
+    '': 'maj',
+    m: 'minor',
+    '7': '7',
+    maj7: 'maj7',
+    M7: 'maj7',
+    m7: 'minor7',
+    min7: 'minor7',
+    mM7: 'minmaj7',
+    'm(maj7)': 'minmaj7',
+    m7b5: 'm7b5',
+    ø7: 'm7b5',
+    dim7: 'dim7',
+    '°7': 'dim7',
+    sus4: 'sus4',
+    sus: 'sus4',
+    '7sus4': '7sus4',
+    '7sus': '7sus4',
+  };
+
+  return suffixMap[suffix] || null;
+}
+
+// 템플릿 기반 코드 생성 (baseChordsForm.json 활용)
+export function generateChordFromTemplate(
+  chordName: string,
+  baseString?: 5 | 6,
+): ChordPosition[] {
+  const parsed = parseChordName(chordName);
+  if (!parsed) return [];
+
+  const { root, suffix } = parsed;
+  const templateSuffix = suffixToTemplateKey(suffix);
+  if (!templateSuffix) return [];
+
+  const rootIndex =
+    NOTES.indexOf(root) !== -1 ? NOTES.indexOf(root) : FLAT_NOTES.indexOf(root);
+  if (rootIndex === -1) return [];
+
+  const results: ChordPosition[] = [];
+
+  // baseString이 지정되면 해당하는 것만, 아니면 5번줄과 6번줄 모두 생성
+  const baseStrings = baseString ? [baseString] : ([6, 5] as const);
+
+  for (const base of baseStrings) {
+    const templateKey = `${base}_${templateSuffix}` as BaseChordFormKey;
+    const template = baseChordsForm[templateKey];
+
+    if (!template) continue;
+
+    // 근음 위치 계산
+    let baseFret: number;
+    if (base === 6) {
+      // 6번줄 기반 (E 줄)
+      baseFret = rootIndex - STANDARD_TUNING[5];
+      if (baseFret < 0) baseFret += 12;
+    } else {
+      // 5번줄 기반 (A 줄)
+      baseFret = rootIndex - STANDARD_TUNING[1]; // 인덱스 4 → 1로 수정
+      if (baseFret < 0) baseFret += 12;
+    }
+
+    // 디버깅 로그
+    console.log(
+      `[generateChordFromTemplate] ${chordName} on ${base}th string:`,
+    );
+    console.log(`  rootIndex: ${rootIndex}, baseFret: ${baseFret}`);
+    console.log(`  template.flat: ${template.flat}`);
+
+    // 템플릿의 프렛을 실제 위치로 변환
+    const transposedFingers: [number, number][] = template.fingers.map(
+      ([string, fret]) => {
+        const actualFret = fret - template.flat + baseFret;
+        // 음수 프렛은 0프렛(개방현)으로 처리
+        return [string, actualFret < 0 ? 0 : actualFret];
+      },
+    );
+
+    // 0 또는 음수 프렛 처리
+    const validFingers = transposedFingers.filter(([, fret]) => fret >= 0);
+
+    // 실제 최소 프렛 계산 (디스플레이용)
+    const actualMinFret =
+      validFingers.length > 0 ? Math.min(...validFingers.map((f) => f[1])) : 1;
+
+    // 0프렛이 포함된 경우 flat을 1로 설정
+    const displayFlat = actualMinFret < 1 ? 1 : actualMinFret;
+    console.log(base, ', actual fret: ', actualMinFret);
+
+    results.push({
+      chord: chordName,
+      fingers: validFingers,
+      mute: [...template.mute],
+      flat: displayFlat,
+    });
+  }
+
+  return results;
+}
+
+// 두 가지 방식을 모두 지원하는 통합 함수
+export function findChordEnhanced(
+  chordName: string,
+  useTemplate: boolean = true,
+): ChordPosition[] {
+  if (useTemplate) {
+    const templateResults = generateChordFromTemplate(chordName);
+    if (templateResults.length > 0) return templateResults;
+  }
+
+  // 템플릿에서 찾지 못하면 기존 로직 사용
+  return findChord(chordName);
 }
