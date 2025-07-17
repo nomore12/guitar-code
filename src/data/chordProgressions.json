@@ -1,0 +1,539 @@
+{
+  "progressions": {
+    "4": [
+      {
+        "id": "prog_4_1",
+        "name": "Pop Progression",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 6, "quality": "minor" },
+          { "degree": 4, "quality": "major" }
+        ],
+        "description": "가장 인기있는 팝 진행",
+        "genre": "Pop/Rock",
+        "difficulty": 1
+      },
+      {
+        "id": "prog_4_2",
+        "name": "50s Progression",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 6, "quality": "minor" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 5, "quality": "major" }
+        ],
+        "description": "50년대 클래식 진행",
+        "genre": "Oldies/Doo-wop",
+        "difficulty": 1
+      },
+      {
+        "id": "prog_4_3",
+        "name": "Rock Progression",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 7, "quality": "major", "accidental": -1 },
+          { "degree": 4, "quality": "major" },
+          { "degree": 1, "quality": "major" }
+        ],
+        "description": "록 음악의 기본 진행",
+        "genre": "Rock",
+        "difficulty": 2
+      },
+      {
+        "id": "prog_4_4",
+        "name": "Blues Progression",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 5, "quality": "major" }
+        ],
+        "description": "블루스 기본 진행",
+        "genre": "Blues",
+        "difficulty": 1
+      },
+      {
+        "id": "prog_4_5",
+        "name": "Minor Pop",
+        "pattern": [
+          { "degree": 1, "quality": "minor" },
+          { "degree": 6, "quality": "major" },
+          { "degree": 3, "quality": "major" },
+          { "degree": 7, "quality": "major" }
+        ],
+        "description": "마이너 팝 진행",
+        "genre": "Pop",
+        "difficulty": 2
+      },
+      {
+        "id": "prog_4_6",
+        "name": "Pachelbel",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 6, "quality": "minor" },
+          { "degree": 3, "quality": "minor" }
+        ],
+        "description": "파헬벨 캐논 진행",
+        "genre": "Classical/Pop",
+        "difficulty": 1
+      },
+      {
+        "id": "prog_4_7",
+        "name": "Folk Progression",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 5, "quality": "major" }
+        ],
+        "description": "포크 음악 기본 진행",
+        "genre": "Folk",
+        "difficulty": 1
+      },
+      {
+        "id": "prog_4_8",
+        "name": "Jazz Turnaround",
+        "pattern": [
+          { "degree": 1, "quality": "maj7" },
+          { "degree": 6, "quality": "m7" },
+          { "degree": 2, "quality": "m7" },
+          { "degree": 5, "quality": "7" }
+        ],
+        "description": "재즈 턴어라운드",
+        "genre": "Jazz",
+        "difficulty": 3
+      },
+      {
+        "id": "prog_4_9",
+        "name": "Andalusian",
+        "pattern": [
+          { "degree": 1, "quality": "minor" },
+          { "degree": 7, "quality": "major" },
+          { "degree": 6, "quality": "major" },
+          { "degree": 5, "quality": "major" }
+        ],
+        "description": "안달루시아 진행",
+        "genre": "Flamenco/Rock",
+        "difficulty": 2
+      },
+      {
+        "id": "prog_4_10",
+        "name": "Circle Progression",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 1, "quality": "major" }
+        ],
+        "description": "순환 진행",
+        "genre": "Traditional",
+        "difficulty": 1
+      }
+    ],
+    "8": [
+      {
+        "id": "prog_8_1",
+        "name": "Extended Pop",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 6, "quality": "minor" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 6, "quality": "minor" },
+          { "degree": 4, "quality": "major" }
+        ],
+        "description": "확장된 팝 진행",
+        "genre": "Pop",
+        "difficulty": 1
+      },
+      {
+        "id": "prog_8_2",
+        "name": "Jazz Standard",
+        "pattern": [
+          { "degree": 1, "quality": "maj7" },
+          { "degree": 6, "quality": "7" },
+          { "degree": 2, "quality": "m7" },
+          { "degree": 5, "quality": "7" },
+          { "degree": 1, "quality": "maj7" },
+          { "degree": 6, "quality": "m7" },
+          { "degree": 2, "quality": "m7" },
+          { "degree": 5, "quality": "7" }
+        ],
+        "description": "재즈 스탠다드 진행",
+        "genre": "Jazz",
+        "difficulty": 3
+      },
+      {
+        "id": "prog_8_3",
+        "name": "12-Bar Blues Short",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 5, "quality": "major" }
+        ],
+        "description": "단축 블루스 진행",
+        "genre": "Blues",
+        "difficulty": 2
+      },
+      {
+        "id": "prog_8_4",
+        "name": "Pop Ballad",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 3, "quality": "minor" },
+          { "degree": 6, "quality": "minor" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 6, "quality": "minor" },
+          { "degree": 4, "quality": "major" }
+        ],
+        "description": "팝 발라드 진행",
+        "genre": "Pop Ballad",
+        "difficulty": 2
+      },
+      {
+        "id": "prog_8_5",
+        "name": "Rock Anthem",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 6, "quality": "minor" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 7, "quality": "major", "accidental": -1 },
+          { "degree": 4, "quality": "major" },
+          { "degree": 1, "quality": "major" }
+        ],
+        "description": "록 앤썸 진행",
+        "genre": "Rock",
+        "difficulty": 2
+      },
+      {
+        "id": "prog_8_6",
+        "name": "Minor Blues",
+        "pattern": [
+          { "degree": 1, "quality": "minor" },
+          { "degree": 1, "quality": "minor" },
+          { "degree": 1, "quality": "minor" },
+          { "degree": 1, "quality": "minor" },
+          { "degree": 4, "quality": "minor" },
+          { "degree": 4, "quality": "minor" },
+          { "degree": 1, "quality": "minor" },
+          { "degree": 5, "quality": "major" }
+        ],
+        "description": "마이너 블루스 진행",
+        "genre": "Blues",
+        "difficulty": 2
+      },
+      {
+        "id": "prog_8_7",
+        "name": "Gospel Progression",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 6, "quality": "minor" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 5, "quality": "major" }
+        ],
+        "description": "가스펠 진행",
+        "genre": "Gospel",
+        "difficulty": 2
+      },
+      {
+        "id": "prog_8_8",
+        "name": "ii-V-I Extended",
+        "pattern": [
+          { "degree": 1, "quality": "maj7" },
+          { "degree": 1, "quality": "maj7" },
+          { "degree": 2, "quality": "m7" },
+          { "degree": 5, "quality": "7" },
+          { "degree": 1, "quality": "maj7" },
+          { "degree": 1, "quality": "maj7" },
+          { "degree": 2, "quality": "m7" },
+          { "degree": 5, "quality": "7" }
+        ],
+        "description": "확장된 ii-V-I 진행",
+        "genre": "Jazz",
+        "difficulty": 3
+      },
+      {
+        "id": "prog_8_9",
+        "name": "Folk Rock",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 6, "quality": "minor" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 5, "quality": "major" }
+        ],
+        "description": "포크 록 진행",
+        "genre": "Folk Rock",
+        "difficulty": 1
+      },
+      {
+        "id": "prog_8_10",
+        "name": "Modal Interchange",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 2, "quality": "minor" },
+          { "degree": 3, "quality": "minor" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 7, "quality": "major", "accidental": -1 },
+          { "degree": 4, "quality": "major" },
+          { "degree": 1, "quality": "major" }
+        ],
+        "description": "모달 인터체인지 진행",
+        "genre": "Progressive",
+        "difficulty": 3
+      }
+    ],
+    "12": [
+      {
+        "id": "prog_12_1",
+        "name": "12-Bar Blues",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 5, "quality": "major" }
+        ],
+        "description": "전통적인 12마디 블루스",
+        "genre": "Blues",
+        "difficulty": 2
+      },
+      {
+        "id": "prog_12_2",
+        "name": "Jazz Blues",
+        "pattern": [
+          { "degree": 1, "quality": "7" },
+          { "degree": 4, "quality": "7" },
+          { "degree": 1, "quality": "7" },
+          { "degree": 1, "quality": "7" },
+          { "degree": 4, "quality": "7" },
+          { "degree": 4, "quality": "7" },
+          { "degree": 1, "quality": "7" },
+          { "degree": 6, "quality": "7" },
+          { "degree": 2, "quality": "m7" },
+          { "degree": 5, "quality": "7" },
+          { "degree": 1, "quality": "7" },
+          { "degree": 5, "quality": "7" }
+        ],
+        "description": "재즈 블루스 진행",
+        "genre": "Jazz Blues",
+        "difficulty": 3
+      },
+      {
+        "id": "prog_12_3",
+        "name": "Pop Epic",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 6, "quality": "minor" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 6, "quality": "minor" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 2, "quality": "minor" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 1, "quality": "major" }
+        ],
+        "description": "서사적 팝 진행",
+        "genre": "Pop",
+        "difficulty": 2
+      },
+      {
+        "id": "prog_12_4",
+        "name": "Rock Ballad Extended",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 6, "quality": "minor" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 3, "quality": "minor" },
+          { "degree": 6, "quality": "minor" },
+          { "degree": 2, "quality": "minor" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 1, "quality": "major" }
+        ],
+        "description": "확장된 록 발라드",
+        "genre": "Rock Ballad",
+        "difficulty": 2
+      },
+      {
+        "id": "prog_12_5",
+        "name": "Circle of Fifths",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 7, "quality": "dim" },
+          { "degree": 3, "quality": "minor" },
+          { "degree": 6, "quality": "minor" },
+          { "degree": 2, "quality": "minor" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 2, "quality": "minor" },
+          { "degree": 5, "quality": "major" }
+        ],
+        "description": "5도권 진행",
+        "genre": "Classical/Jazz",
+        "difficulty": 4
+      },
+      {
+        "id": "prog_12_6",
+        "name": "Minor Jazz",
+        "pattern": [
+          { "degree": 1, "quality": "m7" },
+          { "degree": 1, "quality": "m7" },
+          { "degree": 4, "quality": "m7" },
+          { "degree": 4, "quality": "m7" },
+          { "degree": 1, "quality": "m7" },
+          { "degree": 1, "quality": "m7" },
+          { "degree": 6, "quality": "7" },
+          { "degree": 6, "quality": "7" },
+          { "degree": 2, "quality": "m7b5" },
+          { "degree": 5, "quality": "7" },
+          { "degree": 1, "quality": "m7" },
+          { "degree": 5, "quality": "7" }
+        ],
+        "description": "마이너 재즈 진행",
+        "genre": "Jazz",
+        "difficulty": 4
+      },
+      {
+        "id": "prog_12_7",
+        "name": "Gospel Extended",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 6, "quality": "minor" },
+          { "degree": 2, "quality": "minor" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 5, "quality": "major" }
+        ],
+        "description": "확장된 가스펠 진행",
+        "genre": "Gospel",
+        "difficulty": 2
+      },
+      {
+        "id": "prog_12_8",
+        "name": "Rhythm Changes A",
+        "pattern": [
+          { "degree": 1, "quality": "maj7" },
+          { "degree": 6, "quality": "m7" },
+          { "degree": 2, "quality": "m7" },
+          { "degree": 5, "quality": "7" },
+          { "degree": 3, "quality": "m7" },
+          { "degree": 6, "quality": "7" },
+          { "degree": 2, "quality": "m7" },
+          { "degree": 5, "quality": "7" },
+          { "degree": 1, "quality": "maj7" },
+          { "degree": 1, "quality": "7" },
+          { "degree": 4, "quality": "maj7" },
+          { "degree": 4, "quality": "m7" }
+        ],
+        "description": "리듬 체인지 A섹션",
+        "genre": "Jazz",
+        "difficulty": 4
+      },
+      {
+        "id": "prog_12_9",
+        "name": "Progressive Rock",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 3, "quality": "minor" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 6, "quality": "minor" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 6, "quality": "minor" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 2, "quality": "minor" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 7, "quality": "major", "accidental": -1 }
+        ],
+        "description": "프로그레시브 록 진행",
+        "genre": "Progressive Rock",
+        "difficulty": 3
+      },
+      {
+        "id": "prog_12_10",
+        "name": "Modal Exploration",
+        "pattern": [
+          { "degree": 1, "quality": "major" },
+          { "degree": 2, "quality": "major" },
+          { "degree": 3, "quality": "minor" },
+          { "degree": 4, "quality": "major" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 6, "quality": "minor" },
+          { "degree": 7, "quality": "major", "accidental": -1 },
+          { "degree": 1, "quality": "major" },
+          { "degree": 2, "quality": "minor" },
+          { "degree": 5, "quality": "major" },
+          { "degree": 1, "quality": "major" },
+          { "degree": 1, "quality": "major" }
+        ],
+        "description": "모달 탐험 진행",
+        "genre": "Fusion",
+        "difficulty": 3
+      }
+    ]
+  },
+  "keySignatures": {
+    "C": { "type": "major", "sharps": 0, "notes": ["C", "D", "E", "F", "G", "A", "B"] },
+    "G": { "type": "major", "sharps": 1, "notes": ["G", "A", "B", "C", "D", "E", "F#"] },
+    "D": { "type": "major", "sharps": 2, "notes": ["D", "E", "F#", "G", "A", "B", "C#"] },
+    "A": { "type": "major", "sharps": 3, "notes": ["A", "B", "C#", "D", "E", "F#", "G#"] },
+    "E": { "type": "major", "sharps": 4, "notes": ["E", "F#", "G#", "A", "B", "C#", "D#"] },
+    "B": { "type": "major", "sharps": 5, "notes": ["B", "C#", "D#", "E", "F#", "G#", "A#"] },
+    "F": { "type": "major", "flats": 1, "notes": ["F", "G", "A", "Bb", "C", "D", "E"] },
+    "Bb": { "type": "major", "flats": 2, "notes": ["Bb", "C", "D", "Eb", "F", "G", "A"] },
+    "Eb": { "type": "major", "flats": 3, "notes": ["Eb", "F", "G", "Ab", "Bb", "C", "D"] },
+    "Ab": { "type": "major", "flats": 4, "notes": ["Ab", "Bb", "C", "Db", "Eb", "F", "G"] },
+    "Db": { "type": "major", "flats": 5, "notes": ["Db", "Eb", "F", "Gb", "Ab", "Bb", "C"] },
+    "Am": { "type": "minor", "sharps": 0, "notes": ["A", "B", "C", "D", "E", "F", "G"] },
+    "Em": { "type": "minor", "sharps": 1, "notes": ["E", "F#", "G", "A", "B", "C", "D"] },
+    "Bm": { "type": "minor", "sharps": 2, "notes": ["B", "C#", "D", "E", "F#", "G", "A"] },
+    "Dm": { "type": "minor", "flats": 1, "notes": ["D", "E", "F", "G", "A", "Bb", "C"] },
+    "Gm": { "type": "minor", "flats": 2, "notes": ["G", "A", "Bb", "C", "D", "Eb", "F"] },
+    "Cm": { "type": "minor", "flats": 3, "notes": ["C", "D", "Eb", "F", "G", "Ab", "Bb"] }
+  }
+}
