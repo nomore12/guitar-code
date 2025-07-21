@@ -28,6 +28,16 @@ const MainPage: React.FC = () => {
       </Button>
       <Button
         component={Link}
+        to="/exercise-chords"
+        variant="contained"
+        color="primary"
+        size="large"
+        sx={{ mb: 2 }}
+      >
+        코드 랜덤 연습 페이지로 이동
+      </Button>
+      <Button
+        component={Link}
         to="/backingTracks"
         variant="contained"
         color="secondary"

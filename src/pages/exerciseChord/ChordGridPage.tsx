@@ -1,157 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import {
+  Box,
+  Container,
+  Typography,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  Grid,
+  Stack,
+  useTheme,
+  useMediaQuery,
+} from '@mui/material';
 import ChordDisplay from './ChordDisplay';
 import { chordData } from './chordData';
-import {
-  generateRandomChords,
-  generateRandomChordsWithCategories,
-  ChordGenerationMode,
-  CHORD_PRESETS,
-} from './randomChordGenerator';
+import { generateRandomChordsWithCategories } from './randomChordGenerator';
 import type { ChordCategories } from './randomChordGenerator';
 
-const PageContainer = styled.div`
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-`;
-
-const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-  gap: 16px;
-
-  h1 {
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin: 0;
-  }
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: stretch;
-  }
-`;
-
-const ControlsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: flex-end;
-
-  @media (max-width: 768px) {
-    align-items: stretch;
-  }
-`;
-
-const CheckboxGroup = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 8px;
-  align-items: center;
-  max-width: 600px;
-
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
-    justify-items: center;
-    gap: 6px;
-  }
-
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-    gap: 4px;
-  }
-`;
-
-const CheckboxItem = styled.label`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  user-select: none;
-  white-space: nowrap;
-  justify-content: flex-start;
-
-  input[type='checkbox'] {
-    margin: 0;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-
-  &:hover {
-    color: #007bff;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 0.75rem;
-    justify-content: center;
-  }
-`;
-
-const ButtonGroup = styled.div`
-  display: flex;
-  gap: 8px;
-  align-items: center;
-
-  @media (max-width: 768px) {
-    justify-content: center;
-  }
-`;
-
-const Button = styled.button`
-  padding: 8px 16px;
-  font-size: 0.9rem;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-`;
-
-const ToggleButton = styled(Button)`
-  background-color: #007bff;
-
-  &:hover:not(:disabled) {
-    background-color: #0056b3;
-  }
-`;
-
-const GenerateButton = styled(Button)`
-  background-color: #28a745;
-
-  &:hover:not(:disabled) {
-    background-color: #218838;
-  }
-`;
-
-const ChordGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, minmax(120px, 1fr));
-  grid-template-rows: repeat(4, minmax(120px, 1fr));
-  gap: 8px;
-  justify-items: center;
-  align-items: center;
-
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(3, minmax(100px, 1fr));
-    gap: 6px;
-  }
-
-  @media (max-width: 480px) {
-    grid-template-columns: repeat(2, minmax(100px, 1fr));
-    gap: 4px;
-  }
-`;
-
 const ChordGridPage: React.FC = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
+
   const [hideFingers, setHideFingers] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const [displayChords, setDisplayChords] = useState(chordData);
@@ -225,91 +94,197 @@ const ChordGridPage: React.FC = () => {
   };
 
   return (
-    <PageContainer>
-      <Header>
-        <h1>기타 코드 연습</h1>
-        <ControlsContainer>
-          <CheckboxGroup>
-            <CheckboxItem>
-              <input
-                type="checkbox"
-                checked={selectedCategories.openPosition}
-                onChange={() => handleCategoryChange('openPosition')}
+    <Container maxWidth="md" sx={{ py: 3 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          mb: 3,
+          gap: 2,
+          flexDirection: isMobile ? 'column' : 'row',
+        }}
+      >
+        <Typography variant="h4" component="h1" fontWeight="bold">
+          기타 코드 연습
+        </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 1.5,
+            alignItems: isMobile ? 'stretch' : 'flex-end',
+          }}
+        >
+          <Grid
+            container
+            spacing={1}
+            sx={{
+              maxWidth: 600,
+              justifyContent: isMobile ? 'center' : 'flex-end',
+            }}
+          >
+            <Grid item xs={isSmall ? 12 : 6}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={selectedCategories.openPosition}
+                    onChange={() => handleCategoryChange('openPosition')}
+                    size="small"
+                  />
+                }
+                label="오픈포지션"
+                sx={{
+                  fontSize: '0.8rem',
+                  '& .MuiFormControlLabel-label': { fontSize: '0.8rem' },
+                }}
               />
-              오픈포지션
-            </CheckboxItem>
-            <CheckboxItem>
-              <input
-                type="checkbox"
-                checked={selectedCategories.barreChords}
-                onChange={() => handleCategoryChange('barreChords')}
+            </Grid>
+            <Grid item xs={isSmall ? 12 : 6}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={selectedCategories.barreChords}
+                    onChange={() => handleCategoryChange('barreChords')}
+                    size="small"
+                  />
+                }
+                label="하이코드(5,6번줄)"
+                sx={{
+                  fontSize: '0.8rem',
+                  '& .MuiFormControlLabel-label': { fontSize: '0.8rem' },
+                }}
               />
-              하이코드(5,6번줄)
-            </CheckboxItem>
-            <CheckboxItem>
-              <input
-                type="checkbox"
-                checked={selectedCategories.diminishedChords}
-                onChange={() => handleCategoryChange('diminishedChords')}
+            </Grid>
+            <Grid item xs={isSmall ? 12 : 6}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={selectedCategories.diminishedChords}
+                    onChange={() => handleCategoryChange('diminishedChords')}
+                    size="small"
+                  />
+                }
+                label="Diminished"
+                sx={{
+                  fontSize: '0.8rem',
+                  '& .MuiFormControlLabel-label': { fontSize: '0.8rem' },
+                }}
               />
-              Diminished
-            </CheckboxItem>
-            <CheckboxItem>
-              <input
-                type="checkbox"
-                checked={selectedCategories.minor7b5Chords}
-                onChange={() => handleCategoryChange('minor7b5Chords')}
+            </Grid>
+            <Grid item xs={isSmall ? 12 : 6}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={selectedCategories.minor7b5Chords}
+                    onChange={() => handleCategoryChange('minor7b5Chords')}
+                    size="small"
+                  />
+                }
+                label="Minor7b5"
+                sx={{
+                  fontSize: '0.8rem',
+                  '& .MuiFormControlLabel-label': { fontSize: '0.8rem' },
+                }}
               />
-              Minor7b5
-            </CheckboxItem>
-            <CheckboxItem>
-              <input
-                type="checkbox"
-                checked={selectedCategories.augmentedChords}
-                onChange={() => handleCategoryChange('augmentedChords')}
+            </Grid>
+            <Grid item xs={isSmall ? 12 : 6}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={selectedCategories.augmentedChords}
+                    onChange={() => handleCategoryChange('augmentedChords')}
+                    size="small"
+                  />
+                }
+                label="Augmented"
+                sx={{
+                  fontSize: '0.8rem',
+                  '& .MuiFormControlLabel-label': { fontSize: '0.8rem' },
+                }}
               />
-              Augmented
-            </CheckboxItem>
-            <CheckboxItem>
-              <input
-                type="checkbox"
-                checked={selectedCategories.sus4Chords}
-                onChange={() => handleCategoryChange('sus4Chords')}
+            </Grid>
+            <Grid item xs={isSmall ? 12 : 6}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={selectedCategories.sus4Chords}
+                    onChange={() => handleCategoryChange('sus4Chords')}
+                    size="small"
+                  />
+                }
+                label="Sus4"
+                sx={{
+                  fontSize: '0.8rem',
+                  '& .MuiFormControlLabel-label': { fontSize: '0.8rem' },
+                }}
               />
-              Sus4
-            </CheckboxItem>
-            <CheckboxItem>
-              <input
-                type="checkbox"
-                checked={selectedCategories.sixthChords}
-                onChange={() => handleCategoryChange('sixthChords')}
+            </Grid>
+            {/* <Grid item xs={isSmall ? 12 : 6}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={selectedCategories.sixthChords}
+                    onChange={() => handleCategoryChange('sixthChords')}
+                    size="small"
+                  />
+                }
+                label="6th 코드"
+                sx={{
+                  fontSize: '0.8rem',
+                  '& .MuiFormControlLabel-label': { fontSize: '0.8rem' },
+                }}
               />
-              6th 코드
-            </CheckboxItem>
-          </CheckboxGroup>
-          <ButtonGroup>
-            <GenerateButton onClick={generateNewChords} disabled={isGenerating}>
+            </Grid> */}
+          </Grid>
+          <Stack
+            direction="row"
+            spacing={1}
+            justifyContent={isMobile ? 'center' : 'flex-end'}
+          >
+            <Button
+              variant="contained"
+              color="success"
+              onClick={generateNewChords}
+              disabled={isGenerating}
+              sx={{ fontSize: '0.9rem' }}
+            >
               {isGenerating ? '생성 중...' : '코드 생성'}
-            </GenerateButton>
-            <ToggleButton onClick={toggleHideFingers}>
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={toggleHideFingers}
+              sx={{ fontSize: '0.9rem' }}
+            >
               {hideFingers ? '운지법 보이기' : '운지법 숨기기'}
-            </ToggleButton>
-          </ButtonGroup>
-        </ControlsContainer>
-      </Header>
+            </Button>
+          </Stack>
+        </Box>
+      </Box>
 
-      <ChordGrid>
+      <Grid container spacing={2} justifyContent="center">
         {displayChords.map((chord, index) => (
-          <div key={index} onClick={() => handleChordClick(index)}>
-            <ChordDisplay
-              chord={chord}
-              focused={focusedIndex === index}
-              hide={hideFingers}
-            />
-          </div>
+          <Grid item xs={6} sm={6} md={3} lg={3} key={index}>
+            <Box
+              onClick={() => handleChordClick(index)}
+              sx={{
+                cursor: 'pointer',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <ChordDisplay
+                chord={chord}
+                focused={focusedIndex === index}
+                hide={hideFingers}
+              />
+            </Box>
+          </Grid>
         ))}
-      </ChordGrid>
-    </PageContainer>
+      </Grid>
+    </Container>
   );
 };
 
