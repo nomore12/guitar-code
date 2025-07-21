@@ -111,6 +111,10 @@ const ChordDisplay: React.FC<ChordDisplayProps> = ({
   const minFret =
     fingerFrets.length > 0 ? Math.min(...fingerFrets) : chord.flat;
 
+  // 오픈포지션은 무조건 1fret부터 표시
+  const isOpenPosition = chord.flat === 1 && minFret <= 3;
+  const displayMinFret = isOpenPosition ? 1 : minFret;
+
   const lines: React.ReactNode[] = [];
 
   for (let i = 0; i <= rowCount; i++) {
@@ -155,27 +159,11 @@ const ChordDisplay: React.FC<ChordDisplayProps> = ({
       width={cellSize * columnCount + cellSize * 2 + 10}
       height={cellSizeY * rowCount + cellSizeY * 2}
     >
-      {/* 실제 운지 범위에 맞춰 프렛 번호 표시 */}
-      {minFret > 0 ? (
-        <CompactFlatChord flat={minFret} position={1} />
-      ) : (
-        <CompactFlatChord flat={minFret + 1} position={1} />
-      )}
-      {minFret > 0 ? (
-        <CompactFlatChord flat={minFret + 1} position={2} />
-      ) : (
-        <CompactFlatChord flat={minFret + 2} position={2} />
-      )}
-      {minFret > 0 ? (
-        <CompactFlatChord flat={minFret + 2} position={3} />
-      ) : (
-        <CompactFlatChord flat={minFret + 3} position={3} />
-      )}
-      {minFret > 0 ? (
-        <CompactFlatChord flat={minFret + 3} position={4} />
-      ) : (
-        <CompactFlatChord flat={minFret + 4} position={4} />
-      )}
+      {/* 프렛 번호 표시 */}
+      <CompactFlatChord flat={displayMinFret} position={1} />
+      <CompactFlatChord flat={displayMinFret + 1} position={2} />
+      <CompactFlatChord flat={displayMinFret + 2} position={3} />
+      <CompactFlatChord flat={displayMinFret + 3} position={4} />
       {lines}
 
       {!hide &&
@@ -192,9 +180,12 @@ const ChordDisplay: React.FC<ChordDisplayProps> = ({
         chord.fingers &&
         chord.fingers.map((item, index) => {
           // 실제 프렛 위치를 디스플레이 위치로 변환
-          const displayFret = minFret <= 1 ? item[1] : item[1] - minFret + 1;
+          const displayFret = isOpenPosition
+            ? item[1]
+            : item[1] - displayMinFret + 1;
           return (
-            displayFret !== 0 && (
+            displayFret !== 0 &&
+            displayFret <= 4 && (
               <CompactFingerMark
                 key={index}
                 line={item[0]}

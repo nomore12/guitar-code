@@ -180,6 +180,58 @@ const CHORD_CATEGORIES = {
     'Abm6',
     'Bbm6',
   ],
+
+  // 특수 7th 코드 (5번줄, 6번줄 루트)
+  SEVENTH_CHORDS: [
+    'C7',
+    'Cmaj7',
+    'Cm7',
+    'Cminmaj7',
+    'D7',
+    'Dmaj7',
+    'Dm7',
+    'Dminmaj7',
+    'E7',
+    'Emaj7',
+    'Em7',
+    'Eminmaj7',
+    'F7',
+    'Fmaj7',
+    'Fm7',
+    'Fminmaj7',
+    'G7',
+    'Gmaj7',
+    'Gm7',
+    'Gminmaj7',
+    'A7',
+    'Amaj7',
+    'Am7',
+    'Aminmaj7',
+    'B7',
+    'Bmaj7',
+    'Bm7',
+    'Bminmaj7',
+    'C#7',
+    'C#maj7',
+    'C#m7',
+    'C#minmaj7',
+    'Eb7',
+    'Ebmaj7',
+    'Ebm7',
+    'Ebminmaj7',
+    'F#7',
+    'F#maj7',
+    'F#m7',
+    'F#minmaj7',
+    'Ab7',
+    'Abmaj7',
+    'Abm7',
+    'Abminmaj7',
+    'Bb7',
+    'Bbmaj7',
+    'Bbm7',
+    'Bbminmaj7',
+  ],
 };
 
 // 코드 생성 모드
@@ -317,6 +369,7 @@ export interface ChordCategories {
   augmentedChords: boolean;
   sus4Chords: boolean;
   sixthChords: boolean;
+  seventhChords: boolean;
 }
 
 // 타입 export 확인용
@@ -369,6 +422,9 @@ export function generateRandomChordsWithCategories(
       case 'sixthChords':
         categoryChords = CHORD_CATEGORIES.SIXTH_CHORDS;
         break;
+      case 'seventhChords':
+        categoryChords = CHORD_CATEGORIES.SEVENTH_CHORDS;
+        break;
     }
 
     const generatedChords = generateChordsFromCategory(
@@ -397,6 +453,8 @@ export function generateRandomChordsWithCategories(
       allSelectedChords.push(...CHORD_CATEGORIES.SUS4_CHORDS);
     if (categories.sixthChords)
       allSelectedChords.push(...CHORD_CATEGORIES.SIXTH_CHORDS);
+    if (categories.seventhChords)
+      allSelectedChords.push(...CHORD_CATEGORIES.SEVENTH_CHORDS);
 
     const availableChords = allSelectedChords.filter(
       (chord) => !usedChords.has(chord),

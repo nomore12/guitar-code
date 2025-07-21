@@ -22,6 +22,9 @@ node_modules/
 # OS specific
 .DS_Store
 
+# Build output
+build/
+
 # Task files
 # tasks.json
 # tasks/ 

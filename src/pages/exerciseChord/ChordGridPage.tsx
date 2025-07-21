@@ -34,6 +34,7 @@ const ChordGridPage: React.FC = () => {
       augmentedChords: false,
       sus4Chords: false,
       sixthChords: false,
+      seventhChords: false,
     },
   );
 
@@ -220,22 +221,22 @@ const ChordGridPage: React.FC = () => {
                 }}
               />
             </Grid>
-            {/* <Grid item xs={isSmall ? 12 : 6}>
+            <Grid item xs={isSmall ? 12 : 6}>
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={selectedCategories.sixthChords}
-                    onChange={() => handleCategoryChange('sixthChords')}
+                    checked={selectedCategories.seventhChords}
+                    onChange={() => handleCategoryChange('seventhChords')}
                     size="small"
                   />
                 }
-                label="6th 코드"
+                label="7th 코드"
                 sx={{
                   fontSize: '0.8rem',
                   '& .MuiFormControlLabel-label': { fontSize: '0.8rem' },
                 }}
               />
-            </Grid> */}
+            </Grid>
           </Grid>
           <Stack
             direction="row"
