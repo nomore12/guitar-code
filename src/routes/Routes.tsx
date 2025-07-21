@@ -9,6 +9,7 @@ import AiForm from '../pages/chordsPage/AiForm';
 import ChromaticPage from '../pages/chromaticPage/ChromaticPage';
 import ChordEditor from '../pages/ChordEditor';
 import ChordGeneratorTest from '../pages/ChordGeneratorTest';
+import { ChordGridPage } from '../pages/exerciseChord';
 
 export interface RouteItem {
   path: string;
@@ -71,6 +72,10 @@ const routes: RouteItem[] = [
     path: '/generator-test',
     element: <ChordGeneratorTest />,
     exact: true,
+  },
+  {
+    path: '/exercise-chords',
+    element: <ChordGridPage />,
   },
 ];
 
