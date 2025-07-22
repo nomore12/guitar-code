@@ -129,179 +129,202 @@ const ChordGridPage: React.FC = () => {
 
   return (
     <Container maxWidth="md" sx={{ py: 3 }}>
-      {/* 메트로놈 컨트롤 */}
-      <ChordPracticeMetronome
-        onMeasureComplete={handleMeasureComplete}
-        onPlayStateChange={handlePlayStateChange}
-        currentMeasure={currentMeasure}
-        totalMeasures={16}
-      />
-
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          mb: 3,
-          gap: 2,
-          flexDirection: isMobile ? 'column' : 'row',
-        }}
-      >
-        <Typography variant="h4" component="h1" fontWeight="bold">
+      <Box sx={{ mb: 3 }}>
+        {/* <Typography
+          variant="h4"
+          component="h1"
+          fontWeight="bold"
+          mb={2}
+          textAlign="center"
+        >
           기타 코드 연습
-        </Typography>
+        </Typography> */}
+
+        {/* 컨트롤 영역 - 가로 레이아웃 */}
         <Box
           sx={{
             display: 'flex',
-            flexDirection: 'column',
-            gap: 1.5,
-            alignItems: isMobile ? 'stretch' : 'flex-end',
+            flexDirection: isMobile ? 'column' : 'row',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            gap: 2,
+            flexWrap: 'wrap',
           }}
         >
-          <Grid
-            container
-            spacing={1}
+          {/* 통합 컨트롤 영역 */}
+          <Box
             sx={{
-              maxWidth: 600,
-              justifyContent: isMobile ? 'center' : 'flex-end',
+              p: 2,
+              border: '1px solid #e0e0e0',
+              borderRadius: 2,
+              bgcolor: '#fafafa',
+              maxWidth: 400,
+              flex: '1 1 400px',
             }}
           >
-            <Grid item xs={isSmall ? 12 : 6}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={selectedCategories.openPosition}
-                    onChange={() => handleCategoryChange('openPosition')}
-                    size="small"
-                  />
-                }
-                label="오픈포지션"
-                sx={{
-                  fontSize: '0.8rem',
-                  '& .MuiFormControlLabel-label': { fontSize: '0.8rem' },
-                }}
-              />
-            </Grid>
-            <Grid item xs={isSmall ? 12 : 6}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={selectedCategories.barreChords}
-                    onChange={() => handleCategoryChange('barreChords')}
-                    size="small"
-                  />
-                }
-                label="하이코드(5,6번줄)"
-                sx={{
-                  fontSize: '0.8rem',
-                  '& .MuiFormControlLabel-label': { fontSize: '0.8rem' },
-                }}
-              />
-            </Grid>
-            <Grid item xs={isSmall ? 12 : 6}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={selectedCategories.diminishedChords}
-                    onChange={() => handleCategoryChange('diminishedChords')}
-                    size="small"
-                  />
-                }
-                label="Diminished"
-                sx={{
-                  fontSize: '0.8rem',
-                  '& .MuiFormControlLabel-label': { fontSize: '0.8rem' },
-                }}
-              />
-            </Grid>
-            <Grid item xs={isSmall ? 12 : 6}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={selectedCategories.minor7b5Chords}
-                    onChange={() => handleCategoryChange('minor7b5Chords')}
-                    size="small"
-                  />
-                }
-                label="Minor7b5"
-                sx={{
-                  fontSize: '0.8rem',
-                  '& .MuiFormControlLabel-label': { fontSize: '0.8rem' },
-                }}
-              />
-            </Grid>
-            <Grid item xs={isSmall ? 12 : 6}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={selectedCategories.augmentedChords}
-                    onChange={() => handleCategoryChange('augmentedChords')}
-                    size="small"
-                  />
-                }
-                label="Augmented"
-                sx={{
-                  fontSize: '0.8rem',
-                  '& .MuiFormControlLabel-label': { fontSize: '0.8rem' },
-                }}
-              />
-            </Grid>
-            <Grid item xs={isSmall ? 12 : 6}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={selectedCategories.sus4Chords}
-                    onChange={() => handleCategoryChange('sus4Chords')}
-                    size="small"
-                  />
-                }
-                label="Sus4"
-                sx={{
-                  fontSize: '0.8rem',
-                  '& .MuiFormControlLabel-label': { fontSize: '0.8rem' },
-                }}
-              />
-            </Grid>
-            <Grid item xs={isSmall ? 12 : 6}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={selectedCategories.seventhChords}
-                    onChange={() => handleCategoryChange('seventhChords')}
-                    size="small"
-                  />
-                }
-                label="7th 코드"
-                sx={{
-                  fontSize: '0.8rem',
-                  '& .MuiFormControlLabel-label': { fontSize: '0.8rem' },
-                }}
-              />
-            </Grid>
-          </Grid>
-          <Stack
-            direction="row"
-            spacing={1}
-            justifyContent={isMobile ? 'center' : 'flex-end'}
-          >
-            <Button
-              variant="contained"
-              color="success"
-              onClick={generateNewChords}
-              disabled={isGenerating}
-              sx={{ fontSize: '0.9rem' }}
+            <Typography variant="body2" fontWeight="bold" mb={1.5}>
+              코드 설정
+            </Typography>
+            <Grid
+              container
+              spacing={0.5}
+              sx={{
+                justifyContent: 'center',
+                mb: 2,
+              }}
             >
-              {isGenerating ? '생성 중...' : '코드 생성'}
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={toggleHideFingers}
-              sx={{ fontSize: '0.9rem' }}
-            >
-              {hideFingers ? '운지법 보이기' : '운지법 숨기기'}
-            </Button>
-          </Stack>
+              <Grid item xs={6}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedCategories.openPosition}
+                      onChange={() => handleCategoryChange('openPosition')}
+                      size="small"
+                    />
+                  }
+                  label="오픈포지션"
+                  sx={{
+                    m: 0,
+                    '& .MuiFormControlLabel-label': { fontSize: '0.75rem' },
+                    '& .MuiCheckbox-root': { py: 0.5 },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedCategories.barreChords}
+                      onChange={() => handleCategoryChange('barreChords')}
+                      size="small"
+                    />
+                  }
+                  label="하이코드(5,6번줄)"
+                  sx={{
+                    m: 0,
+                    '& .MuiFormControlLabel-label': { fontSize: '0.75rem' },
+                    '& .MuiCheckbox-root': { py: 0.5 },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedCategories.diminishedChords}
+                      onChange={() => handleCategoryChange('diminishedChords')}
+                      size="small"
+                    />
+                  }
+                  label="Diminished"
+                  sx={{
+                    m: 0,
+                    '& .MuiFormControlLabel-label': { fontSize: '0.75rem' },
+                    '& .MuiCheckbox-root': { py: 0.5 },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedCategories.minor7b5Chords}
+                      onChange={() => handleCategoryChange('minor7b5Chords')}
+                      size="small"
+                    />
+                  }
+                  label="Minor7b5"
+                  sx={{
+                    m: 0,
+                    '& .MuiFormControlLabel-label': { fontSize: '0.75rem' },
+                    '& .MuiCheckbox-root': { py: 0.5 },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedCategories.augmentedChords}
+                      onChange={() => handleCategoryChange('augmentedChords')}
+                      size="small"
+                    />
+                  }
+                  label="Augmented"
+                  sx={{
+                    m: 0,
+                    '& .MuiFormControlLabel-label': { fontSize: '0.75rem' },
+                    '& .MuiCheckbox-root': { py: 0.5 },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedCategories.sus4Chords}
+                      onChange={() => handleCategoryChange('sus4Chords')}
+                      size="small"
+                    />
+                  }
+                  label="Sus4"
+                  sx={{
+                    m: 0,
+                    '& .MuiFormControlLabel-label': { fontSize: '0.75rem' },
+                    '& .MuiCheckbox-root': { py: 0.5 },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedCategories.seventhChords}
+                      onChange={() => handleCategoryChange('seventhChords')}
+                      size="small"
+                    />
+                  }
+                  label="7th 코드"
+                  sx={{
+                    m: 0,
+                    '& .MuiFormControlLabel-label': { fontSize: '0.75rem' },
+                    '& .MuiCheckbox-root': { py: 0.5 },
+                  }}
+                />
+              </Grid>
+            </Grid>
+
+            {/* 버튼 영역 */}
+            <Stack direction="row" spacing={1} width="100%">
+              <Button
+                variant="contained"
+                color="success"
+                onClick={generateNewChords}
+                disabled={isGenerating}
+                sx={{ fontSize: '0.9rem' }}
+                fullWidth
+              >
+                {isGenerating ? '생성 중...' : '코드 생성'}
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={toggleHideFingers}
+                sx={{ fontSize: '0.9rem' }}
+                fullWidth
+              >
+                {hideFingers ? '운지법 보이기' : '운지법 숨기기'}
+              </Button>
+            </Stack>
+          </Box>
+
+          {/* 메트로놈 */}
+          <ChordPracticeMetronome
+            onMeasureComplete={handleMeasureComplete}
+            onPlayStateChange={handlePlayStateChange}
+            currentMeasure={currentMeasure}
+            totalMeasures={16}
+          />
         </Box>
       </Box>
 

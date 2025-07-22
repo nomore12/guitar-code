@@ -3,7 +3,6 @@ import {
   Box,
   Typography,
   Button,
-  Grid,
   Stack,
   Slider,
   Radio,
@@ -88,33 +87,40 @@ const ChordPracticeMetronome: React.FC<ChordPracticeMetronomeProps> = ({
   return (
     <Box
       sx={{
-        p: 2,
+        p: 1.5,
         border: '1px solid #ccc',
         borderRadius: 2,
         bgcolor: '#f9f9f9',
         mb: 2,
+        width: 360,
       }}
     >
-      <Typography variant="h6" component="h2" fontWeight="bold" mb={1.5}>
-        메트로놈
-        {isPlaying && (
-          <Typography component="span" variant="body2" color="primary" ml={2}>
-            {currentMeasure + 1}/{totalMeasures} 마디
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        {countdown === null ? (
+          <Typography variant="body1" component="h2" fontWeight="bold" mb={1}>
+            메트로놈
+            {isPlaying && (
+              <Typography
+                component="span"
+                variant="caption"
+                color="primary"
+                ml={1.5}
+              >
+                {currentMeasure + 1}/{totalMeasures} 마디
+              </Typography>
+            )}
           </Typography>
+        ) : (
+          <Box textAlign="center" mb={1}>
+            <Typography variant="h5" component="div" fontWeight="bold">
+              {countdown}
+            </Typography>
+          </Box>
         )}
-      </Typography>
-
-      {/* 카운트다운 표시 */}
-      {countdown !== null && (
-        <Box textAlign="center" mb={1.5}>
-          <Typography variant="h3" component="div" fontWeight="bold">
-            {countdown}
-          </Typography>
-        </Box>
-      )}
+      </Box>
 
       {/* 컨트롤 버튼 */}
-      <Box mb={2} textAlign="center">
+      <Box mb={1.5} textAlign="center">
         <Stack direction="row" spacing={1.5} justifyContent="center">
           <Button
             variant="contained"
@@ -122,7 +128,7 @@ const ChordPracticeMetronome: React.FC<ChordPracticeMetronomeProps> = ({
             onClick={handleStartMetronome}
             disabled={isPlaying || countdown !== null}
             size="small"
-            sx={{ fontSize: '0.9rem' }}
+            sx={{ fontSize: '0.8rem', py: 0.5 }}
           >
             시작
           </Button>
@@ -132,7 +138,7 @@ const ChordPracticeMetronome: React.FC<ChordPracticeMetronomeProps> = ({
             onClick={handleStopMetronome}
             disabled={!isPlaying && countdown === null}
             size="small"
-            sx={{ fontSize: '0.9rem' }}
+            sx={{ fontSize: '0.8rem', py: 0.5 }}
           >
             정지
           </Button>
@@ -140,10 +146,10 @@ const ChordPracticeMetronome: React.FC<ChordPracticeMetronomeProps> = ({
       </Box>
 
       {/* 메트로놈 설정 */}
-      <Grid container spacing={2}>
+      <Stack spacing={1}>
         {/* BPM 설정 */}
-        <Grid item xs={12} sm={4}>
-          <Typography variant="body2" gutterBottom>
+        <Box>
+          <Typography variant="caption" sx={{ mb: 0.5, display: 'block' }}>
             BPM: {bpm}
           </Typography>
           <Slider
@@ -154,11 +160,11 @@ const ChordPracticeMetronome: React.FC<ChordPracticeMetronomeProps> = ({
             valueLabelDisplay="auto"
             size="small"
           />
-        </Grid>
+        </Box>
 
         {/* 볼륨 설정 */}
-        <Grid item xs={12} sm={4}>
-          <Typography variant="body2" gutterBottom>
+        <Box>
+          <Typography variant="caption" sx={{ mb: 0.5, display: 'block' }}>
             볼륨: {volume}
           </Typography>
           <Slider
@@ -171,25 +177,30 @@ const ChordPracticeMetronome: React.FC<ChordPracticeMetronomeProps> = ({
             valueLabelDisplay="auto"
             size="small"
           />
-        </Grid>
+        </Box>
 
         {/* 비트 설정 */}
-        <Grid item xs={12} sm={4}>
-          <FormControl>
-            <FormLabel component="legend" sx={{ fontSize: '0.875rem' }}>
+        <Box sx={{ width: '100%' }}>
+          <FormControl sx={{ width: '100%' }}>
+            <FormLabel
+              component="legend"
+              sx={{ fontSize: '0.75rem', mb: 0.25 }}
+            >
               비트
             </FormLabel>
             <RadioGroup
               row
               value={beat}
               onChange={(e) => setBeat(e.target.value as '4' | '8' | '16')}
+              sx={{ width: '100%', justifyContent: 'center' }}
             >
               <FormControlLabel
                 value="4"
                 control={<Radio size="small" />}
                 label="4 beat"
                 sx={{
-                  '& .MuiFormControlLabel-label': { fontSize: '0.8rem' },
+                  '& .MuiFormControlLabel-label': { fontSize: '0.7rem' },
+                  flex: 1,
                 }}
               />
               <FormControlLabel
@@ -197,7 +208,8 @@ const ChordPracticeMetronome: React.FC<ChordPracticeMetronomeProps> = ({
                 control={<Radio size="small" />}
                 label="8 beat"
                 sx={{
-                  '& .MuiFormControlLabel-label': { fontSize: '0.8rem' },
+                  '& .MuiFormControlLabel-label': { fontSize: '0.7rem' },
+                  flex: 1,
                 }}
               />
               <FormControlLabel
@@ -205,13 +217,14 @@ const ChordPracticeMetronome: React.FC<ChordPracticeMetronomeProps> = ({
                 control={<Radio size="small" />}
                 label="16 beat"
                 sx={{
-                  '& .MuiFormControlLabel-label': { fontSize: '0.8rem' },
+                  '& .MuiFormControlLabel-label': { fontSize: '0.7rem' },
+                  flex: 1,
                 }}
               />
             </RadioGroup>
           </FormControl>
-        </Grid>
-      </Grid>
+        </Box>
+      </Stack>
     </Box>
   );
 };
