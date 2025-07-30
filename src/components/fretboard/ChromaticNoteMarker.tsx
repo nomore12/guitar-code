@@ -39,7 +39,7 @@ const NoteMarker: React.FC<NoteMarkerProps> = ({
       <circle
         cx={cx}
         cy={cy}
-        r="10"
+        r="14"
         fill={color ? color : 'rgba(0,0,0,0.1)'}
         stroke="#555"
         strokeWidth="1"
@@ -48,7 +48,7 @@ const NoteMarker: React.FC<NoteMarkerProps> = ({
       <text
         x={cx}
         y={cy}
-        fontSize="11"
+        fontSize="14"
         textAnchor="middle"
         dominantBaseline="middle"
         fill="black"

@@ -38,6 +38,16 @@ const MainPage: React.FC = () => {
       </Button>
       <Button
         component={Link}
+        to="/chromatic"
+        variant="contained"
+        color="secondary"
+        size="large"
+        sx={{ mb: 2 }}
+      >
+        크로매틱 연습
+      </Button>
+      <Button
+        component={Link}
         to="/backingTracks"
         variant="contained"
         color="secondary"
@@ -55,15 +65,6 @@ const MainPage: React.FC = () => {
         sx={{ mb: 2 }}
       >
         프랫보드
-      </Button>
-      <Button
-        component={Link}
-        to="/chromatic"
-        variant="contained"
-        color="secondary"
-        size="large"
-      >
-        크로매틱
       </Button>
     </Box>
   );
