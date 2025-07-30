@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from 'react';
 import ChromaticFlatboard from '../../components/fretboard/ChromaticFlatboard';
 // import Metronome from '../../components/metronome/Metronome3'; // 이전 메트로놈 주석 처리
 import MetronomeEngine from '../../components/metronome/MetronomeEngine'; // 파일 이름 변경 반영
@@ -54,9 +60,6 @@ const MAX_BPM = 300; // BPM 최대값 상수 추가
 
 const ChromaticPage: React.FC = () => {
   const [bpm, setBpm] = useState<number | ''>(100); // 타입 string | number로 변경하여 빈 값 허용
-  const [selectedFretSequence, setSelectedFretSequence] = useState<number[]>(
-    DEFAULT_FINGER_PATTERN,
-  );
   const [practiceDirection, setPracticeDirection] =
     useState<PracticeDirection>('asc');
   const [currentLineNumber, setCurrentLineNumber] = useState<number>(
@@ -82,25 +85,15 @@ const ChromaticPage: React.FC = () => {
     setOnMeasureEndCallback,
   } = useNoteStore();
 
-  // useEffect to dynamically update selectedFretSequence (actual frets to play)
-  useEffect(() => {
-    let newCalculatedSequence: number[];
+  // useMemo to calculate selectedFretSequence (actual frets to play)
+  const selectedFretSequence = useMemo(() => {
     if (practiceMode === 'loop') {
-      newCalculatedSequence = [...selectedFingerPattern];
+      return [...selectedFingerPattern];
     } else {
       // Traverse mode
-      newCalculatedSequence = selectedFingerPattern.map(
+      return selectedFingerPattern.map(
         (fingerNum) => fingerNum + currentFretOffset,
       );
-    }
-    if (
-      JSON.stringify(newCalculatedSequence) !==
-      JSON.stringify(selectedFretSequence)
-    ) {
-      console.log(
-        `[DEBUG useEffect/selectedFretSequence] Updating selectedFretSequence from ${selectedFretSequence.join(',')} to ${newCalculatedSequence.join(',')}. Mode: ${practiceMode}, Offset: ${currentFretOffset}, Pattern: ${selectedFingerPattern.join(',')}`,
-      );
-      setSelectedFretSequence(newCalculatedSequence);
     }
   }, [selectedFingerPattern, practiceMode, currentFretOffset]);
 
@@ -123,9 +116,9 @@ const ChromaticPage: React.FC = () => {
   );
 
   const generateAndSetPracticeNotes = useCallback(() => {
-    console.log(
-      `[DEBUG] generateAndSetPracticeNotes CALLED. Line: ${currentLineNumber}, Dir: ${practiceDirection}, ActualFretSeq: ${selectedFretSequence.join(',')}, Pattern for chords: ${selectedFingerPattern.join(',')}`,
-    );
+    // console.log(
+    //   `[DEBUG] generateAndSetPracticeNotes CALLED. Line: ${currentLineNumber}, Dir: ${practiceDirection}, ActualFretSeq: ${selectedFretSequence.join(',')}, Pattern for chords: ${selectedFingerPattern.join(',')}`,
+    // );
     const newPracticeNotes = generateChromaticNotesArray(
       currentLineNumber,
       selectedFretSequence,
@@ -135,24 +128,23 @@ const ChromaticPage: React.FC = () => {
     currentLineNumber,
     practiceDirection,
     selectedFretSequence,
-    selectedFingerPattern, // Directly depend on selectedFingerPattern
-    generateChromaticNotesArray, // Keep this as it depends on selectedFingerPattern too.
+    generateChromaticNotesArray,
     setPracticeNotes,
   ]);
 
   // useEffect to regenerate notes
   useEffect(() => {
-    console.log(
-      `[DEBUG useEffect/noteGeneration] Triggered. Line: ${currentLineNumber}, Dir: ${practiceDirection}, ActualFretSeq: ${selectedFretSequence.join(',')}`,
-    );
+    // console.log(
+    //   `[DEBUG useEffect/noteGeneration] Triggered. Line: ${currentLineNumber}, Dir: ${practiceDirection}, ActualFretSeq: ${selectedFretSequence.join(',')}`,
+    // );
     if (selectedFretSequence && selectedFretSequence.length > 0) {
       generateAndSetPracticeNotes();
     } else if (selectedFretSequence && selectedFretSequence.length === 0) {
       // If the pattern becomes empty, clear the notes on the fretboard
       setPracticeNotes([]);
-      console.log(
-        '[DEBUG useEffect/noteGeneration] Empty finger pattern selected, clearing notes.',
-      );
+      // console.log(
+      //   '[DEBUG useEffect/noteGeneration] Empty finger pattern selected, clearing notes.',
+      // );
     }
   }, [
     currentLineNumber,
@@ -163,9 +155,10 @@ const ChromaticPage: React.FC = () => {
 
   const resetToInitialPracticeState = useCallback(
     (modeToResetTo: PracticeMode) => {
-      console.log(
-        `[DEBUG] resetToInitialPracticeState called for mode: ${modeToResetTo}`,
-      );
+      console.log('resetToInitialPracticeState', selectedFingerPattern);
+      // console.log(
+      //   `[DEBUG] resetToInitialPracticeState called for mode: ${modeToResetTo}`,
+      // );
       if (practiceStartTimerRef.current) {
         clearTimeout(practiceStartTimerRef.current);
         practiceStartTimerRef.current = null;
@@ -238,8 +231,9 @@ const ChromaticPage: React.FC = () => {
   const handleFingerPatternChange = (event: SelectChangeEvent<unknown>) => {
     const value = event.target.value as number[];
     if (Array.isArray(value)) {
-      console.log('[DEBUG] handleFingerPatternChange (User Editable):', value);
+      // console.log('[DEBUG] handleFingerPatternChange (User Editable):', value);
       setSelectedFingerPattern([...value]);
+      // setSelectedFretSequence([...value]);
     }
   };
 
@@ -249,7 +243,7 @@ const ChromaticPage: React.FC = () => {
 
   const handlePracticeModeChange = (event: SelectChangeEvent<PracticeMode>) => {
     const newMode = event.target.value as PracticeMode;
-    console.log(`[DEBUG] handlePracticeModeChange to ${newMode}`);
+    // console.log(`[DEBUG] handlePracticeModeChange to ${newMode}`);
     if (practiceStartTimerRef.current) {
       clearTimeout(practiceStartTimerRef.current);
       practiceStartTimerRef.current = null;
@@ -259,7 +253,7 @@ const ChromaticPage: React.FC = () => {
     setPracticeMode(newMode);
     setCurrentFretOffset(0);
     setFretTraversalDirection('increasing');
-    setSelectedFingerPattern(DEFAULT_FINGER_PATTERN);
+    // setSelectedFingerPattern(DEFAULT_FINGER_PATTERN);
 
     if (newMode === 'loop') {
       setCurrentLineNumber(GUITAR_STRINGS[0]);
@@ -278,9 +272,9 @@ const ChromaticPage: React.FC = () => {
       currentLine: number,
       currentDirection: PracticeDirection,
     ): ModeEndResult => {
-      console.log(
-        `[DEBUG] handleLoopModeEnd CALLED. Current Line: ${currentLine}, Direction: ${currentDirection}`,
-      );
+      // console.log(
+      //   `[DEBUG] handleLoopModeEnd CALLED. Current Line: ${currentLine}, Direction: ${currentDirection}`,
+      // );
       let nextLine = currentLine;
       let nextDir = currentDirection;
       const currentLineIdx = GUITAR_STRINGS.indexOf(currentLine);
@@ -469,9 +463,9 @@ const ChromaticPage: React.FC = () => {
 
     let result: ModeEndResult | undefined = undefined;
 
-    console.log(
-      `[DEBUG] handleMeasureEnd START. Line: ${originalLineNumber}, Direction: ${originalPracticeDirection}, Mode: ${practiceMode}, FretOffset: ${originalFretOffset}, FretTraversalDirection: ${originalFretTraversalDirection}`,
-    );
+    // console.log(
+    //   `[DEBUG] handleMeasureEnd START. Line: ${originalLineNumber}, Direction: ${originalPracticeDirection}, Mode: ${practiceMode}, FretOffset: ${originalFretOffset}, FretTraversalDirection: ${originalFretTraversalDirection}`,
+    // );
 
     if (practiceMode === 'loop') {
       result = handleLoopModeEnd(originalLineNumber, originalPracticeDirection);
@@ -487,15 +481,15 @@ const ChromaticPage: React.FC = () => {
 
     if (result) {
       if (result.shouldStopPractice) {
-        console.log('[DEBUG] handleMeasureEnd - Stopping practice.');
+        // console.log('[DEBUG] handleMeasureEnd - Stopping practice.');
         setIsPracticePlaying(false);
         if (
           practiceMode.startsWith('traverse') &&
           result.nextFretTraversalDirection === 'done'
         ) {
-          console.log(
-            '[DEBUG] handleMeasureEnd - Traverse finished, resetting state.',
-          );
+          // console.log(
+          //   '[DEBUG] handleMeasureEnd - Traverse finished, resetting state.',
+          // );
           resetToInitialPracticeState(practiceMode);
         }
       } else {
@@ -504,23 +498,23 @@ const ChromaticPage: React.FC = () => {
         // result 객체의 속성을 직접 사용하거나, 현재 상태값을 사용합니다.
 
         if (result.nextLineNumber !== undefined) {
-          console.log(
-            `[DEBUG] handleMeasureEnd - Calling setCurrentLineNumber(${result.nextLineNumber}). Prev: ${currentLineNumber}`,
-          );
+          // console.log(
+          //   `[DEBUG] handleMeasureEnd - Calling setCurrentLineNumber(${result.nextLineNumber}). Prev: ${currentLineNumber}`,
+          // );
           setCurrentLineNumber(result.nextLineNumber);
         }
         if (result.nextPracticeDirection !== undefined) {
-          console.log(
-            `[DEBUG] handleMeasureEnd - Calling setPracticeDirection(${result.nextPracticeDirection}). Prev: ${practiceDirection}`,
-          );
+          // console.log(
+          //   `[DEBUG] handleMeasureEnd - Calling setPracticeDirection(${result.nextPracticeDirection}). Prev: ${practiceDirection}`,
+          // );
           setPracticeDirection(result.nextPracticeDirection);
         }
 
         if (practiceMode.startsWith('traverse')) {
           if (result.nextFretOffset !== undefined) {
-            console.log(
-              `[DEBUG] handleMeasureEnd - Calling setCurrentFretOffset(${result.nextFretOffset}). Prev: ${currentFretOffset}`,
-            );
+            // console.log(
+            //   `[DEBUG] handleMeasureEnd - Calling setCurrentFretOffset(${result.nextFretOffset}). Prev: ${currentFretOffset}`,
+            // );
             setCurrentFretOffset(result.nextFretOffset);
           }
           if (result.nextFretTraversalDirection !== undefined) {
@@ -532,18 +526,20 @@ const ChromaticPage: React.FC = () => {
         }
 
         // Determine the sequence for the next set of notes
-        let sequenceForNextNotes = selectedFretSequence; // 사용자의 원래 코드에 있던 'let'
-        // 다음 상태값을 참조해야 하므로, result 값을 우선적으로 사용합니다.
         const offsetForNextNotes =
           result.nextFretOffset !== undefined
             ? result.nextFretOffset
             : currentFretOffset;
 
+        let sequenceForNextNotes: number[];
         if (practiceMode.startsWith('traverse')) {
           sequenceForNextNotes = Array.from(
             { length: DEFAULT_FRET_SEQUENCE_LENGTH },
             (_, i) => i + 1 + offsetForNextNotes,
           );
+        } else {
+          // Loop mode - use current finger pattern
+          sequenceForNextNotes = [...selectedFingerPattern];
         }
 
         // 다음 연주될 라인 넘버와 시퀀스를 사용
@@ -556,16 +552,16 @@ const ChromaticPage: React.FC = () => {
             ? result.nextPracticeDirection
             : practiceDirection;
 
-        console.log(
-          `[DEBUG] handleMeasureEnd - Generating notes for: Line: ${lineForNextNotes}, Dir: ${directionForNextNotes}, Offset: ${offsetForNextNotes}, Seq: ${sequenceForNextNotes.join(',')}`,
-        );
+        // console.log(
+        //   `[DEBUG] handleMeasureEnd - Generating notes for: Line: ${lineForNextNotes}, Dir: ${directionForNextNotes}, Offset: ${offsetForNextNotes}, Seq: ${sequenceForNextNotes.join(',')}`,
+        // );
         const newPracticeNotes = generateChromaticNotesArray(
           lineForNextNotes,
           sequenceForNextNotes,
         );
-        console.log(
-          `[DEBUG] handleMeasureEnd - Setting practice notes directly. Count: ${newPracticeNotes.length}. First: ${newPracticeNotes.length > 0 ? JSON.stringify(newPracticeNotes[0]) : 'N/A'}`,
-        );
+        // console.log(
+        //   `[DEBUG] handleMeasureEnd - Setting practice notes directly. Count: ${newPracticeNotes.length}. First: ${newPracticeNotes.length > 0 ? JSON.stringify(newPracticeNotes[0]) : 'N/A'}`,
+        // );
         setPracticeNotes(newPracticeNotes);
       }
     }
@@ -576,7 +572,7 @@ const ChromaticPage: React.FC = () => {
     practiceDirection,
     currentFretOffset,
     fretTraversalDirection,
-    selectedFretSequence,
+    selectedFingerPattern,
     setIsPracticePlaying,
     setCurrentLineNumber,
     setPracticeDirection,
@@ -606,9 +602,9 @@ const ChromaticPage: React.FC = () => {
 
   const togglePractice = () => {
     const storeIsPlaying = useNoteStore.getState().isPracticePlaying;
-    console.log(
-      `[DEBUG] togglePractice CALLED. Store isPlaying: ${storeIsPlaying}, Local isPreparing: ${isPreparingToPlay}`,
-    );
+    // console.log(
+    //   `[DEBUG] togglePractice CALLED. Store isPlaying: ${storeIsPlaying}, Local isPreparing: ${isPreparingToPlay}`,
+    // );
 
     if (practiceStartTimerRef.current) {
       clearTimeout(practiceStartTimerRef.current);

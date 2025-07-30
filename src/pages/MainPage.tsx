@@ -42,6 +42,7 @@ const MainPage: React.FC = () => {
         variant="contained"
         color="secondary"
         size="large"
+        sx={{ mb: 2 }}
       >
         백킹트랙 플레이어 페이지로 이동
       </Button>
@@ -51,8 +52,18 @@ const MainPage: React.FC = () => {
         variant="contained"
         color="secondary"
         size="large"
+        sx={{ mb: 2 }}
       >
         프랫보드
+      </Button>
+      <Button
+        component={Link}
+        to="/chromatic"
+        variant="contained"
+        color="secondary"
+        size="large"
+      >
+        크로매틱
       </Button>
     </Box>
   );

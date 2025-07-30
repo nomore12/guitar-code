@@ -160,12 +160,12 @@ const ChromaticFlatboard: React.FC<PropsType> = ({
 
           if (note.lineNumber === 6 || note.lineNumber === 1) {
             // 1번 또는 6번 줄 노트만 로깅
-            console.log('[Y-Test Debug]', {
-              lineNumber: note.lineNumber,
-              stringIndexForNote_TEST,
-              calculatedY,
-              isActive,
-            });
+            // console.log('[Y-Test Debug]', {
+            //   lineNumber: note.lineNumber,
+            //   stringIndexForNote_TEST,
+            //   calculatedY,
+            //   isActive,
+            // });
           }
 
           return (
@@ -175,10 +175,8 @@ const ChromaticFlatboard: React.FC<PropsType> = ({
               lineNumber={note.lineNumber}
               calculatedX={calculatedX}
               calculatedY={calculatedY}
-              note={note.chord}
-              color={
-                isActive ? 'rgba(205, 126, 126, 1)' : 'rgba(129, 129, 129, 1)'
-              }
+              note={String(note.chromaticNumber)}
+              color={isActive ? 'rgba(205, 126, 126, 1)' : 'rgb(214, 214, 214)'}
               handleNodeClick={handleNodeClick}
             />
           );

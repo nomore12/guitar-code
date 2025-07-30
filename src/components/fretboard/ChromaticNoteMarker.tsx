@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface NoteMarkerProps {
   fret: number; // 프렛 번호 (1 ~ 12)
