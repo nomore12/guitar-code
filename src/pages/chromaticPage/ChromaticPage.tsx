@@ -29,7 +29,11 @@ import Button from '@mui/material/Button';
 // }
 
 // 연습 모드 타입 정의
-type PracticeMode = 'loop' | 'traverse_6th_start' | 'traverse_1st_start';
+type PracticeMode =
+  | 'loop'
+  | 'traverse_6th_start'
+  | 'traverse_1st_start'
+  | 'traverse_with_repeat';
 
 // 프렛 이동 방향 타입 정의
 type FretTraversalDirection = 'increasing' | 'decreasing' | 'done';
@@ -49,6 +53,7 @@ interface ModeEndResult {
   nextFretOffset?: number;
   nextFretTraversalDirection?: FretTraversalDirection;
   shouldStopPractice?: boolean;
+  nextShouldReversePattern?: boolean;
 }
 
 // 새로운 상수 정의
@@ -77,6 +82,9 @@ const ChromaticPage: React.FC = () => {
   const [selectedFingerPattern, setSelectedFingerPattern] = useState<number[]>(
     DEFAULT_FINGER_PATTERN,
   );
+  const [isRepeatPhase, setIsRepeatPhase] = useState<boolean>(false);
+  const [shouldReversePattern, setShouldReversePattern] =
+    useState<boolean>(false);
 
   const {
     isPracticePlaying,
@@ -84,6 +92,21 @@ const ChromaticPage: React.FC = () => {
     setIsPracticePlaying,
     setOnMeasureEndCallback,
   } = useNoteStore();
+
+  const reverseFretNumber = (line: number) => {
+    switch (line) {
+      case 1:
+        return 4;
+      case 2:
+        return 3;
+      case 3:
+        return 2;
+      case 4:
+        return 1;
+      default:
+        return 0;
+    }
+  };
 
   // useMemo to calculate selectedFretSequence (actual frets to play)
   const selectedFretSequence = useMemo(() => {
@@ -98,21 +121,47 @@ const ChromaticPage: React.FC = () => {
   }, [selectedFingerPattern, practiceMode, currentFretOffset]);
 
   const generateChromaticNotesArray = useCallback(
-    (line: number, sequence: number[]): ChromaticNote[] => {
+    (
+      line: number,
+      sequence: number[],
+      reversePattern?: boolean,
+    ): ChromaticNote[] => {
+      const useReversePattern =
+        reversePattern !== undefined ? reversePattern : shouldReversePattern;
+
+      console.log('[generateChromaticNotesArray Debug]', {
+        selectedFingerPattern,
+        useReversePattern,
+        practiceMode,
+        sequence,
+      });
+
       return sequence.map((fretNumber, index) => {
+        const pattern =
+          useReversePattern && practiceMode === 'traverse_with_repeat'
+            ? [...selectedFingerPattern].reverse()
+            : selectedFingerPattern;
         const displayFingerNumber =
-          selectedFingerPattern[index] !== undefined
-            ? selectedFingerPattern[index]
-            : index + 1;
+          pattern[index] !== undefined ? pattern[index] : index + 1;
+
+        console.log(`[Note ${index}]`, {
+          fretNumber,
+          pattern,
+          displayFingerNumber,
+        });
+
         return {
-          flatNumber: fretNumber,
+          flatNumber:
+            useReversePattern && practiceMode === 'traverse_with_repeat'
+              ? reverseFretNumber(fretNumber)
+              : fretNumber,
           lineNumber: line,
-          chromaticNumber: index + 1,
+          chromaticNumber: displayFingerNumber,
           chord: String(displayFingerNumber),
         };
       });
     },
-    [selectedFingerPattern],
+    [selectedFingerPattern, shouldReversePattern, practiceMode],
   );
 
   const generateAndSetPracticeNotes = useCallback(() => {
@@ -151,6 +200,7 @@ const ChromaticPage: React.FC = () => {
     practiceDirection,
     selectedFretSequence,
     generateAndSetPracticeNotes,
+    shouldReversePattern, // shouldReversePattern 추가
   ]);
 
   const resetToInitialPracticeState = useCallback(
@@ -171,6 +221,8 @@ const ChromaticPage: React.FC = () => {
       setFretTraversalDirection('increasing');
       setPracticeMode(modeToResetTo);
       setSelectedFingerPattern(DEFAULT_FINGER_PATTERN);
+      setIsRepeatPhase(false);
+      setShouldReversePattern(false);
 
       if (modeToResetTo === 'loop') {
         setCurrentLineNumber(GUITAR_STRINGS[0]);
@@ -181,6 +233,9 @@ const ChromaticPage: React.FC = () => {
       } else if (modeToResetTo === 'traverse_1st_start') {
         setCurrentLineNumber(GUITAR_STRINGS[GUITAR_STRINGS.length - 1]);
         setPracticeDirection('desc');
+      } else if (modeToResetTo === 'traverse_with_repeat') {
+        setCurrentLineNumber(GUITAR_STRINGS[0]);
+        setPracticeDirection('asc');
       }
     },
     [
@@ -253,6 +308,8 @@ const ChromaticPage: React.FC = () => {
     setPracticeMode(newMode);
     setCurrentFretOffset(0);
     setFretTraversalDirection('increasing');
+    setIsRepeatPhase(false);
+    setShouldReversePattern(false);
     // setSelectedFingerPattern(DEFAULT_FINGER_PATTERN);
 
     if (newMode === 'loop') {
@@ -264,6 +321,9 @@ const ChromaticPage: React.FC = () => {
     } else if (newMode === 'traverse_1st_start') {
       setCurrentLineNumber(GUITAR_STRINGS[GUITAR_STRINGS.length - 1]);
       setPracticeDirection('desc');
+    } else if (newMode === 'traverse_with_repeat') {
+      setCurrentLineNumber(GUITAR_STRINGS[0]);
+      setPracticeDirection('asc');
     }
   };
 
@@ -338,13 +398,14 @@ const ChromaticPage: React.FC = () => {
       mode: PracticeMode,
     ): ModeEndResult => {
       console.log(
-        `[DEBUG] handleTraverseModeEnd CALLED. Line: ${currentLine}, Direction: ${currentDirection}, FretOffset: ${currentOffset}, FretTraversalDirection: ${currentFretDir}, Mode: ${mode}`,
+        `[DEBUG] handleTraverseModeEnd CALLED. Line: ${currentLine}, Direction: ${currentDirection}, FretOffset: ${currentOffset}, FretTraversalDirection: ${currentFretDir}, Mode: ${mode}, RepeatPhase: ${isRepeatPhase}`,
       );
       let nextLineNum = currentLine;
       let nextPracDir = currentDirection;
       let nextFretOff = currentOffset;
       let nextFretTravDir = currentFretDir;
       let stopPractice = false;
+      let nextShouldReverse: boolean | undefined = undefined;
 
       const currentLineIdx = GUITAR_STRINGS.indexOf(currentLine);
 
@@ -354,9 +415,28 @@ const ChromaticPage: React.FC = () => {
           if (currentLineIdx < GUITAR_STRINGS.length - 1) {
             // 현재 줄이 1번 줄이 아니면
             nextLineNum = GUITAR_STRINGS[currentLineIdx + 1]; // 다음 줄로 (1번 줄 방향으로)
+            // traverse_with_repeat 모드에서는 현재 패턴 상태 유지
+            if (mode === 'traverse_with_repeat') {
+              nextShouldReverse = shouldReversePattern;
+            }
           } else {
             // 1번 줄 상행 완료
-            if (currentOffset < MAX_FRET_OFFSET) {
+            if (mode === 'traverse_with_repeat' && !isRepeatPhase) {
+              // traverse_with_repeat 모드에서 첫 번째 1번줄 도달 시
+              setIsRepeatPhase(true);
+              setShouldReversePattern(true); // 1번줄 도달 직후 바로 역순으로 변경
+              // 1번줄에 머물면서 한 번 더 연주 (상행 유지)
+              nextLineNum = currentLine;
+              nextPracDir = 'asc';
+              nextShouldReverse = true; // 다음 연주(1번줄 두 번째)도 역순
+            } else if (mode === 'traverse_with_repeat' && isRepeatPhase) {
+              // traverse_with_repeat 모드에서 두 번째 1번줄 연주 완료
+              setIsRepeatPhase(false);
+              // 2번줄로 이동하여 하행 시작
+              nextLineNum = GUITAR_STRINGS[currentLineIdx - 1];
+              nextPracDir = 'desc';
+              nextShouldReverse = true; // 2번줄도 역순 유지
+            } else if (currentOffset < MAX_FRET_OFFSET) {
               // 아직 최대 프렛이 아니면
               nextFretOff = currentOffset + 1; // 다음 프렛으로
               nextLineNum = GUITAR_STRINGS[GUITAR_STRINGS.length - 1]; // 1번 줄에서 하행 시작
@@ -375,9 +455,28 @@ const ChromaticPage: React.FC = () => {
           if (currentLineIdx > 0) {
             // 현재 줄이 6번 줄이 아니면
             nextLineNum = GUITAR_STRINGS[currentLineIdx - 1]; // 다음 줄로 (6번 줄 방향으로)
+            // traverse_with_repeat 모드에서는 현재 패턴 상태 유지
+            if (mode === 'traverse_with_repeat') {
+              nextShouldReverse = shouldReversePattern;
+            }
           } else {
             // 6번 줄 하행 완료
-            if (currentOffset < MAX_FRET_OFFSET) {
+            if (mode === 'traverse_with_repeat' && !isRepeatPhase) {
+              // traverse_with_repeat 모드에서 첫 번째 6번줄 도달 시
+              setIsRepeatPhase(true);
+              setShouldReversePattern(false); // 6번줄 도달 직후 바로 원래 순서로 변경
+              // 6번줄에 머물면서 한 번 더 연주 (하행 유지)
+              nextLineNum = currentLine;
+              nextPracDir = 'desc';
+              nextShouldReverse = false; // 다음 연주(6번줄 두 번째)도 원래 순서
+            } else if (mode === 'traverse_with_repeat' && isRepeatPhase) {
+              // traverse_with_repeat 모드에서 두 번째 6번줄 연주 완료
+              setIsRepeatPhase(false);
+              // 5번줄로 이동하여 상행 시작
+              nextLineNum = GUITAR_STRINGS[currentLineIdx + 1];
+              nextPracDir = 'asc';
+              nextShouldReverse = false; // 5번줄도 원래 순서 유지
+            } else if (currentOffset < MAX_FRET_OFFSET) {
               // 아직 최대 프렛이 아니면
               nextFretOff = currentOffset + 1; // 다음 프렛으로
               nextLineNum = GUITAR_STRINGS[0]; // 6번 줄에서 상행 시작
@@ -446,11 +545,12 @@ const ChromaticPage: React.FC = () => {
         nextFretOffset: nextFretOff,
         nextFretTraversalDirection: nextFretTravDir,
         shouldStopPractice: stopPractice,
+        nextShouldReversePattern: nextShouldReverse,
       };
       console.log('[DEBUG] handleTraverseModeEnd RETURNING:', result);
       return result;
     },
-    [],
+    [isRepeatPhase, setIsRepeatPhase, setShouldReversePattern],
   );
 
   const handleMeasureEnd = useCallback(() => {
@@ -555,14 +655,33 @@ const ChromaticPage: React.FC = () => {
         // console.log(
         //   `[DEBUG] handleMeasureEnd - Generating notes for: Line: ${lineForNextNotes}, Dir: ${directionForNextNotes}, Offset: ${offsetForNextNotes}, Seq: ${sequenceForNextNotes.join(',')}`,
         // );
+
+        // traverse_with_repeat 모드에서 올바른 패턴 계산
+        let patternToUse = shouldReversePattern;
+        if (
+          practiceMode === 'traverse_with_repeat' &&
+          result.nextShouldReversePattern !== undefined
+        ) {
+          patternToUse = result.nextShouldReversePattern;
+        }
+
         const newPracticeNotes = generateChromaticNotesArray(
           lineForNextNotes,
           sequenceForNextNotes,
+          patternToUse,
         );
         // console.log(
         //   `[DEBUG] handleMeasureEnd - Setting practice notes directly. Count: ${newPracticeNotes.length}. First: ${newPracticeNotes.length > 0 ? JSON.stringify(newPracticeNotes[0]) : 'N/A'}`,
         // );
         setPracticeNotes(newPracticeNotes);
+
+        // 노트 생성 후에 shouldReversePattern 상태 업데이트
+        if (
+          practiceMode === 'traverse_with_repeat' &&
+          result.nextShouldReversePattern !== undefined
+        ) {
+          setShouldReversePattern(result.nextShouldReversePattern);
+        }
       }
     }
   }, [
@@ -706,12 +825,15 @@ const ChromaticPage: React.FC = () => {
             label="Practice Mode"
             onChange={handlePracticeModeChange}
           >
-            <MenuItem value="loop">Loop Current Frets</MenuItem>
+            <MenuItem value="loop">1번 프랫 반복</MenuItem>
+            <MenuItem value="traverse_with_repeat">
+              1번 프랫 반복(정방향/역방향)
+            </MenuItem>
             <MenuItem value="traverse_6th_start">
-              Traverse 6th String Start
+              프랫 하행(6번줄 시작)
             </MenuItem>
             <MenuItem value="traverse_1st_start">
-              Traverse 1st String Start
+              프랫 하행(1번줄 시작)
             </MenuItem>
           </Select>
         </FormControl>

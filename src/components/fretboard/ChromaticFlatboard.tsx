@@ -31,26 +31,24 @@ const ChromaticFlatboard: React.FC<PropsType> = ({
   } = useNoteStore();
 
   // 렌더링 시 isPracticePlaying 값 확인을 위한 로그 추가
-  console.log('ChromaticFlatboard RENDER - 스토어 값:', {
-    isPracticePlaying,
-    currentIndex,
-    notesLength: practiceNodesFromStore?.length,
-  });
+  // console.log('ChromaticFlatboard RENDER - 스토어 값:', {
+  //   isPracticePlaying,
+  //   currentIndex,
+  //   notesLength: practiceNodesFromStore?.length,
+  // });
 
   // 스토어의 첫 번째 노트 및 전체 노트 정보 로깅 추가
   if (practiceNodesFromStore && practiceNodesFromStore.length > 0) {
     console.log(
-      '[Flatboard Debug] First note from store:',
-      JSON.stringify({
-        line: practiceNodesFromStore[0].lineNumber,
-        chord: practiceNodesFromStore[0].chord,
-        cn: practiceNodesFromStore[0].chromaticNumber,
-      }),
+      '[Flatboard Debug] All notes from store:',
+      practiceNodesFromStore.map((note, idx) => ({
+        index: idx,
+        flatNumber: note.flatNumber,
+        lineNumber: note.lineNumber,
+        chromaticNumber: note.chromaticNumber,
+        chord: note.chord,
+      })),
     );
-    // 전체 노트 정보도 필요하다면 여기서 더 자세히 로깅할 수 있습니다.
-    // console.log('[Flatboard Debug] All notes for Y-coord check:',
-    //   JSON.stringify(practiceNodesFromStore.map(n => ({ l: n.lineNumber, c: n.chord, cn: n.chromaticNumber })))
-    // );
   } else {
     console.log(
       '[Flatboard Debug] No practice notes in store or store is empty.',
