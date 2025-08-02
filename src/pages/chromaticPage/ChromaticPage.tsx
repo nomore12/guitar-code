@@ -890,6 +890,9 @@ const ChromaticPage: React.FC = () => {
       <ChromaticFlatboard
         handleNodeClick={handleNodeClick}
         handleReset={handleResetAndStop}
+        selectedFingerPattern={selectedFingerPattern}
+        shouldReversePattern={shouldReversePattern}
+        practiceMode={practiceMode}
       />
       <Typography sx={{ textAlign: 'center', mt: 1, minHeight: '1.5em' }}>
         {isPracticePlaying

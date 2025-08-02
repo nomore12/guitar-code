@@ -7,11 +7,32 @@ import useNoteStore from '../../store/useNoteStore';
 interface PropsType {
   handleNodeClick: (node: ChromaticNote) => void;
   handleReset?: () => void;
+  selectedFingerPattern: number[];
+  shouldReversePattern: boolean;
+  practiceMode: string;
+}
+
+function getNoteNumber(renderNote: number) {
+  switch (renderNote) {
+    case 1:
+      return 4;
+    case 2:
+      return 3;
+    case 3:
+      return 2;
+    case 4:
+      return 1;
+    default:
+      return String(renderNote);
+  }
 }
 
 const ChromaticFlatboard: React.FC<PropsType> = ({
   handleNodeClick,
   handleReset,
+  selectedFingerPattern,
+  shouldReversePattern,
+  practiceMode,
 }) => {
   const strings = 6;
   const frets = 12;
@@ -137,48 +158,83 @@ const ChromaticFlatboard: React.FC<PropsType> = ({
       />
 
       {practiceNodesFromStore &&
-        practiceNodesFromStore.map((note: ChromaticNote, mapIndex: number) => {
-          const isActive =
-            isPracticePlaying &&
-            practiceNodesFromStore.length > 0 &&
-            currentIndex === mapIndex;
+        (() => {
+          // Finger pattern 순서대로 노트를 정렬
+          const useReversePattern =
+            shouldReversePattern && practiceMode === 'traverse_with_repeat';
+          const pattern = useReversePattern
+            ? [...selectedFingerPattern].reverse()
+            : selectedFingerPattern;
 
-          // y 좌표 계산 테스트: lineNumber 1을 SVG 상단(index 0)으로 매핑 시도
-          // 기존: strings - note.lineNumber (6번줄 -> 0, 1번줄 -> 5)
-          // 테스트: note.lineNumber - 1 (1번줄 -> 0, 6번줄 -> 5)
-          const stringIndexForNote_TEST = note.lineNumber - 1;
+          // pattern 순서대로 노트를 재정렬
+          const sortedNotes = pattern
+            .map((fingerNumber, patternIndex) => {
+              // 해당 손가락 번호와 일치하는 노트 찾기
+              const noteIndex = practiceNodesFromStore.findIndex(
+                (note) => note.chromaticNumber === fingerNumber,
+              );
+              if (noteIndex !== -1) {
+                return {
+                  note: practiceNodesFromStore[noteIndex],
+                  originalIndex: noteIndex,
+                  renderIndex: patternIndex,
+                };
+              }
+              return null;
+            })
+            .filter(
+              (
+                item,
+              ): item is {
+                note: ChromaticNote;
+                originalIndex: number;
+                renderIndex: number;
+              } => item !== null,
+            );
 
-          // Y 좌표 계산 시 위 테스트 인덱스 사용
-          const calculatedY =
-            extraPadding + (stringIndexForNote_TEST + 1) * stringSpacing;
+          console.log('[Flatboard Debug] Sorted notes by finger pattern:', {
+            pattern,
+            useReversePattern,
+            sortedNotes: sortedNotes.map((item) => ({
+              fingerNumber: item.note.chromaticNumber,
+              fretNumber: item.note.flatNumber,
+              renderIndex: item.renderIndex,
+              originalIndex: item.originalIndex,
+            })),
+          });
 
-          // X 좌표 계산 (이전 제안대로 Flatboard에서 계산)
-          const calculatedX =
-            (note.flatNumber - 0.5) * fretWidth + paddingLeft + extraPadding;
+          return sortedNotes.map((item, renderIndex) => {
+            const { note, originalIndex } = item;
+            const isActive =
+              isPracticePlaying &&
+              practiceNodesFromStore.length > 0 &&
+              currentIndex === originalIndex; // 메트로놈은 원래 인덱스 사용
 
-          if (note.lineNumber === 6 || note.lineNumber === 1) {
-            // 1번 또는 6번 줄 노트만 로깅
-            // console.log('[Y-Test Debug]', {
-            //   lineNumber: note.lineNumber,
-            //   stringIndexForNote_TEST,
-            //   calculatedY,
-            //   isActive,
-            // });
-          }
+            // Y 좌표 계산
+            const stringIndexForNote_TEST = note.lineNumber - 1;
+            const calculatedY =
+              extraPadding + (stringIndexForNote_TEST + 1) * stringSpacing;
 
-          return (
-            <NoteMarker
-              key={`practice-${note.lineNumber}-${note.flatNumber}-${mapIndex}`}
-              fret={note.flatNumber}
-              lineNumber={note.lineNumber}
-              calculatedX={calculatedX}
-              calculatedY={calculatedY}
-              note={String(note.chromaticNumber)}
-              color={isActive ? 'rgba(205, 126, 126, 1)' : 'rgb(214, 214, 214)'}
-              handleNodeClick={handleNodeClick}
-            />
-          );
-        })}
+            // X 좌표 계산 (실제 프렛 위치 사용)
+            const calculatedX =
+              (note.flatNumber - 0.5) * fretWidth + paddingLeft + extraPadding;
+
+            return (
+              <NoteMarker
+                key={`practice-${note.lineNumber}-${note.flatNumber}-${renderIndex}`}
+                fret={note.flatNumber}
+                lineNumber={note.lineNumber}
+                calculatedX={calculatedX}
+                calculatedY={calculatedY}
+                note={String(sortedNotes[renderIndex].originalIndex + 1)}
+                color={
+                  isActive ? 'rgba(205, 126, 126, 1)' : 'rgb(214, 214, 214)'
+                }
+                handleNodeClick={handleNodeClick}
+              />
+            );
+          });
+        })()}
     </svg>
   );
 };
