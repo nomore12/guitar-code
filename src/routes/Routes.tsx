@@ -10,6 +10,8 @@ import ChromaticPage from '../pages/chromaticPage/ChromaticPage';
 import ChordEditor from '../pages/ChordEditor';
 import ChordGeneratorTest from '../pages/ChordGeneratorTest';
 import { ChordGridPage } from '../pages/exerciseChord';
+import RhythmPage from '../pages/rhythmPage/RhythmPage';
+import { RhythmEvent } from '../pages/rhythmPage/types';
 
 export interface RouteItem {
   path: string;
@@ -76,6 +78,11 @@ const routes: RouteItem[] = [
   {
     path: '/exercise-chords',
     element: <ChordGridPage />,
+  },
+  {
+    path: '/rhythm',
+    element: <RhythmPage />,
+    exact: true,
   },
 ];
 
