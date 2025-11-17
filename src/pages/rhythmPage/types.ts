@@ -39,3 +39,8 @@ export interface BeamSegment {
   toX: number;
   y: number; // 빔 높이
 }
+
+export interface Bar {
+  beatsPerBar: number;
+  events: RhythmEvent[];
+}

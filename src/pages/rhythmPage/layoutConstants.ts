@@ -1,0 +1,11 @@
+export const BAR_PADDING = 12;
+export const NOTE_RADIUS_X = 7;
+export const NOTE_RADIUS_Y = 5;
+export const NOTE_ROTATION_DEG = -20;
+export const STEM_LENGTH = 30;
+export const STEM_OFFSET_X = 6; // 오른쪽으로 이동
+export const STEM_WIDTH = 2;
+export const FLAG_CONTROL_OFFSET_X = 14;
+export const FLAG_CONTROL_OFFSET_Y = 10;
+export const BEAM_THICKNESS = 2;
+export const BEAM_GAP = 6;

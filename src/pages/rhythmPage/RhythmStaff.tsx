@@ -1,7 +1,8 @@
 import React from 'react';
-import { RhythmEvent } from './types';
+import { Bar } from './types';
 import StaffLine from './StaffLine';
 import RhythmLayer from './RhythmLayer';
+import BeamLayer from './BeamLayer';
 
 interface RhythmStaffProps {
   y: number;
@@ -10,8 +11,7 @@ interface RhythmStaffProps {
   endX: number;
   barsPerStaff: number;
   barWidth: number;
-  beatsPerBar: number;
-  bars: RhythmEvent[][];
+  bars: Bar[];
 }
 
 const RhythmStaff: React.FC<RhythmStaffProps> = ({
@@ -21,7 +21,6 @@ const RhythmStaff: React.FC<RhythmStaffProps> = ({
   endX,
   barsPerStaff,
   barWidth,
-  beatsPerBar,
   bars,
 }) => {
   return (
@@ -34,13 +33,8 @@ const RhythmStaff: React.FC<RhythmStaffProps> = ({
         barsPerStaff={barsPerStaff}
         barWidth={barWidth}
       />
-      <RhythmLayer
-        y={y}
-        startX={startX}
-        barWidth={barWidth}
-        beatsPerBar={beatsPerBar}
-        bars={bars}
-      />
+      <RhythmLayer y={y} startX={startX} barWidth={barWidth} bars={bars} />
+      <BeamLayer y={y} startX={startX} barWidth={barWidth} bars={bars} />
     </g>
   );
 };

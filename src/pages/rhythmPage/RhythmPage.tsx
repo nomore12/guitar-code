@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import RhythmStaff from './RhythmStaff';
-import { RhythmEvent } from './types';
+import { Bar } from './types';
 
 const RhythmPageContainer = styled.div`
   width: 100%;
@@ -28,16 +28,48 @@ const RhythmPage: React.FC = () => {
 
   const beatsPerBar = 4;
   const barsPerStaff = 4;
-  const createQuarterNoteBar = (): RhythmEvent[] =>
-    Array.from({ length: beatsPerBar }, (_, beatIndex) => ({
-      start: beatIndex * 4,
-      length: 4,
-      kind: 'note' as const,
-    }));
 
-  const staffBarData: RhythmEvent[][][] = Array.from(
+  const sampleBars: Bar[] = [
+    {
+      beatsPerBar,
+      events: [
+        { start: 0, length: 4, kind: 'note' }, // quarter
+        { start: 4, length: 2, kind: 'note' }, // eighth
+        { start: 6, length: 2, kind: 'rest' }, // eighth rest
+        { start: 8, length: 3, kind: 'note', dots: 1 }, // dotted eighth
+        { start: 11, length: 1, kind: 'note' }, // sixteenth
+        { start: 12, length: 1, kind: 'rest' }, // sixteenth rest
+        { start: 13, length: 1, kind: 'note' }, // sixteenth
+        { start: 14, length: 1, kind: 'note' }, // sixteenth
+        { start: 15, length: 1, kind: 'note' }, // sixteenth
+      ],
+    },
+    {
+      beatsPerBar,
+      events: [
+        { start: 0, length: 3, kind: 'note', dots: 1 }, // dotted eighth
+        { start: 3, length: 1, kind: 'note' }, // sixteenth
+        { start: 4, length: 2, kind: 'note' }, // eighth
+        { start: 6, length: 2, kind: 'note' }, // eighth
+        { start: 8, length: 4, kind: 'rest' }, // quarter rest
+        { start: 12, length: 1, kind: 'note' }, // sixteenth
+        { start: 13, length: 1, kind: 'note' },
+        { start: 14, length: 1, kind: 'note' },
+        { start: 15, length: 1, kind: 'note' },
+      ],
+    },
+  ];
+
+  const totalBars = staffCount * barsPerStaff;
+  const bars: Bar[] = Array.from(
+    { length: totalBars },
+    (_, i) => sampleBars[i % sampleBars.length],
+  );
+
+  const staffBarData: Bar[][] = Array.from(
     { length: staffCount },
-    () => Array.from({ length: barsPerStaff }, () => createQuarterNoteBar()),
+    (_, staffIndex) =>
+      bars.slice(staffIndex * barsPerStaff, (staffIndex + 1) * barsPerStaff),
   );
 
   const innerWidth = width - marginLeft - marginRight;
@@ -95,7 +127,6 @@ const RhythmPage: React.FC = () => {
             endX={width - marginRight}
             barsPerStaff={barsPerStaff}
             barWidth={barWidth}
-            beatsPerBar={beatsPerBar}
             bars={staffBarData[staffIndex]}
           />
         ))}

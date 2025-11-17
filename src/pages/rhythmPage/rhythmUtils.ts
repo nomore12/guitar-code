@@ -6,9 +6,23 @@ import {
   BeamSegment,
 } from './types';
 
+const SLOTS_PER_BEAT = 4; // 16분 기준 (4/4)
+
+export function computeEffectiveLength(event: RhythmEvent): number {
+  if (!event.dots) return event.length;
+  let total = event.length;
+  let dotValue = event.length / 2;
+  for (let i = 0; i < event.dots; i++) {
+    total += dotValue;
+    dotValue /= 2;
+  }
+  return total;
+}
+
 export function computeFlagLevel(event: RhythmEvent): number {
-  if (event.length >= 4) return 0; // 4분 이상
-  if (event.length >= 2) return 1; // 8분 계열 (2~3칸)
+  const effectiveLength = computeEffectiveLength(event);
+  if (effectiveLength >= SLOTS_PER_BEAT) return 0; // 4분 이상
+  if (effectiveLength >= 2) return 1; // 8분 계열 (2~3칸)
   return 2; // 16분 계열 (1칸)
 }
 
@@ -87,8 +101,6 @@ export function computeBeamSegments(
 }
 
 // beatIndex 는 0 ~ beatsPerBar-1
-const SLOTS_PER_BEAT = 4; // 16분 기준 (4/4)
-
 export function makeBeatGroupsFromBar(
   events: RhythmEvent[],
   beatsPerBar: number,
