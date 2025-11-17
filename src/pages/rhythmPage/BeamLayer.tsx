@@ -46,7 +46,7 @@ const BeamLayer: React.FC<BeamLayerProps> = ({ bars, barWidth, startX, y }) => {
             return segments.map((segment, segmentIndex) => {
               const baseY = y - STEM_LENGTH;
               const levelOffset =
-                segment.level === 1 ? +6 : +7 + (BEAM_THICKNESS + BEAM_GAP);
+                segment.level === 1 ? +6 : +4 + (BEAM_THICKNESS + BEAM_GAP);
               const beamY = baseY + levelOffset;
 
               return (

@@ -7,5 +7,5 @@ export const STEM_OFFSET_X = 6; // 오른쪽으로 이동
 export const STEM_WIDTH = 2;
 export const FLAG_CONTROL_OFFSET_X = 14;
 export const FLAG_CONTROL_OFFSET_Y = 10;
-export const BEAM_THICKNESS = 2;
+export const BEAM_THICKNESS = 4;
 export const BEAM_GAP = 6;
