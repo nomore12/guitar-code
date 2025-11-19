@@ -3,6 +3,7 @@ import { Bar, RhythmEvent } from './types';
 import {
   computeNotePositions,
   computeFlagLevel,
+  computeEffectiveLength,
   makeBeatGroupsFromBar,
   makeBeamGroups,
 } from './rhythmUtils';
@@ -12,6 +13,9 @@ import {
   NOTE16_PATH,
   NOTE4_PATH,
   NOTE_VIEWBOX_SIZE,
+  REST4_PATH,
+  REST8_PATH,
+  REST16_PATH,
 } from './noteExample';
 
 interface RhythmLayerProps {
@@ -28,6 +32,13 @@ const NOTE_PATHS = {
 };
 const NOTE_PATH_ANCHOR_X = NOTE_VIEWBOX_SIZE * 0.55;
 const NOTE_PATH_ANCHOR_Y = NOTE_VIEWBOX_SIZE * 0.75;
+const REST_PATHS = {
+  quarter: REST4_PATH,
+  eighth: REST8_PATH,
+  sixteenth: REST16_PATH,
+};
+const REST_PATH_ANCHOR_X = NOTE_VIEWBOX_SIZE * 0.5;
+const REST_PATH_ANCHOR_Y = NOTE_VIEWBOX_SIZE * 0.65;
 
 const renderNotePath = (
   path: string,
@@ -37,6 +48,24 @@ const renderNotePath = (
 ): JSX.Element => {
   const translateX = x - NOTE_PATH_ANCHOR_X;
   const translateY = y - NOTE_PATH_ANCHOR_Y;
+  return (
+    <path
+      key={key}
+      d={path}
+      transform={`translate(${translateX}, ${translateY})`}
+      fill="black"
+    />
+  );
+};
+
+const renderRestPath = (
+  path: string,
+  key: string,
+  x: number,
+  y: number,
+): JSX.Element => {
+  const translateX = x - REST_PATH_ANCHOR_X;
+  const translateY = y - REST_PATH_ANCHOR_Y;
   return (
     <path
       key={key}
@@ -90,21 +119,29 @@ const RhythmLayer: React.FC<RhythmLayerProps> = ({
           const x = positions.get(event);
           if (!x) return null;
 
-          if (event.kind !== 'note') {
-            return null;
+          const eventKey = `bar-${barIndex}-event-${eventIndex}`;
+
+          if (event.kind === 'rest') {
+            const effectiveLength = computeEffectiveLength(event);
+            let path = REST_PATHS.sixteenth;
+            if (effectiveLength >= 4) {
+              path = REST_PATHS.quarter;
+            } else if (effectiveLength >= 2) {
+              path = REST_PATHS.eighth;
+            }
+            return renderRestPath(path, eventKey, x, y);
           }
 
           const flagLevel = computeFlagLevel(event);
-          const noteKey = `bar-${barIndex}-event-${eventIndex}`;
           const isBeamed = beamedEvents.has(event);
 
           if (!isBeamed && flagLevel > 0) {
             const path =
               flagLevel === 1 ? NOTE_PATHS.eighth : NOTE_PATHS.sixteenth;
-            return renderNotePath(path, noteKey, x, y);
+            return renderNotePath(path, eventKey, x, y);
           }
 
-          return renderNotePath(NOTE_PATHS.quarter, noteKey, x, y);
+          return renderNotePath(NOTE_PATHS.quarter, eventKey, x, y);
         });
       })}
     </g>

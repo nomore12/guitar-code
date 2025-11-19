@@ -33,15 +33,15 @@ const RhythmPage: React.FC = () => {
     {
       beatsPerBar,
       events: [
-        { start: 0, length: 4, kind: 'note' }, // quarter
-        { start: 4, length: 2, kind: 'note' }, // eighth
-        { start: 6, length: 2, kind: 'rest' }, // eighth rest
-        { start: 8, length: 3, kind: 'note', dots: 1 }, // dotted eighth
-        { start: 11, length: 1, kind: 'note' }, // sixteenth
-        { start: 12, length: 1, kind: 'rest' }, // sixteenth rest
-        { start: 13, length: 1, kind: 'note' }, // sixteenth
-        { start: 14, length: 1, kind: 'note' }, // sixteenth
-        { start: 15, length: 1, kind: 'note' }, // sixteenth
+        { start: 0, length: 2, kind: 'note' }, // 8th
+        { start: 2, length: 1, kind: 'note' }, // 16th
+        { start: 3, length: 1, kind: 'note' }, // 16th (완전한 1박)
+        { start: 4, length: 2, kind: 'rest' }, // 8th rest
+        { start: 6, length: 2, kind: 'note' }, // 8th (박 경계 직전)
+        { start: 8, length: 1, kind: 'note' }, // 16th (다음 박으로 넘김)
+        { start: 9, length: 1, kind: 'note' }, // 16th
+        { start: 10, length: 2, kind: 'note' }, // 8th
+        { start: 12, length: 4, kind: 'note' }, // quarter
       ],
     },
     {
@@ -50,12 +50,26 @@ const RhythmPage: React.FC = () => {
         { start: 0, length: 3, kind: 'note', dots: 1 }, // dotted eighth
         { start: 3, length: 1, kind: 'note' }, // sixteenth
         { start: 4, length: 2, kind: 'note' }, // eighth
-        { start: 6, length: 2, kind: 'note' }, // eighth
-        { start: 8, length: 4, kind: 'rest' }, // quarter rest
-        { start: 12, length: 1, kind: 'note' }, // sixteenth
-        { start: 13, length: 1, kind: 'note' },
-        { start: 14, length: 1, kind: 'note' },
-        { start: 15, length: 1, kind: 'note' },
+        { start: 6, length: 1, kind: 'rest' }, // sixteenth rest
+        { start: 7, length: 1, kind: 'note' }, // sixteenth
+        { start: 8, length: 2, kind: 'note' }, // eighth crossing beat
+        { start: 10, length: 1, kind: 'note' }, // sixteenth
+        { start: 11, length: 1, kind: 'note' }, // sixteenth
+        { start: 12, length: 2, kind: 'rest' }, // eighth rest
+        { start: 14, length: 2, kind: 'note' }, // eighth
+      ],
+    },
+    {
+      beatsPerBar,
+      events: [
+        { start: 0, length: 4, kind: 'rest' }, // quarter rest
+        { start: 4, length: 2, kind: 'note' }, // eighth
+        { start: 6, length: 2, kind: 'rest' }, // eighth rest
+        { start: 8, length: 1, kind: 'note' }, // sixteenth
+        { start: 9, length: 1, kind: 'rest' }, // sixteenth rest
+        { start: 10, length: 1, kind: 'note' }, // sixteenth
+        { start: 11, length: 1, kind: 'note' }, // sixteenth
+        { start: 12, length: 4, kind: 'rest' }, // quarter rest
       ],
     },
   ];

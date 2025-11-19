@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bar } from './types';
+import { Bar, BeamSegment } from './types';
 import {
   computeNotePositions,
   makeBeatGroupsFromBar,
@@ -21,6 +21,31 @@ interface BeamLayerProps {
   y: number;
 }
 
+const EPSILON = 0.01;
+
+const splitSegmentByBeats = (
+  segment: BeamSegment,
+  beatBoundaries: number[],
+): BeamSegment[] => {
+  const { fromX, toX, level } = segment;
+  const relevantBoundaries = beatBoundaries.filter(
+    (boundary) => boundary > fromX + EPSILON && boundary < toX - EPSILON,
+  );
+
+  if (relevantBoundaries.length === 0) {
+    return [segment];
+  }
+
+  const pieces: BeamSegment[] = [];
+  let currentStart = fromX;
+  for (const boundary of relevantBoundaries) {
+    pieces.push({ level, fromX: currentStart, toX: boundary, y: segment.y });
+    currentStart = boundary;
+  }
+  pieces.push({ level, fromX: currentStart, toX: toX, y: segment.y });
+  return pieces;
+};
+
 const BeamLayer: React.FC<BeamLayerProps> = ({ bars, barWidth, startX, y }) => {
   return (
     <g>
@@ -36,12 +61,18 @@ const BeamLayer: React.FC<BeamLayerProps> = ({ bars, barWidth, startX, y }) => {
           beatsPerBar,
         );
         const beatGroups = makeBeatGroupsFromBar(events, beatsPerBar);
+        const beatBoundaries = Array.from(
+          { length: beatsPerBar + 1 },
+          (_, i) => innerStartX + (i / beatsPerBar) * innerWidth,
+        );
 
         return beatGroups.flatMap((beatGroup) => {
           const beamGroups = makeBeamGroups(beatGroup);
 
           return beamGroups.flatMap((group) => {
-            const segments = computeBeamSegments(group, positions);
+            const segments = computeBeamSegments(group, positions).flatMap(
+              (segment) => splitSegmentByBeats(segment, beatBoundaries),
+            );
 
             return segments.map((segment, segmentIndex) => {
               const baseY = y - STEM_LENGTH;
