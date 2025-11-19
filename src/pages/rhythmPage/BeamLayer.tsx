@@ -1,17 +1,20 @@
 import React from 'react';
-import { Bar, BeamSegment } from './types';
+import { Bar, BeamSegment, RhythmEvent } from './types';
 import {
-  computeNotePositions,
   makeBeatGroupsFromBar,
   makeBeamGroups,
   computeBeamSegments,
+  computeEventRenderX,
 } from './rhythmUtils';
 import {
-  BAR_PADDING,
+  BAR_PADDING_LEFT,
+  BAR_PADDING_RIGHT,
   STEM_OFFSET_X,
   STEM_LENGTH,
   BEAM_THICKNESS,
   BEAM_GAP,
+  SLOT_HIGHLIGHT_MARGIN,
+  BEAT_GAP,
 } from './layoutConstants';
 
 interface BeamLayerProps {
@@ -52,25 +55,42 @@ const BeamLayer: React.FC<BeamLayerProps> = ({ bars, barWidth, startX, y }) => {
       {bars.map((bar, barIndex) => {
         const { events, beatsPerBar } = bar;
         const barX = startX + barIndex * barWidth;
-        const innerStartX = barX + BAR_PADDING;
-        const innerWidth = barWidth - BAR_PADDING * 2;
-        const positions = computeNotePositions(
-          events,
-          innerStartX,
-          innerWidth,
-          beatsPerBar,
-        );
+        const innerStartX = barX + BAR_PADDING_LEFT;
+        const innerWidth = barWidth - BAR_PADDING_LEFT - BAR_PADDING_RIGHT;
+        const beatWidth =
+          (innerWidth - BEAT_GAP * (beatsPerBar - 1)) / beatsPerBar;
         const beatGroups = makeBeatGroupsFromBar(events, beatsPerBar);
-        const beatBoundaries = Array.from(
-          { length: beatsPerBar + 1 },
-          (_, i) => innerStartX + (i / beatsPerBar) * innerWidth,
+        const highlightWidth = Math.max(
+          beatWidth - SLOT_HIGHLIGHT_MARGIN * 2,
+          0,
+        );
+        const beatBoundaries: number[] = [];
+        for (let i = 0; i < beatsPerBar; i++) {
+          const start =
+            innerStartX + i * (beatWidth + BEAT_GAP) + SLOT_HIGHLIGHT_MARGIN;
+          beatBoundaries.push(start);
+        }
+        beatBoundaries.push(
+          innerStartX +
+            (beatsPerBar - 1) * (beatWidth + BEAT_GAP) +
+            SLOT_HIGHLIGHT_MARGIN +
+            highlightWidth,
         );
 
         return beatGroups.flatMap((beatGroup) => {
           const beamGroups = makeBeamGroups(beatGroup);
 
           return beamGroups.flatMap((group) => {
-            const segments = computeBeamSegments(group, positions).flatMap(
+            const beatBaseX =
+              innerStartX + beatGroup.beatIndex * (beatWidth + BEAT_GAP);
+            const localPositions = new Map<RhythmEvent, number>();
+            group.notes.forEach(({ event }) => {
+              localPositions.set(
+                event,
+                computeEventRenderX(event, beatBaseX, beatWidth),
+              );
+            });
+            const segments = computeBeamSegments(group, localPositions).flatMap(
               (segment) => splitSegmentByBeats(segment, beatBoundaries),
             );
 

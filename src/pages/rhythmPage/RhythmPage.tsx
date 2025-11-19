@@ -33,16 +33,34 @@ const RhythmPage: React.FC = () => {
     {
       beatsPerBar,
       events: [
-        { start: 0, length: 2, kind: 'note' }, // 8th
-        { start: 2, length: 1, kind: 'note' }, // 16th
-        { start: 3, length: 1, kind: 'note' }, // 16th (완전한 1박)
-        { start: 4, length: 2, kind: 'rest' }, // 8th rest
-        { start: 6, length: 2, kind: 'note' }, // 8th (박 경계 직전)
-        { start: 8, length: 1, kind: 'note' }, // 16th (다음 박으로 넘김)
-        { start: 9, length: 1, kind: 'note' }, // 16th
-        { start: 10, length: 2, kind: 'note' }, // 8th
-        { start: 12, length: 4, kind: 'note' }, // quarter
+        { start: 0, length: 1, kind: 'note' }, // 8th
+        { start: 1, length: 1, kind: 'note' }, // 8th
+        { start: 2, length: 1, kind: 'note' }, // 8th
+        { start: 3, length: 1, kind: 'note' }, // 8th
+        { start: 4, length: 1, kind: 'note' }, // 8th
+        { start: 5, length: 1, kind: 'note' }, // 8th
+        { start: 6, length: 1, kind: 'note' }, // 8th
+        { start: 7, length: 1, kind: 'note' }, // 8th
+        { start: 8, length: 1, kind: 'note' }, // 8th
+        { start: 9, length: 1, kind: 'note' }, // 8th
+        { start: 10, length: 1, kind: 'note' }, // 8th
+        { start: 11, length: 1, kind: 'note' }, // 8th
+        { start: 12, length: 1, kind: 'note' }, // 8th
+        { start: 13, length: 1, kind: 'note' }, // 8th
+        { start: 14, length: 1, kind: 'note' }, // 8th
+        { start: 15, length: 1, kind: 'note' }, // 8th
       ],
+      // events: [
+      //   { start: 0, length: 2, kind: 'note' }, // 8th
+      //   { start: 2, length: 1, kind: 'note' }, // 16th
+      //   { start: 3, length: 1, kind: 'note' }, // 16th (완전한 1박)
+      //   { start: 4, length: 2, kind: 'rest' }, // 8th rest
+      //   { start: 6, length: 2, kind: 'note' }, // 8th (박 경계 직전)
+      //   { start: 8, length: 1, kind: 'note' }, // 16th (다음 박으로 넘김)
+      //   { start: 9, length: 1, kind: 'note' }, // 16th
+      //   { start: 10, length: 2, kind: 'note' }, // 8th
+      //   { start: 12, length: 4, kind: 'note' }, // quarter
+      // ],
     },
     {
       beatsPerBar,

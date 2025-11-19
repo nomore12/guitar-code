@@ -5,8 +5,15 @@ import {
   RhythmEvent,
   BeamSegment,
 } from './types';
+import {
+  BEAT_GAP,
+  BAR_PADDING_LEFT,
+  BAR_PADDING_RIGHT,
+  SLOT_HIGHLIGHT_MARGIN,
+  SLOT_HIGHLIGHT_EXTRA_MARGIN,
+} from './layoutConstants';
 
-const SLOTS_PER_BEAT = 4; // 16분 기준 (4/4)
+export const SLOTS_PER_BEAT = 4; // 16분 기준 (4/4)
 
 export function computeEffectiveLength(event: RhythmEvent): number {
   if (!event.dots) return event.length;
@@ -120,20 +127,19 @@ export function makeBeatGroupsFromBar(
   return groups;
 }
 
-export function computeNotePositions(
-  events: RhythmEvent[],
-  barX: number,
-  barWidth: number,
-  beatsPerBar: number,
-): Map<RhythmEvent, number> {
-  const positions = new Map<RhythmEvent, number>();
-  const totalSlots = beatsPerBar * SLOTS_PER_BEAT;
-
-  for (const e of events) {
-    const ratio = e.start / totalSlots; // 0 ~ 1
-    const x = barX + ratio * barWidth;
-    positions.set(e, x);
-  }
-
-  return positions;
+export function computeEventRenderX(
+  event: RhythmEvent,
+  beatBaseX: number,
+  beatWidth: number,
+): number {
+  const effectiveBeatWidth = Math.max(beatWidth - SLOT_HIGHLIGHT_MARGIN * 2, 0);
+  const slotInBeat = event.start % SLOTS_PER_BEAT;
+  const centerSlot = slotInBeat + computeEffectiveLength(event) / 2;
+  const ratio = Math.min(centerSlot / SLOTS_PER_BEAT, 1);
+  const innerMargin = SLOT_HIGHLIGHT_MARGIN + SLOT_HIGHLIGHT_EXTRA_MARGIN;
+  const innerWidth = Math.max(
+    effectiveBeatWidth - SLOT_HIGHLIGHT_EXTRA_MARGIN * 2,
+    0,
+  );
+  return beatBaseX + innerMargin + ratio * innerWidth;
 }

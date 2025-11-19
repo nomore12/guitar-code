@@ -1,4 +1,5 @@
-export const BAR_PADDING = 12;
+export const BAR_PADDING_LEFT = 12;
+export const BAR_PADDING_RIGHT = 8;
 export const NOTE_RADIUS_X = 7;
 export const NOTE_RADIUS_Y = 5;
 export const NOTE_ROTATION_DEG = -20;
@@ -9,3 +10,10 @@ export const FLAG_CONTROL_OFFSET_X = 14;
 export const FLAG_CONTROL_OFFSET_Y = 10;
 export const BEAM_THICKNESS = 4;
 export const BEAM_GAP = 6;
+export const BEAT_GAP = 2;
+export const SLOT_HIGHLIGHT_HEIGHT = 36;
+export const SLOT_HIGHLIGHT_OFFSET = 18;
+export const SLOT_HIGHLIGHT_OPACITY = 0.12;
+export const SLOT_HIGHLIGHT_RADIUS = 4;
+export const SLOT_HIGHLIGHT_MARGIN = 2;
+export const SLOT_HIGHLIGHT_EXTRA_MARGIN = 0;
