@@ -21,6 +21,9 @@ import {
   SLOT_HIGHLIGHT_MARGIN,
   SLOT_HIGHLIGHT_EXTRA_MARGIN,
   SLOT_HIGHLIGHT_OPACITY,
+  NOTE_DOT_OFFSET_X,
+  NOTE_DOT_OFFSET_Y,
+  NOTE_DOT_RADIUS,
 } from './layoutConstants';
 
 interface BeatRendererProps {
@@ -88,14 +91,31 @@ const BeatRenderer: React.FC<BeatRendererProps> = ({
           if (effectiveLength >= 4) restPath = REST_PATHS.quarter;
           else if (effectiveLength >= 2) restPath = REST_PATHS.eighth;
           return (
-            <path
-              key={key}
-              d={restPath}
-              transform={`translate(${
-                eventX - REST_PATH_ANCHOR_X
-              }, ${y - REST_PATH_ANCHOR_Y})`}
-              fill="black"
-            />
+            <g key={key}>
+              <path
+                d={restPath}
+                transform={`translate(${
+                  eventX - REST_PATH_ANCHOR_X
+                }, ${y - REST_PATH_ANCHOR_Y})`}
+                fill="black"
+              />
+              {event.dots
+                ? Array.from({ length: event.dots }, (_, dotIndex) => {
+                    const dotX =
+                      eventX + NOTE_DOT_OFFSET_X + dotIndex * NOTE_DOT_OFFSET_X;
+                    const dotY = y - NOTE_DOT_OFFSET_Y;
+                    return (
+                      <circle
+                        key={`${key}-rest-dot-${dotIndex}`}
+                        cx={dotX}
+                        cy={dotY}
+                        r={NOTE_DOT_RADIUS}
+                        fill="black"
+                      />
+                    );
+                  })
+                : null}
+            </g>
           );
         }
 
@@ -107,29 +127,32 @@ const BeatRenderer: React.FC<BeatRendererProps> = ({
               ? NOTE_PATHS.eighth
               : NOTE_PATHS.sixteenth;
 
-        // Beamed notes stay quarter-style; single notes use note type path.
-        if (isBeamed(event) || flagLevel === 0) {
-          return (
-            <path
-              key={key}
-              d={NOTE_PATHS.quarter}
-              transform={`translate(${eventX - NOTE_PATH_ANCHOR_X}, ${
-                y - NOTE_PATH_ANCHOR_Y
-              })`}
-              fill="black"
-            />
-          );
-        }
+        const baseTransform = `translate(${eventX - NOTE_PATH_ANCHOR_X}, ${
+          y - NOTE_PATH_ANCHOR_Y
+        })`;
+        const glyphPath =
+          isBeamed(event) || flagLevel === 0 ? NOTE_PATHS.quarter : notePath;
 
         return (
-          <path
-            key={key}
-            d={notePath}
-            transform={`translate(${eventX - NOTE_PATH_ANCHOR_X}, ${
-              y - NOTE_PATH_ANCHOR_Y
-            })`}
-            fill="black"
-          />
+          <g key={key}>
+            <path d={glyphPath} transform={baseTransform} fill="black" />
+            {event.dots
+              ? Array.from({ length: event.dots }, (_, dotIndex) => {
+                  const dotX =
+                    eventX + NOTE_DOT_OFFSET_X + dotIndex * NOTE_DOT_OFFSET_X;
+                  const dotY = y - NOTE_DOT_OFFSET_Y;
+                  return (
+                    <circle
+                      key={`${key}-dot-${dotIndex}`}
+                      cx={dotX}
+                      cy={dotY}
+                      r={NOTE_DOT_RADIUS}
+                      fill="black"
+                    />
+                  );
+                })
+              : null}
+          </g>
         );
       })}
     </g>

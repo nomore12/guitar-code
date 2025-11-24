@@ -17,3 +17,6 @@ export const SLOT_HIGHLIGHT_OPACITY = 0.12;
 export const SLOT_HIGHLIGHT_RADIUS = 4;
 export const SLOT_HIGHLIGHT_MARGIN = 2;
 export const SLOT_HIGHLIGHT_EXTRA_MARGIN = 0;
+export const NOTE_DOT_OFFSET_X = 6;
+export const NOTE_DOT_OFFSET_Y = 4;
+export const NOTE_DOT_RADIUS = 2;
