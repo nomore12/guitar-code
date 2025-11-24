@@ -20,6 +20,7 @@ import {
   SLOT_HIGHLIGHT_RADIUS,
   SLOT_HIGHLIGHT_MARGIN,
   SLOT_HIGHLIGHT_EXTRA_MARGIN,
+  SLOT_HIGHLIGHT_OPACITY,
 } from './layoutConstants';
 
 interface BeatRendererProps {
@@ -29,6 +30,7 @@ interface BeatRendererProps {
   y: number;
   events: RhythmEvent[];
   isBeamed: (event: RhythmEvent) => boolean;
+  isActive: boolean;
 }
 
 const NOTE_PATHS = {
@@ -55,6 +57,7 @@ const BeatRenderer: React.FC<BeatRendererProps> = ({
   y,
   events,
   isBeamed,
+  isActive,
 }) => {
   const highlightX =
     startX + SLOT_HIGHLIGHT_MARGIN + SLOT_HIGHLIGHT_EXTRA_MARGIN;
@@ -72,7 +75,7 @@ const BeatRenderer: React.FC<BeatRendererProps> = ({
         height={SLOT_HIGHLIGHT_HEIGHT}
         rx={SLOT_HIGHLIGHT_RADIUS}
         fill="black"
-        fillOpacity={0.12}
+        fillOpacity={isActive ? SLOT_HIGHLIGHT_OPACITY : 0}
       />
 
       {events.map((event, eventIndex) => {

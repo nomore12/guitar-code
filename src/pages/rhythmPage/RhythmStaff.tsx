@@ -3,6 +3,7 @@ import { Bar } from './types';
 import StaffLine from './StaffLine';
 import RhythmLayer from './RhythmLayer';
 import BeamLayer from './BeamLayer';
+import { ActivePosition } from './useRhythmPlayback';
 
 interface RhythmStaffProps {
   y: number;
@@ -12,6 +13,8 @@ interface RhythmStaffProps {
   barsPerStaff: number;
   barWidth: number;
   bars: Bar[];
+  startBarIndex: number;
+  activePosition: ActivePosition | null;
 }
 
 const RhythmStaff: React.FC<RhythmStaffProps> = ({
@@ -22,6 +25,8 @@ const RhythmStaff: React.FC<RhythmStaffProps> = ({
   barsPerStaff,
   barWidth,
   bars,
+  startBarIndex,
+  activePosition,
 }) => {
   return (
     <g>
@@ -33,7 +38,14 @@ const RhythmStaff: React.FC<RhythmStaffProps> = ({
         barsPerStaff={barsPerStaff}
         barWidth={barWidth}
       />
-      <RhythmLayer y={y} startX={startX} barWidth={barWidth} bars={bars} />
+      <RhythmLayer
+        y={y}
+        startX={startX}
+        barWidth={barWidth}
+        bars={bars}
+        startBarIndex={startBarIndex}
+        activePosition={activePosition}
+      />
       <BeamLayer y={y} startX={startX} barWidth={barWidth} bars={bars} />
     </g>
   );

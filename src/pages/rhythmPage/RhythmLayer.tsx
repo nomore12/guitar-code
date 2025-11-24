@@ -7,12 +7,15 @@ import {
   BEAT_GAP,
 } from './layoutConstants';
 import BeatRenderer from './BeatRenderer';
+import { ActivePosition } from './useRhythmPlayback';
 
 interface RhythmLayerProps {
   bars: Bar[];
   barWidth: number;
   startX: number;
   y: number;
+  startBarIndex: number;
+  activePosition: ActivePosition | null;
 }
 
 const collectBeamedEvents = (bars: Bar[]): Set<RhythmEvent> => {
@@ -37,6 +40,8 @@ const RhythmLayer: React.FC<RhythmLayerProps> = ({
   barWidth,
   startX,
   y,
+  startBarIndex,
+  activePosition,
 }) => {
   const beamedEvents = useMemo(() => collectBeamedEvents(bars), [bars]);
 
@@ -44,6 +49,8 @@ const RhythmLayer: React.FC<RhythmLayerProps> = ({
     <g>
       {bars.map((bar, barIndex) => {
         const { events, beatsPerBar } = bar;
+        const globalBarIndex = startBarIndex + barIndex;
+        const isActiveBar = activePosition?.barIndex === globalBarIndex;
         const barX = startX + barIndex * barWidth;
         const innerStartX = barX + BAR_PADDING_LEFT;
         const innerWidth = barWidth - BAR_PADDING_LEFT - BAR_PADDING_RIGHT;
@@ -57,6 +64,8 @@ const RhythmLayer: React.FC<RhythmLayerProps> = ({
               const beatIndex = beatGroup.beatIndex;
               const beatBaseX =
                 innerStartX + beatIndex * (beatWidth + BEAT_GAP);
+              const isActiveBeat =
+                isActiveBar && activePosition?.beatIndex === beatIndex;
               return (
                 <BeatRenderer
                   key={`bar-${barIndex}-beat-${beatIndex}`}
@@ -66,6 +75,7 @@ const RhythmLayer: React.FC<RhythmLayerProps> = ({
                   y={y}
                   events={beatGroup.events}
                   isBeamed={(event) => beamedEvents.has(event)}
+                  isActive={Boolean(isActiveBeat)}
                 />
               );
             })}

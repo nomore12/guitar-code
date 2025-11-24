@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import RhythmStaff from './RhythmStaff';
 import { Bar } from './types';
 import ControlUi from './ControlUi';
+import useRhythmPlayback, { ActivePosition } from './useRhythmPlayback';
 
 const RhythmPageContainer = styled.div`
   width: 100%;
@@ -36,79 +37,77 @@ const RhythmPage: React.FC = () => {
   const beatsPerBar = 4;
   const barsPerStaff = 4;
 
-  const sampleBars: Bar[] = [
-    {
-      beatsPerBar,
-      events: [
-        { start: 0, length: 1, kind: 'note' }, // 8th
-        { start: 1, length: 1, kind: 'note' }, // 8th
-        { start: 2, length: 1, kind: 'note' }, // 8th
-        { start: 3, length: 1, kind: 'note' }, // 8th
-        { start: 4, length: 1, kind: 'note' }, // 8th
-        { start: 5, length: 1, kind: 'note' }, // 8th
-        { start: 6, length: 1, kind: 'note' }, // 8th
-        { start: 7, length: 1, kind: 'note' }, // 8th
-        { start: 8, length: 1, kind: 'note' }, // 8th
-        { start: 9, length: 1, kind: 'note' }, // 8th
-        { start: 10, length: 1, kind: 'note' }, // 8th
-        { start: 11, length: 1, kind: 'note' }, // 8th
-        { start: 12, length: 1, kind: 'note' }, // 8th
-        { start: 13, length: 1, kind: 'note' }, // 8th
-        { start: 14, length: 1, kind: 'note' }, // 8th
-        { start: 15, length: 1, kind: 'note' }, // 8th
-      ],
-      // events: [
-      //   { start: 0, length: 2, kind: 'note' }, // 8th
-      //   { start: 2, length: 1, kind: 'note' }, // 16th
-      //   { start: 3, length: 1, kind: 'note' }, // 16th (완전한 1박)
-      //   { start: 4, length: 2, kind: 'rest' }, // 8th rest
-      //   { start: 6, length: 2, kind: 'note' }, // 8th (박 경계 직전)
-      //   { start: 8, length: 1, kind: 'note' }, // 16th (다음 박으로 넘김)
-      //   { start: 9, length: 1, kind: 'note' }, // 16th
-      //   { start: 10, length: 2, kind: 'note' }, // 8th
-      //   { start: 12, length: 4, kind: 'note' }, // quarter
-      // ],
-    },
-    {
-      beatsPerBar,
-      events: [
-        { start: 0, length: 3, kind: 'note', dots: 1 }, // dotted eighth
-        { start: 3, length: 1, kind: 'note' }, // sixteenth
-        { start: 4, length: 2, kind: 'note' }, // eighth
-        { start: 6, length: 1, kind: 'rest' }, // sixteenth rest
-        { start: 7, length: 1, kind: 'note' }, // sixteenth
-        { start: 8, length: 2, kind: 'note' }, // eighth crossing beat
-        { start: 10, length: 1, kind: 'note' }, // sixteenth
-        { start: 11, length: 1, kind: 'note' }, // sixteenth
-        { start: 12, length: 2, kind: 'rest' }, // eighth rest
-        { start: 14, length: 2, kind: 'note' }, // eighth
-      ],
-    },
-    {
-      beatsPerBar,
-      events: [
-        { start: 0, length: 4, kind: 'rest' }, // quarter rest
-        { start: 4, length: 2, kind: 'note' }, // eighth
-        { start: 6, length: 2, kind: 'rest' }, // eighth rest
-        { start: 8, length: 1, kind: 'note' }, // sixteenth
-        { start: 9, length: 1, kind: 'rest' }, // sixteenth rest
-        { start: 10, length: 1, kind: 'note' }, // sixteenth
-        { start: 11, length: 1, kind: 'note' }, // sixteenth
-        { start: 12, length: 4, kind: 'rest' }, // quarter rest
-      ],
-    },
-  ];
-
-  const totalBars = staffCount * barsPerStaff;
-  const bars: Bar[] = Array.from(
-    { length: totalBars },
-    (_, i) => sampleBars[i % sampleBars.length],
+  const sampleBars: Bar[] = useMemo(
+    () => [
+      {
+        beatsPerBar,
+        events: [
+          { start: 0, length: 1, kind: 'note' },
+          { start: 1, length: 1, kind: 'note' },
+          { start: 2, length: 1, kind: 'note' },
+          { start: 3, length: 1, kind: 'note' },
+          { start: 4, length: 1, kind: 'note' },
+          { start: 5, length: 1, kind: 'note' },
+          { start: 6, length: 1, kind: 'note' },
+          { start: 7, length: 1, kind: 'note' },
+          { start: 8, length: 1, kind: 'note' },
+          { start: 9, length: 1, kind: 'note' },
+          { start: 10, length: 1, kind: 'note' },
+          { start: 11, length: 1, kind: 'note' },
+          { start: 12, length: 1, kind: 'note' },
+          { start: 13, length: 1, kind: 'note' },
+          { start: 14, length: 1, kind: 'note' },
+          { start: 15, length: 1, kind: 'note' },
+        ],
+      },
+      {
+        beatsPerBar,
+        events: [
+          { start: 0, length: 3, kind: 'note', dots: 1 },
+          { start: 3, length: 1, kind: 'note' },
+          { start: 4, length: 2, kind: 'note' },
+          { start: 6, length: 1, kind: 'rest' },
+          { start: 7, length: 1, kind: 'note' },
+          { start: 8, length: 2, kind: 'note' },
+          { start: 10, length: 1, kind: 'note' },
+          { start: 11, length: 1, kind: 'note' },
+          { start: 12, length: 2, kind: 'rest' },
+          { start: 14, length: 2, kind: 'note' },
+        ],
+      },
+      {
+        beatsPerBar,
+        events: [
+          { start: 0, length: 4, kind: 'rest' },
+          { start: 4, length: 2, kind: 'note' },
+          { start: 6, length: 2, kind: 'rest' },
+          { start: 8, length: 1, kind: 'note' },
+          { start: 9, length: 1, kind: 'rest' },
+          { start: 10, length: 1, kind: 'note' },
+          { start: 11, length: 1, kind: 'note' },
+          { start: 12, length: 4, kind: 'rest' },
+        ],
+      },
+    ],
+    [beatsPerBar],
   );
 
-  const staffBarData: Bar[][] = Array.from(
-    { length: staffCount },
-    (_, staffIndex) =>
-      bars.slice(staffIndex * barsPerStaff, (staffIndex + 1) * barsPerStaff),
+  const totalBars = staffCount * barsPerStaff;
+  const bars: Bar[] = useMemo(
+    () =>
+      Array.from(
+        { length: totalBars },
+        (_, i) => sampleBars[i % sampleBars.length],
+      ),
+    [sampleBars, totalBars],
+  );
+
+  const staffBarData: Bar[][] = useMemo(
+    () =>
+      Array.from({ length: staffCount }, (_, staffIndex) =>
+        bars.slice(staffIndex * barsPerStaff, (staffIndex + 1) * barsPerStaff),
+      ),
+    [bars, barsPerStaff, staffCount],
   );
 
   const innerWidth = width - marginLeft - marginRight;
@@ -118,6 +117,19 @@ const RhythmPage: React.FC = () => {
     { length: staffCount },
     (_, i) => marginTop + i * staffSpacing,
   );
+
+  const [activePosition, setActivePosition] = useState<ActivePosition | null>(
+    null,
+  );
+
+  useRhythmPlayback({
+    bars,
+    beatsPerBar,
+    bpm,
+    isPlaying,
+    restAccentEnabled,
+    onPositionChange: setActivePosition,
+  });
 
   return (
     <RhythmPageContainer>
@@ -165,18 +177,23 @@ const RhythmPage: React.FC = () => {
           4
         </text>
 
-        {staffYPositions.map((y, staffIndex) => (
-          <RhythmStaff
-            key={staffIndex}
-            y={y + 20}
-            staffIndex={staffIndex}
-            startX={marginLeft}
-            endX={width - marginRight}
-            barsPerStaff={barsPerStaff}
-            barWidth={barWidth}
-            bars={staffBarData[staffIndex]}
-          />
-        ))}
+        {staffYPositions.map((y, staffIndex) => {
+          const staffStartBarIndex = staffIndex * barsPerStaff;
+          return (
+            <RhythmStaff
+              key={staffIndex}
+              y={y + 20}
+              staffIndex={staffIndex}
+              startX={marginLeft}
+              endX={width - marginRight}
+              barsPerStaff={barsPerStaff}
+              barWidth={barWidth}
+              bars={staffBarData[staffIndex]}
+              startBarIndex={staffStartBarIndex}
+              activePosition={activePosition}
+            />
+          );
+        })}
       </svg>
     </RhythmPageContainer>
   );
