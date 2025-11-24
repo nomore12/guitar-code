@@ -64,6 +64,7 @@ export function computeBeamSegments(
   notePositions: Map<RhythmEvent, number>,
 ): BeamSegment[] {
   const segments: BeamSegment[] = [];
+  const STUB_LENGTH = 12;
 
   // 1레벨 빔: 그룹 전체를 하나로 연결
   const first = group.notes[0];
@@ -77,31 +78,73 @@ export function computeBeamSegments(
 
   // 2레벨 빔: 인접한 flagLevel=2 노트들끼리만 연결
   let runStart: BeamNoteRef | null = null;
+  let runStartIndex = -1;
+
   for (let i = 0; i < group.notes.length; i++) {
     const n = group.notes[i];
     if (n.flagLevel === 2) {
-      if (!runStart) runStart = n;
+      if (!runStart) {
+        runStart = n;
+        runStartIndex = i;
+      }
     } else {
       if (runStart) {
         const prev = group.notes[i - 1];
-        segments.push({
-          level: 2,
-          fromX: notePositions.get(runStart.event)!,
-          toX: notePositions.get(prev.event)!,
-          y: 1, // 1레벨보다 조금 더 안쪽 y
-        });
+        const startX = notePositions.get(runStart.event)!;
+        const endX = notePositions.get(prev.event)!;
+
+        if (runStart === prev) {
+          // 단독 16분음표: 스터브(Stub) 생성
+          if (runStartIndex === 0) {
+            // 그룹의 첫 음표면 오른쪽으로
+            segments.push({
+              level: 2,
+              fromX: startX,
+              toX: startX + STUB_LENGTH,
+              y: 1,
+            });
+          } else {
+            // 그 외(중간이나 끝)면 왼쪽으로
+            segments.push({
+              level: 2,
+              fromX: startX - STUB_LENGTH,
+              toX: startX,
+              y: 1,
+            });
+          }
+        } else {
+          // 연속된 16분음표
+          segments.push({ level: 2, fromX: startX, toX: endX, y: 1 });
+        }
         runStart = null;
       }
     }
   }
   if (runStart) {
     const last16 = group.notes[group.notes.length - 1];
-    segments.push({
-      level: 2,
-      fromX: notePositions.get(runStart.event)!,
-      toX: notePositions.get(last16.event)!,
-      y: 1, // 동일한 2레벨 y
-    });
+    const startX = notePositions.get(runStart.event)!;
+    const endX = notePositions.get(last16.event)!;
+
+    if (runStart === last16) {
+      // 단독 16분음표
+      if (runStartIndex === 0) {
+        segments.push({
+          level: 2,
+          fromX: startX,
+          toX: startX + STUB_LENGTH,
+          y: 1,
+        });
+      } else {
+        segments.push({
+          level: 2,
+          fromX: startX - STUB_LENGTH,
+          toX: startX,
+          y: 1,
+        });
+      }
+    } else {
+      segments.push({ level: 2, fromX: startX, toX: endX, y: 1 });
+    }
   }
 
   return segments;

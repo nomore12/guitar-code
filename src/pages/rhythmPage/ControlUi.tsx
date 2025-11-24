@@ -26,6 +26,7 @@ interface ControlUiProps {
   stageId: StageId;
   onStageChange: (stage: StageId) => void;
   stageOptions: { id: StageId; name: string }[];
+  onRegenerate: () => void;
 }
 
 const ControlUi: React.FC<ControlUiProps> = ({
@@ -40,6 +41,7 @@ const ControlUi: React.FC<ControlUiProps> = ({
   stageId,
   onStageChange,
   stageOptions,
+  onRegenerate,
 }) => {
   return (
     <Card
@@ -94,7 +96,9 @@ const ControlUi: React.FC<ControlUiProps> = ({
                 </MenuItem>
               ))}
             </Select>
-
+            <Button variant="outlined" onClick={onRegenerate}>
+              Random
+            </Button>
             <FormControlLabel
               control={
                 <Switch
@@ -102,7 +106,7 @@ const ControlUi: React.FC<ControlUiProps> = ({
                   onChange={(event) => onRestAccentToggle(event.target.checked)}
                 />
               }
-              label="4분 쉼표 강조"
+              label="쉼표 강조"
             />
 
             <Button

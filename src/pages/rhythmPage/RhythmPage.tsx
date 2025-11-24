@@ -4,7 +4,7 @@ import RhythmStaff from './RhythmStaff';
 import { Bar, StageId, TrainingStage } from './types';
 import ControlUi from './ControlUi';
 import useRhythmPlayback, { ActivePosition } from './useRhythmPlayback';
-import { RHYTHM_PRESETS } from './rhythmPresets';
+import { generateStagePreset } from './rhythmGenerator';
 
 const RhythmPageContainer = styled.div`
   width: 100%;
@@ -25,6 +25,7 @@ const RhythmPage: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [restAccentEnabled, setRestAccentEnabled] = useState(true);
   const [stageId, setStageId] = useState<StageId>(1);
+  const [seed, setSeed] = useState(Date.now());
 
   const width = 1200;
   const height = 480;
@@ -40,21 +41,16 @@ const RhythmPage: React.FC = () => {
 
   const presetOptions = useMemo(
     () =>
-      RHYTHM_PRESETS.filter((stage: TrainingStage) => stage.id <= 3).map(
-        (stage: TrainingStage) => ({
-          id: stage.id,
-          name: stage.name,
-        }),
-      ),
+      Array.from({ length: 8 }, (_, i) => ({
+        id: (i + 1) as StageId,
+        name: `Stage ${i + 1}`,
+      })),
     [],
   );
 
-  const activeStage = useMemo(
-    () =>
-      RHYTHM_PRESETS.find((stage: TrainingStage) => stage.id === stageId) ??
-      (RHYTHM_PRESETS[0] as TrainingStage),
-    [stageId],
-  );
+  const activeStage = useMemo(() => {
+    return generateStagePreset(stageId, seed);
+  }, [stageId, seed]);
   const stageBars = activeStage.bars;
   const beatsPerBar = stageBars[0]?.beatsPerBar ?? 4;
 
@@ -92,6 +88,7 @@ const RhythmPage: React.FC = () => {
     if (nextStageId === stageId) return;
     setIsPlaying(false);
     setStageId(nextStageId);
+    setSeed(Date.now()); // Change seed on stage change for fresh patterns
   };
 
   useRhythmPlayback({
@@ -115,6 +112,7 @@ const RhythmPage: React.FC = () => {
         stageId={stageId}
         onStageChange={handleStageChange}
         stageOptions={presetOptions}
+        onRegenerate={() => setSeed(Date.now())}
       />
       <svg
         className="score-svg"
@@ -123,7 +121,7 @@ const RhythmPage: React.FC = () => {
       >
         {/* 템포 표시 */}
         <text x={marginLeft} y={16} fontSize={16} fontWeight="bold">
-          ♩ = {bpm}
+          BPM: {bpm}
         </text>
 
         {/* 4/4 박자 표시 (첫 줄 왼쪽) */}
