@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import RhythmStaff from './RhythmStaff';
-import { Bar } from './types';
+import { Bar, StageId, TrainingStage } from './types';
 import ControlUi from './ControlUi';
 import useRhythmPlayback, { ActivePosition } from './useRhythmPlayback';
+import { RHYTHM_PRESETS } from './rhythmPresets';
 
 const RhythmPageContainer = styled.div`
   width: 100%;
@@ -23,6 +24,7 @@ const RhythmPage: React.FC = () => {
   const [bpm, setBpm] = useState(90);
   const [isPlaying, setIsPlaying] = useState(false);
   const [restAccentEnabled, setRestAccentEnabled] = useState(true);
+  const [stageId, setStageId] = useState<StageId>(1);
 
   const width = 1200;
   const height = 480;
@@ -34,72 +36,36 @@ const RhythmPage: React.FC = () => {
   const staffCount = 4; // 기본 4줄
   const staffSpacing = 120;
 
-  const beatsPerBar = 4;
   const barsPerStaff = 4;
 
-  const sampleBars: Bar[] = useMemo(
-    () => [
-      {
-        beatsPerBar,
-        events: [
-          { start: 0, length: 1, kind: 'note' },
-          { start: 1, length: 1, kind: 'note' },
-          { start: 2, length: 1, kind: 'note' },
-          { start: 3, length: 1, kind: 'note' },
-          { start: 4, length: 1, kind: 'note' },
-          { start: 5, length: 1, kind: 'note' },
-          { start: 6, length: 1, kind: 'note' },
-          { start: 7, length: 1, kind: 'note' },
-          { start: 8, length: 1, kind: 'note' },
-          { start: 9, length: 1, kind: 'note' },
-          { start: 10, length: 1, kind: 'note' },
-          { start: 11, length: 1, kind: 'note' },
-          { start: 12, length: 1, kind: 'note' },
-          { start: 13, length: 1, kind: 'note' },
-          { start: 14, length: 1, kind: 'note' },
-          { start: 15, length: 1, kind: 'note' },
-        ],
-      },
-      {
-        beatsPerBar,
-        events: [
-          { start: 0, length: 3, kind: 'note', dots: 1 },
-          { start: 3, length: 1, kind: 'note' },
-          { start: 4, length: 2, kind: 'note' },
-          { start: 6, length: 1, kind: 'rest' },
-          { start: 7, length: 1, kind: 'note' },
-          { start: 8, length: 2, kind: 'note' },
-          { start: 10, length: 1, kind: 'note' },
-          { start: 11, length: 1, kind: 'note' },
-          { start: 12, length: 2, kind: 'rest' },
-          { start: 14, length: 2, kind: 'note' },
-        ],
-      },
-      {
-        beatsPerBar,
-        events: [
-          { start: 0, length: 4, kind: 'rest' },
-          { start: 4, length: 2, kind: 'note' },
-          { start: 6, length: 2, kind: 'rest' },
-          { start: 8, length: 1, kind: 'note' },
-          { start: 9, length: 1, kind: 'rest' },
-          { start: 10, length: 1, kind: 'note' },
-          { start: 11, length: 1, kind: 'note' },
-          { start: 12, length: 4, kind: 'rest' },
-        ],
-      },
-    ],
-    [beatsPerBar],
+  const presetOptions = useMemo(
+    () =>
+      RHYTHM_PRESETS.filter((stage: TrainingStage) => stage.id <= 3).map(
+        (stage: TrainingStage) => ({
+          id: stage.id,
+          name: stage.name,
+        }),
+      ),
+    [],
   );
+
+  const activeStage = useMemo(
+    () =>
+      RHYTHM_PRESETS.find((stage: TrainingStage) => stage.id === stageId) ??
+      (RHYTHM_PRESETS[0] as TrainingStage),
+    [stageId],
+  );
+  const stageBars = activeStage.bars;
+  const beatsPerBar = stageBars[0]?.beatsPerBar ?? 4;
 
   const totalBars = staffCount * barsPerStaff;
   const bars: Bar[] = useMemo(
     () =>
       Array.from(
         { length: totalBars },
-        (_, i) => sampleBars[i % sampleBars.length],
+        (_, i) => stageBars[i % stageBars.length],
       ),
-    [sampleBars, totalBars],
+    [stageBars, totalBars],
   );
 
   const staffBarData: Bar[][] = useMemo(
@@ -122,6 +88,12 @@ const RhythmPage: React.FC = () => {
     null,
   );
 
+  const handleStageChange = (nextStageId: StageId) => {
+    if (nextStageId === stageId) return;
+    setIsPlaying(false);
+    setStageId(nextStageId);
+  };
+
   useRhythmPlayback({
     bars,
     beatsPerBar,
@@ -140,6 +112,9 @@ const RhythmPage: React.FC = () => {
         onTogglePlay={() => setIsPlaying((prev) => !prev)}
         restAccentEnabled={restAccentEnabled}
         onRestAccentToggle={setRestAccentEnabled}
+        stageId={stageId}
+        onStageChange={handleStageChange}
+        stageOptions={presetOptions}
       />
       <svg
         className="score-svg"

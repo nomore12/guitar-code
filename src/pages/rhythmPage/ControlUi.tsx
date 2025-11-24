@@ -12,6 +12,7 @@ import {
   MenuItem,
 } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
+import { StageId } from './types';
 
 interface ControlUiProps {
   bpm: number;
@@ -22,6 +23,9 @@ interface ControlUiProps {
   onTogglePlay: () => void;
   restAccentEnabled: boolean;
   onRestAccentToggle: (enabled: boolean) => void;
+  stageId: StageId;
+  onStageChange: (stage: StageId) => void;
+  stageOptions: { id: StageId; name: string }[];
 }
 
 const ControlUi: React.FC<ControlUiProps> = ({
@@ -33,6 +37,9 @@ const ControlUi: React.FC<ControlUiProps> = ({
   onTogglePlay,
   restAccentEnabled,
   onRestAccentToggle,
+  stageId,
+  onStageChange,
+  stageOptions,
 }) => {
   return (
     <Card
@@ -76,15 +83,16 @@ const ControlUi: React.FC<ControlUiProps> = ({
                 aria-label="BPM Slider"
               />
             </Stack>
-            <Select defaultValue="step-1">
-              <MenuItem value="step-1">Step 1</MenuItem>
-              <MenuItem value="step-2">Step 2</MenuItem>
-              <MenuItem value="step-3">Step 3</MenuItem>
-              <MenuItem value="step-4">Step 4</MenuItem>
-              <MenuItem value="step-5">Step 5</MenuItem>
-              <MenuItem value="step-6">Step 6</MenuItem>
-              <MenuItem value="step-7">Step 7</MenuItem>
-              <MenuItem value="step-8">Step 8</MenuItem>
+            <Select
+              value={stageId}
+              onChange={(event) => onStageChange(event.target.value as StageId)}
+              size="small"
+            >
+              {stageOptions.map((stage) => (
+                <MenuItem key={stage.id} value={stage.id}>
+                  {stage.name}
+                </MenuItem>
+              ))}
             </Select>
 
             <FormControlLabel

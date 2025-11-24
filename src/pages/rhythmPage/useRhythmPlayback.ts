@@ -21,17 +21,15 @@ interface UseRhythmPlaybackOptions {
 
 const NOTE_VOICE = {
   pitchDecay: 0.01,
-  octaves: 2,
-  oscillator: { type: 'triangle' as const },
-  envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.05 },
+  octaves: 4,
+  oscillator: { type: 'sine' as const },
+  envelope: { attack: 0.001, decay: 0.15, sustain: 0, release: 0.08 },
 };
 
 const REST_VOICE = {
-  harmonicity: 4,
-  modulationIndex: 32,
-  resonance: 4000,
-  octaves: 0.5,
-  envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.1 },
+  noise: { type: 'pink' as const },
+  envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.03 },
+  volume: -8,
 };
 
 const useRhythmPlayback = ({
@@ -69,24 +67,19 @@ const useRhythmPlayback = ({
 
     let isDisposed = false;
     const noteSynth = new Tone.MembraneSynth(NOTE_VOICE).toDestination();
-    const restSynth = new Tone.MetalSynth(REST_VOICE).toDestination();
+    const restSynth = new Tone.NoiseSynth(REST_VOICE).toDestination();
     let currentSlot = 0;
 
     const handleSlot = (slotIndex: number, time: number) => {
       const events = slotEventMap.get(slotIndex) ?? [];
       const hasNote = events.some((event) => event.kind === 'note');
-      const hasQuarterRest =
-        restAccentEnabled &&
-        events.some(
-          (event) =>
-            event.kind === 'rest' &&
-            computeEffectiveLength(event) >= SLOTS_PER_BEAT,
-        );
+      const hasRestForAccent =
+        restAccentEnabled && events.some((event) => event.kind === 'rest');
 
       if (hasNote) {
-        noteSynth.triggerAttackRelease('C2', '16n', time);
-      } else if (hasQuarterRest) {
-        restSynth.triggerAttackRelease('8n', time);
+        noteSynth.triggerAttackRelease('E1', '16n', time, 0.8);
+      } else if (hasRestForAccent) {
+        restSynth.triggerAttackRelease('16n', time, 0.5);
       }
 
       const barIndex = Math.floor(slotIndex / slotsPerBar);

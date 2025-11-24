@@ -230,12 +230,12 @@ export const TRAINING_STAGES: TrainingStage[] = [
 - 7단계는 점음표가 처음 등장하는 단계이므로 점 리듬 제약을 반드시 박 기준(maxDottedBeatsPerBar)으로 설정해야 합니다. 점이 포함된 박이 최소 몇 개는 등장하게 하고, 동시에 과도하게 많아지지 않도록 상한을 둡니다. 쉼표는 느슨한 이벤트 제어, 16분은 중간 수준(예: 2박)으로 제한하면 점 리듬을 안정적으로 체화할 수 있습니다.
 - 8단계는 점음표+쉼표+16분이 실전처럼 섞이는 종합 단계입니다. 점박은 박 기준으로 비중을 낮춰 양념처럼 섞이게 하고, 16분 박은 약간 더 넓게 허용합니다(예: 3박까지). 쉼표는 이벤트 기준 제한을 풀고, 대신 “쉼표가 포함된 박 수”만 박 기준으로 가볍게 제어하면 흐름이 무너지지 않으면서도 다양한 패턴을 노출할 수 있습니다.
 
-| Stage | 16분 밀도 제약 | 쉼표 제약 | 점음표 제약 |
-|-------|----------------|-----------|-------------|
-| 5     | 박 기준 (2박, `maxDenseBeatsPerBar = 2`) | 이벤트 기준 (1~5개) | 사용 안 함 |
-| 6     | 박 기준 (3박까지 허용) | 이벤트 기준 완만 (0~6개) | 사용 안 함 |
-| 7     | 박 기준 (2박으로 축소) | 이벤트 기준 느슨 (0~5개) | 박 기준 (최소 1박, 최대 2박) |
-| 8     | 박 기준 완화 (3박 허용) | 박 기준으로 가볍게 제어하거나 해제 (`maxRestBeatsPerBar` 필요 시 추가), 이벤트는 사실상 해제(0~7개) | 박 기준 (최대 1박, 양념 느낌) |
+| Stage | 16분 밀도 제약                           | 쉼표 제약                                                                                           | 점음표 제약                   |
+| ----- | ---------------------------------------- | --------------------------------------------------------------------------------------------------- | ----------------------------- |
+| 5     | 박 기준 (2박, `maxDenseBeatsPerBar = 2`) | 이벤트 기준 (1~5개)                                                                                 | 사용 안 함                    |
+| 6     | 박 기준 (3박까지 허용)                   | 이벤트 기준 완만 (0~6개)                                                                            | 사용 안 함                    |
+| 7     | 박 기준 (2박으로 축소)                   | 이벤트 기준 느슨 (0~5개)                                                                            | 박 기준 (최소 1박, 최대 2박)  |
+| 8     | 박 기준 완화 (3박 허용)                  | 박 기준으로 가볍게 제어하거나 해제 (`maxRestBeatsPerBar` 필요 시 추가), 이벤트는 사실상 해제(0~7개) | 박 기준 (최대 1박, 양념 느낌) |
 
 권장 수치 예시는 다음과 같습니다. (여전히 한 마디는 16칸을 정확히 채우며, `maxDenseBeatsPerBar`는 16분이 포함된 박 수, `maxRestBeatsPerBar`는 쉼표가 포함된 박 수, 쉼표 관련 이벤트 값은 쉼 이벤트 개수, 점음표 관련 값은 점이 포함된 박 수로 해석합니다.)
 
@@ -579,7 +579,10 @@ export const STAGE_5_RULES: StageRules = {
       { length: 2, kind: 'note' },
     ],
     // 쉬운 박도 섞어서 감각 유지
-    [{ length: 2, kind: 'note' }, { length: 2, kind: 'note' }],
+    [
+      { length: 2, kind: 'note' },
+      { length: 2, kind: 'note' },
+    ],
     [{ length: 4, kind: 'note' }],
   ],
   maxDenseBeatsPerBar: 2,
@@ -595,7 +598,10 @@ export const STAGE_6_RULES: StageRules = {
   stageId: 6,
   name: 'Stage 6 – Mixed density',
   beatPatterns: [
-    [{ length: 2, kind: 'note' }, { length: 2, kind: 'note' }],
+    [
+      { length: 2, kind: 'note' },
+      { length: 2, kind: 'note' },
+    ],
     [{ length: 4, kind: 'note' }],
     [
       { length: 2, kind: 'note' },
@@ -644,7 +650,10 @@ export const STAGE_7_RULES: StageRules = {
       { length: 1, kind: 'note' },
       { length: 3, kind: 'note', dots: 1 },
     ],
-    [{ length: 2, kind: 'note' }, { length: 2, kind: 'note' }],
+    [
+      { length: 2, kind: 'note' },
+      { length: 2, kind: 'note' },
+    ],
     [{ length: 4, kind: 'note' }],
     [{ length: 4, kind: 'rest' }],
   ],
@@ -666,7 +675,10 @@ export const STAGE_8_RULES: StageRules = {
       { length: 3, kind: 'note', dots: 1 },
       { length: 1, kind: 'note' },
     ],
-    [{ length: 2, kind: 'note' }, { length: 2, kind: 'note' }],
+    [
+      { length: 2, kind: 'note' },
+      { length: 2, kind: 'note' },
+    ],
     [
       { length: 1, kind: 'note' },
       { length: 1, kind: 'note' },

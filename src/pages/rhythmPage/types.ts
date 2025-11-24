@@ -44,3 +44,41 @@ export interface Bar {
   beatsPerBar: number;
   events: RhythmEvent[];
 }
+
+export type StageId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+
+/** 1박(=16분 4칸)을 채우는 패턴. start는 박 조립 시 부여된다. */
+export type BeatPattern = Omit<RhythmEvent, 'start'>[];
+
+/** 단계별 규칙 메타 정보 (허용 길이, 점음표, 박 경계 허용 등) */
+export interface StageSpec {
+  id: StageId;
+  name: string;
+  allowedLengths: DurationUnit[];
+  allowRests: boolean;
+  allowDots: boolean;
+  allowCrossBeatEvents: boolean;
+}
+
+/** 단계별 StageRules (자동 생성용) */
+export interface StageRules {
+  stageId: StageId;
+  name: string;
+  beatPatterns: BeatPattern[];
+  maxDenseBeatsPerBar: number;
+  minRestEventsPerBar: number;
+  maxRestEventsPerBar: number;
+  maxRestBeatsPerBar?: number;
+  allowDots: boolean;
+  minDottedBeatsPerBar?: number;
+  maxDottedBeatsPerBar: number;
+  allowCrossBeatEvents: boolean;
+}
+
+/** 골든 세트 등 하드코딩 프리셋 */
+export interface TrainingStage {
+  id: StageId;
+  name: string;
+  description?: string;
+  bars: Bar[];
+}
