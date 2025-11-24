@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import RhythmStaff from './RhythmStaff';
 import { Bar } from './types';
+import ControlUi from './ControlUi';
 
 const RhythmPageContainer = styled.div`
   width: 100%;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
   padding: 24px 0;
 
   .score-svg {
@@ -16,6 +19,10 @@ const RhythmPageContainer = styled.div`
 `;
 
 const RhythmPage: React.FC = () => {
+  const [bpm, setBpm] = useState(90);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [restAccentEnabled, setRestAccentEnabled] = useState(true);
+
   const width = 1200;
   const height = 480;
 
@@ -114,6 +121,14 @@ const RhythmPage: React.FC = () => {
 
   return (
     <RhythmPageContainer>
+      <ControlUi
+        bpm={bpm}
+        onBpmChange={setBpm}
+        isPlaying={isPlaying}
+        onTogglePlay={() => setIsPlaying((prev) => !prev)}
+        restAccentEnabled={restAccentEnabled}
+        onRestAccentToggle={setRestAccentEnabled}
+      />
       <svg
         className="score-svg"
         viewBox={`0 0 ${width} ${height}`}
@@ -121,7 +136,7 @@ const RhythmPage: React.FC = () => {
       >
         {/* 템포 표시 */}
         <text x={marginLeft} y={16} fontSize={16} fontWeight="bold">
-          ♩ = 60
+          ♩ = {bpm}
         </text>
 
         {/* 4/4 박자 표시 (첫 줄 왼쪽) */}
