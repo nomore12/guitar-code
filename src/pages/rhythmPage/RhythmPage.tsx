@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import RhythmStaff from './RhythmStaff';
-import { Bar, StageId, TrainingStage } from './types';
+import { Bar, StageId } from './types';
 import ControlUi from './ControlUi';
 import useRhythmPlayback, { ActivePosition } from './useRhythmPlayback';
 import { generateStagePreset } from './rhythmGenerator';

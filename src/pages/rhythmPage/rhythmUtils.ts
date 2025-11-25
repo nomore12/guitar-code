@@ -6,9 +6,6 @@ import {
   BeamSegment,
 } from './types';
 import {
-  BEAT_GAP,
-  BAR_PADDING_LEFT,
-  BAR_PADDING_RIGHT,
   SLOT_HIGHLIGHT_MARGIN,
   SLOT_HIGHLIGHT_EXTRA_MARGIN,
 } from './layoutConstants';
