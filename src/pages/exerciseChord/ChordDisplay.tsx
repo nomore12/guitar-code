@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import CompactFingerMark from './CompactFingerMark';
 import CompactMuteMark from './CompactMuteMark';
@@ -104,8 +104,6 @@ const ChordDisplay: React.FC<ChordDisplayProps> = ({
   const cellSize = 14; // 20 -> 14로 축소
   const cellSizeY = 20; // 30 -> 20으로 축소
 
-  const [openFingers, setOpenFingers] = useState<number[]>([]);
-
   // 실제 운지된 프렛의 최소값과 최대값 찾기
   const fingerFrets = chord.fingers.map((f) => f[1]);
   const minFret =
@@ -115,43 +113,44 @@ const ChordDisplay: React.FC<ChordDisplayProps> = ({
   const isOpenPosition = chord.flat === 1 && minFret <= 3;
   const displayMinFret = isOpenPosition ? 1 : minFret;
 
-  const lines: React.ReactNode[] = [];
+  const lines = useMemo(() => {
+    const result: React.ReactNode[] = [];
+    for (let i = 0; i <= rowCount; i++) {
+      result.push(
+        <line
+          key={`h${i}`}
+          x1={cellSize + 10}
+          y1={(i + 1) * cellSizeY}
+          x2={cellSize * (columnCount + 1) + 10}
+          y2={(i + 1) * cellSizeY}
+          strokeWidth={i === 0 ? 3 : 1}
+          stroke="black"
+        />,
+      );
+    }
 
-  for (let i = 0; i <= rowCount; i++) {
-    lines.push(
-      <line
-        key={`h${i}`}
-        x1={cellSize + 10}
-        y1={(i + 1) * cellSizeY}
-        x2={cellSize * (columnCount + 1) + 10}
-        y2={(i + 1) * cellSizeY}
-        strokeWidth={i === 0 ? 3 : 1} // 4 -> 3으로 축소
-        stroke="black"
-      />,
-    );
-  }
+    for (let i = 0; i <= columnCount; i++) {
+      result.push(
+        <line
+          key={`v${i}`}
+          x1={(i + 1) * cellSize + 10}
+          y1={cellSizeY}
+          x2={(i + 1) * cellSize + 10}
+          y2={cellSizeY * (rowCount + 1)}
+          stroke="black"
+        />,
+      );
+    }
+    return result;
+  }, [rowCount, columnCount, cellSize, cellSizeY]);
 
-  for (let i = 0; i <= columnCount; i++) {
-    lines.push(
-      <line
-        key={`v${i}`}
-        x1={(i + 1) * cellSize + 10}
-        y1={cellSizeY}
-        x2={(i + 1) * cellSize + 10}
-        y2={cellSizeY * (rowCount + 1)}
-        stroke="black"
-      />,
-    );
-  }
-
-  useEffect(() => {
-    const lines = chord.fingers.map((item) => item[0]);
-    const resultLines = chord.mute ? lines.concat(chord.mute) : lines;
+  const openFingers = useMemo(() => {
+    const fingerLines = chord.fingers.map((item) => item[0]);
+    const resultLines = chord.mute
+      ? fingerLines.concat(chord.mute)
+      : fingerLines;
     const removeSet = new Set(resultLines);
-    const resultArray = [1, 2, 3, 4, 5, 6].filter(
-      (item) => !removeSet.has(item),
-    );
-    setOpenFingers([...resultArray]);
+    return [1, 2, 3, 4, 5, 6].filter((item) => !removeSet.has(item));
   }, [chord.fingers, chord.mute]);
 
   const chordGrid = (

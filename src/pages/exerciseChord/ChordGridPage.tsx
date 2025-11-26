@@ -10,17 +10,23 @@ import {
   Stack,
   useTheme,
   useMediaQuery,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
 import ChordDisplay from './ChordDisplay';
 import { chordData } from './chordData';
-import { generateRandomChordsWithCategories } from './randomChordGenerator';
+import {
+  generateRandomChordsWithCategories,
+  generateRandomChords,
+} from './randomChordGenerator';
 import type { ChordCategories } from './randomChordGenerator';
+import { ChordGenerationMode } from './chordCategories';
 import ChordPracticeMetronome from '../../components/metronome/ChordPracticeMetronome';
+import { TOTAL_MEASURES } from './constants';
 
 const ChordGridPage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [hideFingers, setHideFingers] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
@@ -38,13 +44,17 @@ const ChordGridPage: React.FC = () => {
       seventhChords: false,
     },
   );
+  const [selectedMode, setSelectedMode] = useState<
+    ChordGenerationMode | 'custom'
+  >('custom');
 
   // 메트로놈 상태
   const [currentMeasure, setCurrentMeasure] = useState<number>(0);
+  const [stopSignal, setStopSignal] = useState(0);
 
   // 컴포넌트 마운트 시 랜덤하게 하나의 코드에 포커스
   useEffect(() => {
-    const randomIndex = Math.floor(Math.random() * 16);
+    const randomIndex = Math.floor(Math.random() * TOTAL_MEASURES);
     setFocusedIndex(randomIndex);
   }, []);
 
@@ -63,8 +73,9 @@ const ChordGridPage: React.FC = () => {
       const nextMeasure = prevMeasure + 1;
 
       // 16마디 완료 시 자동 정지
-      if (nextMeasure >= 16) {
-        setCurrentMeasure(0);
+      if (nextMeasure >= TOTAL_MEASURES) {
+        setFocusedIndex(0);
+        setStopSignal((prev) => prev + 1);
         return 0;
       }
 
@@ -104,19 +115,35 @@ const ChordGridPage: React.FC = () => {
     }));
   };
 
+  // 모드 변경 핸들러
+  const handleModeChange = (
+    event: React.MouseEvent<HTMLElement>,
+    newMode: ChordGenerationMode | 'custom' | null,
+  ) => {
+    if (newMode !== null) {
+      setSelectedMode(newMode);
+    }
+  };
+
   // 랜덤 코드 생성
   const generateNewChords = async () => {
     setIsGenerating(true);
 
     try {
-      // 로딩 시뮬레이션 (실제로는 생성이 빠름)
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // 로딩 시뮬레이션 제거
+      // await new Promise((resolve) => setTimeout(resolve, 500));
 
-      const newChords = generateRandomChordsWithCategories(selectedCategories);
+      let newChords;
+      if (selectedMode === 'custom') {
+        newChords = generateRandomChordsWithCategories(selectedCategories);
+      } else {
+        newChords = generateRandomChords(selectedMode);
+      }
+
       setDisplayChords(newChords);
 
       // 새로운 랜덤 포커스 설정
-      const randomIndex = Math.floor(Math.random() * 16);
+      const randomIndex = Math.floor(Math.random() * TOTAL_MEASURES);
       setFocusedIndex(randomIndex);
     } catch (error) {
       console.error('코드 생성 실패:', error);
@@ -163,7 +190,33 @@ const ChordGridPage: React.FC = () => {
             }}
           >
             <Typography variant="body2" fontWeight="bold" mb={1.5}>
-              코드 설정
+              난이도 설정
+            </Typography>
+
+            <ToggleButtonGroup
+              value={selectedMode}
+              exclusive
+              onChange={handleModeChange}
+              aria-label="difficulty mode"
+              size="small"
+              fullWidth
+              sx={{ mb: 2 }}
+            >
+              <ToggleButton value={ChordGenerationMode.BEGINNER}>
+                초급
+              </ToggleButton>
+              <ToggleButton value={ChordGenerationMode.INTERMEDIATE}>
+                중급
+              </ToggleButton>
+              <ToggleButton value={ChordGenerationMode.ADVANCED}>
+                고급
+              </ToggleButton>
+              <ToggleButton value="custom">커스텀</ToggleButton>
+            </ToggleButtonGroup>
+
+            <Typography variant="body2" fontWeight="bold" mb={1.5}>
+              코드 카테고리{' '}
+              {selectedMode !== 'custom' && '(커스텀 모드에서만 선택 가능)'}
             </Typography>
             <Grid
               container
@@ -180,6 +233,7 @@ const ChordGridPage: React.FC = () => {
                       checked={selectedCategories.openPosition}
                       onChange={() => handleCategoryChange('openPosition')}
                       size="small"
+                      disabled={selectedMode !== 'custom'}
                     />
                   }
                   label="오픈포지션"
@@ -197,6 +251,7 @@ const ChordGridPage: React.FC = () => {
                       checked={selectedCategories.barreChords}
                       onChange={() => handleCategoryChange('barreChords')}
                       size="small"
+                      disabled={selectedMode !== 'custom'}
                     />
                   }
                   label="하이코드(5,6번줄)"
@@ -214,6 +269,7 @@ const ChordGridPage: React.FC = () => {
                       checked={selectedCategories.diminishedChords}
                       onChange={() => handleCategoryChange('diminishedChords')}
                       size="small"
+                      disabled={selectedMode !== 'custom'}
                     />
                   }
                   label="Diminished"
@@ -231,6 +287,7 @@ const ChordGridPage: React.FC = () => {
                       checked={selectedCategories.minor7b5Chords}
                       onChange={() => handleCategoryChange('minor7b5Chords')}
                       size="small"
+                      disabled={selectedMode !== 'custom'}
                     />
                   }
                   label="Minor7b5"
@@ -248,6 +305,7 @@ const ChordGridPage: React.FC = () => {
                       checked={selectedCategories.augmentedChords}
                       onChange={() => handleCategoryChange('augmentedChords')}
                       size="small"
+                      disabled={selectedMode !== 'custom'}
                     />
                   }
                   label="Augmented"
@@ -265,6 +323,7 @@ const ChordGridPage: React.FC = () => {
                       checked={selectedCategories.sus4Chords}
                       onChange={() => handleCategoryChange('sus4Chords')}
                       size="small"
+                      disabled={selectedMode !== 'custom'}
                     />
                   }
                   label="Sus4"
@@ -282,6 +341,7 @@ const ChordGridPage: React.FC = () => {
                       checked={selectedCategories.seventhChords}
                       onChange={() => handleCategoryChange('seventhChords')}
                       size="small"
+                      disabled={selectedMode !== 'custom'}
                     />
                   }
                   label="7th 코드"
@@ -323,7 +383,8 @@ const ChordGridPage: React.FC = () => {
             onMeasureComplete={handleMeasureComplete}
             onPlayStateChange={handlePlayStateChange}
             currentMeasure={currentMeasure}
-            totalMeasures={16}
+            totalMeasures={TOTAL_MEASURES}
+            stopSignal={stopSignal}
           />
         </Box>
       </Box>
@@ -333,11 +394,22 @@ const ChordGridPage: React.FC = () => {
           <Grid item xs={6} sm={6} md={3} lg={3} key={index}>
             <Box
               onClick={() => handleChordClick(index)}
+              tabIndex={0}
+              role="button"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  handleChordClick(index);
+                }
+              }}
               sx={{
                 cursor: 'pointer',
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
+                '&:focus': {
+                  outline: '2px solid #1976d2',
+                  borderRadius: 1,
+                },
               }}
             >
               <ChordDisplay

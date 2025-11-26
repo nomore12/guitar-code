@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -22,6 +22,8 @@ export interface ChordPracticeMetronomeProps {
   currentMeasure?: number;
   /** 전체 마디 수 (기본값: 16) */
   totalMeasures?: number;
+  /** 부모에서 재생을 강제로 중단시키기 위한 신호 (값이 변할 때마다 정지) */
+  stopSignal?: number;
 }
 
 const ChordPracticeMetronome: React.FC<ChordPracticeMetronomeProps> = ({
@@ -29,12 +31,15 @@ const ChordPracticeMetronome: React.FC<ChordPracticeMetronomeProps> = ({
   onPlayStateChange,
   currentMeasure = 0,
   totalMeasures = 16,
+  stopSignal,
 }) => {
   const [bpm, setBpm] = useState<number>(60);
   const [volume, setVolume] = useState(10);
   const [beat, setBeat] = useState<'4' | '8' | '16'>('4');
   const [isPlaying, setIsPlaying] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
+
+  const isInitialStopSignal = React.useRef(true);
 
   // 메트로놈 콜백 - 마디가 끝날 때마다 호출
   const metronomeCallback = () => {
@@ -74,6 +79,16 @@ const ChordPracticeMetronome: React.FC<ChordPracticeMetronomeProps> = ({
     setCountdown(null);
     onPlayStateChange?.(false);
   };
+
+  // 부모에서 강제 정지 신호 수신
+  useEffect(() => {
+    if (stopSignal === undefined) return;
+    if (isInitialStopSignal.current) {
+      isInitialStopSignal.current = false;
+      return;
+    }
+    handleStopMetronome();
+  }, [stopSignal]);
 
   // BPM 변경 핸들러
   const onChangeBpm = (_event: Event, value: number | number[]) => {
