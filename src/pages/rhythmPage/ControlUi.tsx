@@ -10,8 +10,11 @@ import {
   FormControlLabel,
   Select,
   MenuItem,
+  Box,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
-import { PlayArrow, Stop } from '@mui/icons-material';
+import { PlayArrow, Stop, Shuffle } from '@mui/icons-material';
 import { StageId } from './types';
 
 interface ControlUiProps {
@@ -45,33 +48,44 @@ const ControlUi: React.FC<ControlUiProps> = ({
 }) => {
   return (
     <Card
-      elevation={1}
+      elevation={3}
       sx={{
         width: '100%',
-        maxWidth: 960,
-        mb: 3,
+        maxWidth: 1200,
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        borderRadius: 3,
       }}
     >
-      <CardContent>
+      <CardContent sx={{ py: 3, px: 4 }}>
         <Stack spacing={3}>
-          <Typography variant="h6" component="h2">
-            리듬 컨트롤
-          </Typography>
-          <Stack
-            direction={{ xs: 'column', md: 'row' }}
-            spacing={3}
-            alignItems={{ md: 'center' }}
+          <Typography
+            variant="h5"
+            component="h2"
+            sx={{ fontWeight: 600, textAlign: 'center' }}
           >
-            <Stack flex={1}>
+            🎵 리듬 트레이닝
+          </Typography>
+
+          {/* Main Controls Row */}
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            {/* BPM Slider */}
+            <Box sx={{ flex: 1, minWidth: 200 }}>
               <Stack
                 direction="row"
                 justifyContent="space-between"
                 alignItems="center"
+                sx={{ mb: 1 }}
               >
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>
                   BPM
                 </Typography>
-                <Typography variant="body1" fontWeight={600}>
+                <Typography variant="h6" fontWeight={600}>
                   {bpm}
                 </Typography>
               </Stack>
@@ -83,12 +97,39 @@ const ControlUi: React.FC<ControlUiProps> = ({
                 step={1}
                 valueLabelDisplay="auto"
                 aria-label="BPM Slider"
+                sx={{
+                  color: 'white',
+                  '& .MuiSlider-thumb': {
+                    width: 16,
+                    height: 16,
+                  },
+                }}
               />
-            </Stack>
+            </Box>
+
+            {/* Stage Selection */}
             <Select
               value={stageId}
               onChange={(event) => onStageChange(event.target.value as StageId)}
               size="small"
+              sx={{
+                minWidth: 120,
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                color: 'white',
+                borderRadius: 2,
+                '.MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.5)',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'white',
+                },
+                '.MuiSvgIcon-root': {
+                  color: 'white',
+                },
+              }}
             >
               {stageOptions.map((stage) => (
                 <MenuItem key={stage.id} value={stage.id}>
@@ -96,25 +137,60 @@ const ControlUi: React.FC<ControlUiProps> = ({
                 </MenuItem>
               ))}
             </Select>
-            <Button variant="outlined" onClick={onRegenerate}>
-              Random
-            </Button>
+
+            {/* Random Button */}
+            <Tooltip title="새로운 패턴 생성">
+              <IconButton
+                onClick={onRegenerate}
+                sx={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                  },
+                  color: 'white',
+                }}
+              >
+                <Shuffle />
+              </IconButton>
+            </Tooltip>
+
+            {/* Rest Accent Toggle */}
             <FormControlLabel
               control={
                 <Switch
                   checked={restAccentEnabled}
                   onChange={(event) => onRestAccentToggle(event.target.checked)}
+                  sx={{
+                    '& .MuiSwitch-switchBase.Mui-checked': {
+                      color: 'white',
+                    },
+                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                    },
+                  }}
                 />
               }
-              label="쉼표 강조"
+              label={
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                  쉼표 강조
+                </Typography>
+              }
             />
 
+            {/* Play/Stop Button */}
             <Button
               variant="contained"
-              color={isPlaying ? 'error' : 'primary'}
+              color={isPlaying ? 'error' : 'success'}
               onClick={onTogglePlay}
               startIcon={isPlaying ? <Stop /> : <PlayArrow />}
-              sx={{ minWidth: 120 }}
+              sx={{
+                minWidth: 120,
+                fontWeight: 600,
+                boxShadow: 3,
+                '&:hover': {
+                  boxShadow: 5,
+                },
+              }}
             >
               {isPlaying ? '정지' : '재생'}
             </Button>

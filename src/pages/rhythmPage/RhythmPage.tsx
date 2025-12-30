@@ -1,24 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import styled from 'styled-components';
+import { Box, Card, CardContent, Container } from '@mui/material';
 import RhythmStaff from './RhythmStaff';
 import { Bar, StageId } from './types';
 import ControlUi from './ControlUi';
 import useRhythmPlayback, { ActivePosition } from './useRhythmPlayback';
 import { generateStagePreset } from './rhythmGenerator';
-
-const RhythmPageContainer = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-  padding: 24px 0;
-
-  .score-svg {
-    width: 1200px;
-    max-width: 100%;
-  }
-`;
 
 const RhythmPage: React.FC = () => {
   const [bpm, setBpm] = useState(90);
@@ -101,74 +87,109 @@ const RhythmPage: React.FC = () => {
   });
 
   return (
-    <RhythmPageContainer>
-      <ControlUi
-        bpm={bpm}
-        onBpmChange={setBpm}
-        isPlaying={isPlaying}
-        onTogglePlay={() => setIsPlaying((prev) => !prev)}
-        restAccentEnabled={restAccentEnabled}
-        onRestAccentToggle={setRestAccentEnabled}
-        stageId={stageId}
-        onStageChange={handleStageChange}
-        stageOptions={presetOptions}
-        onRegenerate={() => setSeed(Date.now())}
-      />
-      <svg
-        className="score-svg"
-        viewBox={`0 0 ${width} ${height}`}
-        xmlns="http://www.w3.org/2000/svg"
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 3,
+        }}
       >
-        {/* 템포 표시 */}
-        <text x={marginLeft} y={16} fontSize={16} fontWeight="bold">
-          BPM: {bpm}
-        </text>
-
-        {/* 4/4 박자 표시 (첫 줄 왼쪽) */}
-        <text
-          x={marginLeft - 30}
-          y={staffYPositions[0] + 18}
-          fontSize={20}
-          fontWeight="bold"
-        >
-          {beatsPerBar}
-        </text>
-        <line
-          x1={marginLeft - 30}
-          y1={staffYPositions[0] + 20}
-          x2={marginLeft - 16}
-          y2={staffYPositions[0] + 20}
-          stroke="black"
-          strokeWidth={2}
+        <ControlUi
+          bpm={bpm}
+          onBpmChange={setBpm}
+          isPlaying={isPlaying}
+          onTogglePlay={() => setIsPlaying((prev) => !prev)}
+          restAccentEnabled={restAccentEnabled}
+          onRestAccentToggle={setRestAccentEnabled}
+          stageId={stageId}
+          onStageChange={handleStageChange}
+          stageOptions={presetOptions}
+          onRegenerate={() => setSeed(Date.now())}
         />
-        <text
-          x={marginLeft - 30}
-          y={staffYPositions[0] + 38}
-          fontSize={20}
-          fontWeight="bold"
-        >
-          4
-        </text>
 
-        {staffYPositions.map((y, staffIndex) => {
-          const staffStartBarIndex = staffIndex * barsPerStaff;
-          return (
-            <RhythmStaff
-              key={staffIndex}
-              y={y + 20}
-              staffIndex={staffIndex}
-              startX={marginLeft}
-              endX={width - marginRight}
-              barsPerStaff={barsPerStaff}
-              barWidth={barWidth}
-              bars={staffBarData[staffIndex]}
-              startBarIndex={staffStartBarIndex}
-              activePosition={activePosition}
-            />
-          );
-        })}
-      </svg>
-    </RhythmPageContainer>
+        <Card
+          elevation={3}
+          sx={{
+            width: '100%',
+            maxWidth: 1200,
+            borderRadius: 3,
+            background: 'linear-gradient(135deg, #dfdfdfff 0%, #e4e4e4ff 100%)',
+            overflow: 'visible',
+          }}
+        >
+          <CardContent sx={{ p: 3 }}>
+            <svg
+              viewBox={`0 0 ${width} ${height}`}
+              xmlns="http://www.w3.org/2000/svg"
+              style={{
+                width: '100%',
+                height: 'auto',
+                display: 'block',
+              }}
+            >
+              {/* 템포 표시 */}
+              <text
+                x={marginLeft}
+                y={16}
+                fontSize={16}
+                fontWeight="bold"
+                fill="black"
+              >
+                BPM: {bpm}
+              </text>
+
+              {/* 4/4 박자 표시 (첫 줄 왼쪽) */}
+              <text
+                x={marginLeft - 30}
+                y={staffYPositions[0] + 18}
+                fontSize={20}
+                fontWeight="bold"
+                fill="black"
+              >
+                {beatsPerBar}
+              </text>
+              <line
+                x1={marginLeft - 30}
+                y1={staffYPositions[0] + 20}
+                x2={marginLeft - 16}
+                y2={staffYPositions[0] + 20}
+                stroke="black"
+                strokeWidth={2}
+              />
+              <text
+                x={marginLeft - 30}
+                y={staffYPositions[0] + 38}
+                fontSize={20}
+                fontWeight="bold"
+                fill="black"
+              >
+                4
+              </text>
+
+              {staffYPositions.map((y, staffIndex) => {
+                const staffStartBarIndex = staffIndex * barsPerStaff;
+                return (
+                  <RhythmStaff
+                    key={staffIndex}
+                    y={y + 20}
+                    staffIndex={staffIndex}
+                    startX={marginLeft}
+                    endX={width - marginRight}
+                    barsPerStaff={barsPerStaff}
+                    barWidth={barWidth}
+                    bars={staffBarData[staffIndex]}
+                    startBarIndex={staffStartBarIndex}
+                    activePosition={activePosition}
+                  />
+                );
+              })}
+            </svg>
+          </CardContent>
+        </Card>
+      </Box>
+    </Container>
   );
 };
 
